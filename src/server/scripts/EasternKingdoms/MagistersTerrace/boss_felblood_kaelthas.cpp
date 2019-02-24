@@ -128,22 +128,6 @@ enum Phases
     PHASE_OUTRO = 3
 };
 
-class GravityElapseKnockupEvent : public BasicEvent
-{
-    public:
-        GravityElapseKnockupEvent(Unit* caster, uint32 difficultySpellId) :  _caster(caster), _difficultySpellId(difficultySpellId) { }
-
-        bool Execute(uint64 /*time*/, uint32 /*diff*/) override
-        {
-            _caster->CastSpell(_caster, _difficultySpellId);
-            _caster->CastSpell(_caster, SPELL_GRAVITY_LAPSE_FLY);
-            return true;
-        }
-    private:
-        Unit* _caster;
-        uint32 _difficultySpellId;
-};
-
 struct boss_felblood_kaelthas : public BossAI
 {
     boss_felblood_kaelthas(Creature* creature) : BossAI(creature, DATA_KAELTHAS_SUNSTRIDER)
@@ -172,8 +156,7 @@ struct boss_felblood_kaelthas : public BossAI
     {
         _Reset();
         Initialize();
-        if (instance->GetData(DATA_KAELTHAS_INTRO_STATE) != DONE)
-            me->SetImmuneToPC(true);
+        events.SetPhase(PHASE_INTRO);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -182,15 +165,12 @@ struct boss_felblood_kaelthas : public BossAI
         instance->SetBossState(DATA_KAELTHAS_SUNSTRIDER, DONE);
     }
 
-    void EnterEvadeMode(EvadeReason why) override
+    void EnterEvadeMode(EvadeReason /*why*/) override
     {
         DoCastAOE(SPELL_CLEAR_FLIGHT, true);
         _EnterEvadeMode();
         summons.DespawnAll();
-        events.Reset();
-        me->SetReactState(REACT_AGGRESSIVE);
-        me->ReleaseFocus();
-        BossAI::EnterEvadeMode(why);
+        _DespawnAtEvade();
     }
 
     void DamageTaken(Unit* attacker, uint32 &damage) override
@@ -229,7 +209,11 @@ struct boss_felblood_kaelthas : public BossAI
     {
         if (type == DATA_KAELTHAS_INTRO)
         {
-            events.SetPhase(PHASE_INTRO);
+            // skip the intro if Kael'thas is engaged already
+            if (!events.IsInPhase(PHASE_INTRO))
+                return;
+
+            me->SetImmuneToPC(true);
             events.ScheduleEvent(EVENT_TALK_INTRO_1, 6s, 0, PHASE_INTRO);
         }
     }
@@ -239,10 +223,18 @@ struct boss_felblood_kaelthas : public BossAI
         switch (spell->Id)
         {
             case SPELL_GRAVITY_LAPSE_INITIAL:
+            {
                 DoCast(target, gravityLapseTeleportSpells[_gravityLapseTargetCount], true);
-                target->m_Events.AddEventAtOffset(new GravityElapseKnockupEvent(target, SPELL_GRAVITY_LAPSE_DAMAGE), 400ms);
+                uint32 gravityLapseDamageSpell = SPELL_GRAVITY_LAPSE_DAMAGE;
+                target->m_Events.AddEventAtOffset([target, gravityLapseDamageSpell]()
+                {
+                    target->CastSpell(target, gravityLapseDamageSpell);
+                    target->CastSpell(target, SPELL_GRAVITY_LAPSE_FLY);
+
+                }, 400ms);
                 _gravityLapseTargetCount++;
                 break;
+            }
             case SPELL_CLEAR_FLIGHT:
                 target->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
                 target->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DAMAGE);

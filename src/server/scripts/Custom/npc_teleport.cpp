@@ -18,6 +18,7 @@
  */
 
 #include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "sc_npc_teleport.h"
 #include "Creature.h"

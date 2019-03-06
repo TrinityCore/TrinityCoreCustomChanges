@@ -20,6 +20,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
 #include "sc_npc_teleport.h"
+#include "Creature.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldSession.h"

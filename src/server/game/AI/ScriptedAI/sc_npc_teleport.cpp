@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 20??-2008 Wilibald09
  * Copyright (C) 2011-2015 ArkCORE <http://www.arkania.net/>
- * Copyright (C) 2008-2016 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,7 @@
  */
 
 #include "Player.h"
+#include "Log.h"
 #include "sc_npc_teleport.h"
 #include "WorldSession.h"
 #include "DatabaseEnv.h"

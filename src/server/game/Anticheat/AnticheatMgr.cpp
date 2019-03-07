@@ -338,6 +338,9 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
+        WorldPacket data2(SMSG_SERVER_MESSAGE, (str.size()+1));
+        data2 << str;
+        sWorld->SendGlobalGMMessage(&data2);
     }
 }
 

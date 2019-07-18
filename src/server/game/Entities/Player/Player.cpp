@@ -506,7 +506,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetObjectScale(1.0f);
 
-    setFactionForRace(createInfo->Race);
+    SetFactionForRace(createInfo->Race);
 
     if (!IsValidGender(createInfo->Gender))
     {
@@ -522,10 +522,10 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
         return false;
     }
 
-    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE, createInfo->Race);
-    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS, createInfo->Class);
+    SetRace(createInfo->Race);
+    SetClass(createInfo->Class);
     SetGender(createInfo->Gender);
-    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE, powertype);
+    SetPowerType(Powers(powertype), false);
     InitDisplayIds();
     UpdatePositionData();
     if (sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_PVP || sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP)
@@ -539,17 +539,17 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));  // -1 is default value
 
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID, createInfo->Skin);
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID, createInfo->Face);
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID, createInfo->HairStyle);
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID, createInfo->HairColor);
-    SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE, createInfo->FacialHair);
-    SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE, (GetSession()->IsARecruiter() || GetSession()->GetRecruiterId() != 0) ? REST_STATE_RAF_LINKED : REST_STATE_NOT_RAF_LINKED);
+    SetSkinId(createInfo->Skin);
+    SetFaceId(createInfo->Face);
+    SetHairStyleId(createInfo->HairStyle);
+    SetHairColorId(createInfo->HairColor);
+    SetFacialStyle(createInfo->FacialHair);
+    SetRestState((GetSession()->IsARecruiter() || GetSession()->GetRecruiterId() != 0) ? REST_STATE_RAF_LINKED : REST_STATE_NOT_RAF_LINKED);
     SetNativeGender(createInfo->Gender);
-    SetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_ARENA_FACTION, 0);
+    SetArenaFaction(0);
 
     SetUInt32Value(PLAYER_GUILDID, 0);
-    SetUInt32Value(PLAYER_GUILDRANK, 0);
+    SetRank(0);
     SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
 
     for (int i = 0; i < KNOWN_TITLES_SIZE; ++i)
@@ -573,11 +573,11 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
             start_level = gm_level;
     }
 
-    SetUInt32Value(UNIT_FIELD_LEVEL, start_level);
+    SetLevel(start_level, false);
 
     InitRunes();
 
-    SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
+    SetMoney(sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
     SetHonorPoints(sWorld->getIntConfig(CONFIG_START_HONOR_POINTS));
     SetArenaPoints(sWorld->getIntConfig(CONFIG_START_ARENA_POINTS));
 
@@ -2415,7 +2415,7 @@ void Player::SetGameMaster(bool on)
         SetPhaseMask(newPhase, false);
 
         m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
-        setFactionForRace(GetRace());
+        SetFactionForRace(GetRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 
@@ -2568,9 +2568,8 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
 
-    uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
-    uint32 newXP = curXP + xp + bonus_xp;
+    uint32 newXP = GetXP() + xp + bonus_xp;
 
     while (newXP >= nextLvlXP && level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
@@ -2583,7 +2582,7 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
-    SetUInt32Value(PLAYER_XP, newXP);
+    SetXP(newXP);
 }
 
 // Update player to next level
@@ -4715,14 +4714,8 @@ Corpse* Player::CreateCorpse()
 
     _corpseLocation.WorldRelocate(*this);
 
-    uint8 skin = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
-    uint8 face = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID);
-    uint8 hairstyle = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID);
-    uint8 haircolor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID);
-    uint8 facialhair = GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE);
-
-    _cfb1 = ((0x00) | (GetRace() << 8) | (GetNativeGender() << 16) | (skin << 24));
-    _cfb2 = ((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24));
+    _cfb1 = ((0x00) | (GetRace() << 8) | (GetNativeGender() << 16) | (GetSkinId() << 24));
+    _cfb2 = (GetFaceId() | (GetHairStyleId() << 8) | (GetHairColorId() << 16) | (GetFacialStyle() << 24));
 
     corpse->SetUInt32Value(CORPSE_FIELD_BYTES_1, _cfb1);
     corpse->SetUInt32Value(CORPSE_FIELD_BYTES_2, _cfb2);
@@ -6518,7 +6511,7 @@ uint32 Player::TeamForRace(uint8 race)
     return ALLIANCE;
 }
 
-void Player::setFactionForRace(uint8 race)
+void Player::SetFactionForRace(uint8 race)
 {
     m_team = TeamForRace(race);
 
@@ -7075,13 +7068,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         return;
 
     if (sWorld->getBoolConfig(CONFIG_WEATHER))
-    {
-        if (Weather* weather = WeatherMgr::FindWeather(zone->ID))
-            weather->SendWeatherUpdateToPlayer(this);
-        else if (!WeatherMgr::AddWeather(zone->ID))
-            // send fine weather packet to remove old zone's weather
-            WeatherMgr::SendFineWeatherUpdateToPlayer(this);
-    }
+        GetMap()->GetOrGenerateZoneDefaultWeather(newZone);
+
+    GetMap()->SendZoneDynamicInfo(newZone, this);
+
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
@@ -14547,7 +14537,9 @@ void Player::PrepareQuestMenu(ObjectGuid guid)
         if (!CanTakeQuest(quest, false))
             continue;
 
-        if (quest->IsAutoComplete())
+        if (quest->IsAutoComplete() && (!quest->IsRepeatable() || quest->IsDaily() || quest->IsWeekly() || quest->IsMonthly()))
+            qm.AddMenuItem(quest_id, 0);
+        else if (quest->IsAutoComplete())
             qm.AddMenuItem(quest_id, 4);
         else if (GetQuestStatus(quest_id) == QUEST_STATUS_NONE)
             qm.AddMenuItem(quest_id, 2);
@@ -14816,12 +14808,20 @@ bool Player::CanCompleteRepeatableQuest(Quest const* quest)
 
 bool Player::CanRewardQuest(Quest const* quest, bool msg)
 {
+    // quest is disabled
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this))
+        return false;
+
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
     if (!quest->IsDFQuest() && !quest->IsAutoComplete() && !(quest->GetFlags() & QUEST_FLAGS_AUTOCOMPLETE) && GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE)
         return false;
 
     // daily quest can't be rewarded (25 daily quest already completed)
     if (!SatisfyQuestDay(quest, true) || !SatisfyQuestWeek(quest, true) || !SatisfyQuestMonth(quest, true) || !SatisfyQuestSeasonal(quest, true))
+        return false;
+
+    // player no longer satisfies the quest's requirements (skill level etc.)
+    if (!SatisfyQuestLevel(quest, true) || !SatisfyQuestSkill(quest, true) || !SatisfyQuestReputation(quest, true))
         return false;
 
     // rewarded and not repeatable quest (only cheating case, then ignore without message)
@@ -15977,7 +15977,7 @@ void Player::SendQuestUpdate(uint32 questId)
         }
     }
 
-    UpdateForQuestWorldObjects();
+    UpdateVisibleGameobjectsOrSpellClicks();
 }
 
 QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
@@ -16052,13 +16052,40 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
             {
                 if (SatisfyQuestLevel(quest, false))
                 {
-                    if (GetLevel() <= (GetQuestLevel(quest) + sWorld->getIntConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF)))
+                    bool isNotLowLevelQuest = GetLevel() <= (GetQuestLevel(quest) + sWorld->getIntConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF));
+                    if (quest->IsRepeatable())
                     {
                         if (quest->IsDaily())
-                            result2 = DIALOG_STATUS_AVAILABLE_REP;
+                        {
+                            if (isNotLowLevelQuest)
+                                result2 = DIALOG_STATUS_AVAILABLE_REP;
+                            else
+                                result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE_REP;
+                        }
+                        else if (quest->IsWeekly() || quest->IsMonthly())
+                        {
+                            if (isNotLowLevelQuest)
+                                result2 = DIALOG_STATUS_AVAILABLE;
+                            else
+                                result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
+                        }
+                        else if (quest->IsAutoComplete())
+                        {
+                            if (isNotLowLevelQuest)
+                                result2 = DIALOG_STATUS_REWARD_REP;
+                            else
+                                result2 = DIALOG_STATUS_LOW_LEVEL_REWARD_REP;
+                        }
                         else
-                            result2 = DIALOG_STATUS_AVAILABLE;
+                        {
+                            if (isNotLowLevelQuest)
+                                result2 = DIALOG_STATUS_AVAILABLE;
+                            else
+                                result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
+                        }
                     }
+                    else if (isNotLowLevelQuest)
+                        result2 = DIALOG_STATUS_AVAILABLE;
                     else
                         result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
                 }
@@ -16254,12 +16281,12 @@ void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
                 if (CanCompleteQuest(questid))
                     CompleteQuest(questid);
                 else if (q_status.ItemCount[j] == reqitemcount) // Send quest update when an objective is completed
-                    UpdateForQuestWorldObjects();
+                    UpdateVisibleGameobjectsOrSpellClicks();
                 return;
             }
         }
     }
-    UpdateForQuestWorldObjects();
+    UpdateVisibleGameobjectsOrSpellClicks();
 }
 
 void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
@@ -16302,7 +16329,7 @@ void Player::ItemRemovedQuestCheck(uint32 entry, uint32 count)
             }
         }
     }
-    UpdateForQuestWorldObjects();
+    UpdateVisibleGameobjectsOrSpellClicks();
 }
 
 void Player::KilledMonster(CreatureTemplate const* cInfo, ObjectGuid guid)
@@ -17126,8 +17153,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         return false;
     }
 
-    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE, fields[3].GetUInt8());
-    SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS, fields[4].GetUInt8());
+    SetRace(fields[3].GetUInt8());
+    SetClass(fields[4].GetUInt8());
     SetGender(gender);
 
     // check if race/class combination is valid
@@ -17138,8 +17165,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         return false;
     }
 
-    SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
-    SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
+    SetLevel(fields[6].GetUInt8(), false);
+    SetXP(fields[7].GetUInt32());
 
     _LoadIntoDataField(fields[66].GetString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
     _LoadIntoDataField(fields[69].GetString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE * 2);
@@ -17155,25 +17182,20 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         money = MAX_MONEY_AMOUNT;
     SetMoney(money);
 
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID, fields[9].GetUInt8());
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID, fields[10].GetUInt8());
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID, fields[11].GetUInt8());
-    SetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID, fields[12].GetUInt8());
-    SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE, fields[13].GetUInt8());
-    SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_BANK_BAG_SLOTS, fields[14].GetUInt8());
-    SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE, fields[15].GetUInt8());
+    SetSkinId(fields[9].GetUInt8());
+    SetFaceId(fields[10].GetUInt8());
+    SetHairStyleId(fields[11].GetUInt8());
+    SetHairColorId(fields[12].GetUInt8());
+    SetFacialStyle(fields[13].GetUInt8());
+    SetBankBagSlotCount(fields[14].GetUInt8());
+    SetRestState(fields[15].GetUInt8());
     SetNativeGender(fields[5].GetUInt8());
     SetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_INEBRIATION, fields[54].GetUInt8());
 
     if (!ValidateAppearance(
         fields[3].GetUInt8(), // race
         fields[4].GetUInt8(), // class
-        gender,
-        GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID),
-        GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID),
-        GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID),
-        GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE),
-        GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID)))
+        gender, GetHairStyleId(), GetHairColorId(), GetFaceId(), GetFacialStyle(), GetSkinId()))
     {
         TC_LOG_ERROR("entities.player", "Player::LoadFromDB: Player (%s) has wrong Appearance values (Hair/Skin/Color), can't load.", guid.ToString().c_str());
         return false;
@@ -17208,7 +17230,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     //Need to call it to initialize m_team (m_team can be calculated from race)
     //Other way is to saves m_team into characters table.
-    setFactionForRace(GetRace());
+    SetFactionForRace(GetRace());
 
     // load home bind and check in same time class/race pair, it used later for restore broken positions
     if (!_LoadHomeBind(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_HOME_BIND)))
@@ -17545,11 +17567,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     // set value, including drunk invisibility detection
     // calculate sobering. after 15 minutes logged out, the player will be sober again
-    uint8 newDrunkValue = 0;
     if (time_diff < uint32(GetDrunkValue()) * 9)
-        newDrunkValue = GetDrunkValue() - time_diff / 9;
-
-    SetDrunkValue(newDrunkValue);
+        SetDrunkValue(GetDrunkValue() - time_diff / 9);
+    else
+        SetDrunkValue(0);
 
     m_cinematic = fields[23].GetUInt8();
     m_Played_time[PLAYED_TIME_TOTAL] = fields[24].GetUInt32();
@@ -17781,6 +17802,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
                 break;
         }
     }
+
+    InitPvP();
 
     // RaF stuff.
     m_grantableLevels = fields[71].GetUInt8();
@@ -19249,15 +19272,15 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_XP));
+        stmt->setUInt32(index++, GetXP());
         stmt->setUInt32(index++, GetMoney());
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_BANK_BAG_SLOTS));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE));
+        stmt->setUInt8(index++, GetSkinId());
+        stmt->setUInt8(index++, GetFaceId());
+        stmt->setUInt8(index++, GetHairStyleId());
+        stmt->setUInt8(index++, GetHairColorId());
+        stmt->setUInt8(index++, GetFacialStyle());
+        stmt->setUInt8(index++, GetBankBagSlotCount());
+        stmt->setUInt8(index++, GetRestState());
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FLAGS));
         stmt->setUInt16(index++, (uint16)GetMapId());
         stmt->setUInt32(index++, (uint32)GetInstanceId());
@@ -19359,15 +19382,15 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_XP));
+        stmt->setUInt32(index++, GetXP());
         stmt->setUInt32(index++, GetMoney());
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_BANK_BAG_SLOTS));
-        stmt->setUInt8(index++, GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE));
+        stmt->setUInt8(index++, GetSkinId());
+        stmt->setUInt8(index++, GetFaceId());
+        stmt->setUInt8(index++, GetHairStyleId());
+        stmt->setUInt8(index++, GetHairColorId());
+        stmt->setUInt8(index++, GetFacialStyle());
+        stmt->setUInt8(index++, GetBankBagSlotCount());
+        stmt->setUInt8(index++, GetRestState());
         stmt->setUInt32(index++, GetUInt32Value(PLAYER_FLAGS));
 
         if (!IsBeingTeleported())
@@ -20500,13 +20523,14 @@ void Player::ResetContestedPvP()
 
 void Player::UpdatePvPFlag(time_t currTime)
 {
-    if (!IsPvP())
-        return;
+    if (pvpInfo.EndTimer && pvpInfo.EndTimer <= currTime)
+    {
+        pvpInfo.EndTimer = 0;
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
+    }
 
-    if (!pvpInfo.EndTimer || currTime < (pvpInfo.EndTimer + 300) || pvpInfo.IsHostile)
-        return;
-
-    UpdatePvP(false);
+    if (IsPvP() && !pvpInfo.IsHostile && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP | PLAYER_FLAGS_PVP_TIMER))
+        UpdatePvP(false);
 }
 
 void Player::UpdateDuelFlag(time_t currTime)
@@ -21176,13 +21200,13 @@ void Player::SetRestBonus(float rest_bonus_new)
 
     // update data for client
     if ((GetsRecruitAFriendBonus(true) && (GetSession()->IsARecruiter() || GetSession()->GetRecruiterId() != 0)))
-        SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE, REST_STATE_RAF_LINKED);
+        SetRestState(REST_STATE_RAF_LINKED);
     else
     {
         if (m_rest_bonus > 10)
-            SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE, REST_STATE_RESTED);
+            SetRestState(REST_STATE_RESTED);
         else if (m_rest_bonus <= 1)
-            SetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_REST_STATE, REST_STATE_NOT_RAF_LINKED);
+            SetRestState(REST_STATE_NOT_RAF_LINKED);
     }
 
     //RestTickUpdate
@@ -21813,6 +21837,18 @@ void Player::UpdateHomebindTime(uint32 time)
     }
 }
 
+void Player::InitPvP()
+{
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+        UpdatePvP(true, true);
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER))
+    {
+        UpdatePvP(true, true);
+        if (!pvpInfo.IsHostile)
+            pvpInfo.EndTimer = GameTime::GetGameTime() + 300;
+    }
+}
+
 void Player::UpdatePvPState(bool onlyFFA)
 {
     /// @todo should we always synchronize UNIT_FIELD_BYTES_2, 1 of controller and controlled?
@@ -21845,7 +21881,7 @@ void Player::UpdatePvPState(bool onlyFFA)
     else                                                    // in friendly area
     {
         if (IsPvP() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) && !pvpInfo.EndTimer)
-            pvpInfo.EndTimer = GameTime::GetGameTime();                  // start toggle-off
+            pvpInfo.EndTimer = GameTime::GetGameTime() + 300;                  // start toggle-off
     }
 }
 
@@ -21865,7 +21901,7 @@ void Player::UpdatePvP(bool state, bool _override)
     }
     else
     {
-        pvpInfo.EndTimer = GameTime::GetGameTime();
+        pvpInfo.EndTimer = GameTime::GetGameTime() + 300;
         SetPvP(state);
     }
 }
@@ -22116,7 +22152,7 @@ void Player::SetBattlegroundEntryPoint()
 void Player::SetBGTeam(uint32 team)
 {
     m_bgData.bgTeam = team;
-    SetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_ARENA_FACTION, uint8(team == ALLIANCE ? 1 : 0));
+    SetArenaFaction(uint8(team == ALLIANCE ? 1 : 0));
 }
 
 uint32 Player::GetBGTeam() const
@@ -22492,13 +22528,6 @@ bool Player::ModifyMoney(int32 amount, bool sendError /*= true*/)
         }
     }
 
-    return true;
-}
-
-bool Player::HasEnoughMoney(int32 amount) const
-{
-    if (amount > 0)
-        return (GetMoney() >= (uint32) amount);
     return true;
 }
 
@@ -23404,7 +23433,7 @@ bool Player::HasQuestForGO(int32 GOId) const
     return false;
 }
 
-void Player::UpdateForQuestWorldObjects()
+void Player::UpdateVisibleGameobjectsOrSpellClicks()
 {
     if (m_clientGUIDs.empty())
         return;
@@ -23431,20 +23460,10 @@ void Player::UpdateForQuestWorldObjects()
             auto clickBounds = sObjectMgr->GetSpellClickInfoMapBounds(obj->GetEntry());
             for (auto const& clickPair : clickBounds)
             {
-                //! This code doesn't look right, but it was logically converted to condition system to do the exact
-                //! same thing it did before. It definitely needs to be overlooked for intended functionality.
                 if (ConditionContainer const* conds = sConditionMgr->GetConditionsForSpellClickEvent(obj->GetEntry(), clickPair.second.spellId))
                 {
-                    bool buildUpdateBlock = false;
-                    for (ConditionContainer::const_iterator jtr = conds->begin(); jtr != conds->end() && !buildUpdateBlock; ++jtr)
-                        if ((*jtr)->ConditionType == CONDITION_QUESTREWARDED || (*jtr)->ConditionType == CONDITION_QUESTTAKEN || (*jtr)->ConditionType == CONDITION_QUEST_COMPLETE)
-                            buildUpdateBlock = true;
-
-                    if (buildUpdateBlock)
-                    {
-                        obj->BuildValuesUpdateBlockForPlayer(&udata, this);
-                        break;
-                    }
+                    obj->BuildValuesUpdateBlockForPlayer(&udata, this);
+                    break;
                 }
             }
         }
@@ -24371,10 +24390,10 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
     if (level > GT_MAX_LEVEL)
         level = GT_MAX_LEVEL;                               // max level in this dbc
 
-    uint8 hairstyle = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID);
-    uint8 haircolor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID);
-    uint8 facialhair = GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE);
-    uint8 skincolor = GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID);
+    uint8 hairstyle = GetHairStyleId();
+    uint8 haircolor = GetHairColorId();
+    uint8 facialhair = GetFacialStyle();
+    uint8 skincolor = GetSkinId();
 
     if ((hairstyle == newhairstyle) && (haircolor == newhaircolor) && (facialhair == newfacialhair) && (!newSkin || (newSkin->hair_id == skincolor)))
         return 0;
@@ -26574,7 +26593,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         case SUMMON_PET:
             // this enables pet details window (Shift+P)
             pet->GetCharmInfo()->SetPetNumber(pet_number, true);
-            pet->SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_CLASS, CLASS_MAGE);
+            pet->SetClass(CLASS_MAGE);
             pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             pet->SetFullHealth();

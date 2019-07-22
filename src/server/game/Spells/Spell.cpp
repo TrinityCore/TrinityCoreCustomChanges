@@ -548,7 +548,7 @@ m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerO
     {
         // wand case
         if (m_attackType == RANGED_ATTACK)
-            if ((playerCaster->getClassMask() & CLASSMASK_WAND_USERS) != 0)
+            if ((playerCaster->GetClassMask() & CLASSMASK_WAND_USERS) != 0)
                 if (Item* pItem = playerCaster->GetWeaponForAttack(RANGED_ATTACK))
                     m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetTemplate()->Damage[0].DamageType);
     }
@@ -2101,7 +2101,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (m_auraScaleMask && ihit->EffectMask == m_auraScaleMask && m_caster != target)
         {
             SpellInfo const* auraSpell = m_spellInfo->GetFirstRankSpell();
-            if (uint32(target->getLevel() + 10) >= auraSpell->SpellLevel)
+            if (uint32(target->GetLevel() + 10) >= auraSpell->SpellLevel)
                 ihit->ScaleAura = true;
         }
         return;
@@ -2121,7 +2121,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     if (m_auraScaleMask && targetInfo.EffectMask == m_auraScaleMask && m_caster != target)
     {
         SpellInfo const* auraSpell = m_spellInfo->GetFirstRankSpell();
-        if (uint32(target->getLevel() + 10) >= auraSpell->SpellLevel)
+        if (uint32(target->GetLevel() + 10) >= auraSpell->SpellLevel)
             targetInfo.ScaleAura = true;
     }
 
@@ -2279,6 +2279,10 @@ void Spell::TargetInfo::PreprocessTarget(Spell* spell)
         _spellHitTarget = unit;
     else if (MissCondition == SPELL_MISS_REFLECT && ReflectResult == SPELL_MISS_NONE)
         _spellHitTarget = spell->m_caster->ToUnit();
+
+    // Ensure that a player target is put in combat by a taunt, even if they result immune clientside
+    if ((MissCondition == SPELL_MISS_IMMUNE || MissCondition == SPELL_MISS_IMMUNE2) && spell->m_caster->GetTypeId() == TYPEID_PLAYER && unit->GetTypeId() == TYPEID_PLAYER && spell->m_caster->IsValidAttackTarget(unit, spell->GetSpellInfo()))
+        unit->SetInCombatWith(spell->m_caster->ToPlayer());
 
     _enablePVP = false; // need to check PvP state before spell effects, but act on it afterwards
     if (_spellHitTarget)
@@ -2695,7 +2699,7 @@ SpellMissInfo Spell::PreprocessSpellHit(Unit* unit, bool scaleAura, TargetInfo& 
         hitInfo.AuraSpellInfo = m_spellInfo;
         if (scaleAura)
         {
-            if (SpellInfo const* actualSpellInfo = m_spellInfo->GetAuraRankForLevel(unitTarget->getLevel()))
+            if (SpellInfo const* actualSpellInfo = m_spellInfo->GetAuraRankForLevel(unitTarget->GetLevel()))
                 hitInfo.AuraSpellInfo = actualSpellInfo;
 
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -4156,7 +4160,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_PENDING;
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR0_REQ_AMMO) || m_spellInfo->HasAttribute(SPELL_ATTR0_CU_NEEDS_AMMO_DATA))
-        castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
+        castFlags |= CAST_FLAG_AMMO; // arrows/bullets visual
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER ||
         (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsPet()))
@@ -4164,17 +4168,17 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_POWER_LEFT_SELF;
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER)
-        && (m_caster->ToPlayer()->getClass() == CLASS_DEATH_KNIGHT)
+        && (m_caster->ToPlayer()->GetClass() == CLASS_DEATH_KNIGHT)
         && m_spellInfo->RuneCostID
         && m_spellInfo->PowerType == POWER_RUNE
         && !(_triggeredCastFlags & TRIGGERED_IGNORE_POWER_AND_REAGENT_COST))
     {
-        castFlags |= CAST_FLAG_NO_GCD;                       // not needed, but Blizzard sends it
-        castFlags |= CAST_FLAG_RUNE_LIST;                    // rune cooldowns list
+        castFlags |= CAST_FLAG_NO_GCD; // not needed, but Blizzard sends it
+        castFlags |= CAST_FLAG_RUNE_LIST; // rune cooldowns list
     }
 
     if (m_spellInfo->HasEffect(SPELL_EFFECT_ACTIVATE_RUNE))
-        castFlags |= CAST_FLAG_RUNE_LIST;                    // rune cooldowns list
+        castFlags |= CAST_FLAG_RUNE_LIST; // rune cooldowns list
 
     if (m_targets.HasTraj())
         castFlags |= CAST_FLAG_ADJUST_MISSILE;
@@ -4203,12 +4207,12 @@ void Spell::SendSpellGo()
     if (castFlags & CAST_FLAG_POWER_LEFT_SELF)
         castData.RemainingPower = ASSERT_NOTNULL(m_caster->ToUnit())->GetPower(m_spellInfo->PowerType);
 
-    if (castFlags & CAST_FLAG_RUNE_LIST)                   // rune cooldowns list
+    if (castFlags & CAST_FLAG_RUNE_LIST && !m_spellInfo->HasAura(SPELL_AURA_CONVERT_RUNE)) // rune cooldowns list
     {
         castData.RemainingRunes = boost::in_place();
 
         /// @todo There is a crash caused by a spell with CAST_FLAG_RUNE_LIST cast by a creature
-        //The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
+        // The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
         if (Player* player = m_caster->ToPlayer())
         {
             uint8 runeMaskInitial = m_runesState;
@@ -4749,7 +4753,7 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID) const
     if (!player)
         return SPELL_CAST_OK;
 
-    if (player->getClass() != CLASS_DEATH_KNIGHT)
+    if (player->GetClass() != CLASS_DEATH_KNIGHT)
         return SPELL_CAST_OK;
 
     SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(runeCostID);
@@ -4789,7 +4793,7 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID) const
 
 void Spell::TakeRunePower(bool didHit)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER || m_caster->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
+    if (m_caster->GetTypeId() != TYPEID_PLAYER || m_caster->ToPlayer()->GetClass() != CLASS_DEATH_KNIGHT)
         return;
 
     SpellRuneCostEntry const* runeCostData = sSpellRuneCostStore.LookupEntry(m_spellInfo->RuneCostID);
@@ -5397,7 +5401,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                 if (!learn_spellproto)
                     return SPELL_FAILED_NOT_KNOWN;
 
-                if (m_spellInfo->SpellLevel > pet->getLevel())
+                if (m_spellInfo->SpellLevel > pet->GetLevel())
                     return SPELL_FAILED_LOWLEVEL;
 
                 break;
@@ -5419,7 +5423,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                     if (!learn_spellproto)
                         return SPELL_FAILED_NOT_KNOWN;
 
-                    if (m_spellInfo->SpellLevel > pet->getLevel())
+                    if (m_spellInfo->SpellLevel > pet->GetLevel())
                         return SPELL_FAILED_LOWLEVEL;
                 }
                 break;
@@ -5537,7 +5541,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                 uint32 skill = creature->GetCreatureTemplate()->GetRequiredLootSkill();
 
                 int32 skillValue = m_caster->ToPlayer()->GetSkillValue(skill);
-                int32 TargetLevel = m_targets.GetUnitTarget()->getLevel();
+                int32 TargetLevel = m_targets.GetUnitTarget()->GetLevel();
                 int32 ReqValue = (skillValue < 100 ? (TargetLevel-10) * 10 : TargetLevel * 5);
                 if (ReqValue > skillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
@@ -5857,7 +5861,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                         return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
 
                     int32 value = CalculateDamage(i);
-                    if (value && int32(target->getLevel()) > value)
+                    if (value && int32(target->GetLevel()) > value)
                         return SPELL_FAILED_HIGHLEVEL;
                 }
 
@@ -6990,8 +6994,8 @@ SpellCastResult Spell::CheckItems(uint32* param1 /*= nullptr*/, uint32* param2 /
 
 void Spell::Delayed() // only called in DealDamage()
 {
-    Unit* unitCaster = m_caster->ToUnit();
-    if (!unitCaster)
+    Player* playerCaster = m_caster->ToPlayer();
+    if (!playerCaster)
         return;
 
     // spells not losing casting time
@@ -7005,9 +7009,9 @@ void Spell::Delayed() // only called in DealDamage()
     int32 delaytime = 500;                                  // spellcasting delay is normally 500ms
 
     int32 delayReduce = 100;                                // must be initialized to 100 for percent modifiers
-    if (Player* player = unitCaster->GetSpellModOwner())
+    if (Player* player = playerCaster->GetSpellModOwner())
         player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce, this);
-    delayReduce += unitCaster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
+    delayReduce += playerCaster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
         return;
 
@@ -7022,16 +7026,16 @@ void Spell::Delayed() // only called in DealDamage()
         m_timer += delaytime;
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
-    data << unitCaster->GetPackGUID();
+    data << playerCaster->GetPackGUID();
     data << uint32(delaytime);
 
-    unitCaster->SendMessageToSet(&data, true);
+    playerCaster->SendMessageToSet(&data, true);
 }
 
 void Spell::DelayedChannel()
 {
-    Unit* unitCaster = m_caster->ToUnit();
-    if (!unitCaster)
+    Player* playerCaster = m_caster->ToPlayer();
+    if (!playerCaster)
         return;
 
     if (m_spellState != SPELL_STATE_CASTING)
@@ -7051,9 +7055,9 @@ void Spell::DelayedChannel()
     int32 delaytime = CalculatePct(duration, 25); // channeling delay is normally 25% of its time per hit
 
     int32 delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
-    if (Player* player = unitCaster->GetSpellModOwner())
+    if (Player* player = playerCaster->GetSpellModOwner())
         player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce, this);
-    delayReduce += unitCaster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
+    delayReduce += playerCaster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
         return;
 
@@ -7069,11 +7073,11 @@ void Spell::DelayedChannel()
 
     for (TargetInfo const& targetInfo : m_UniqueTargetInfo)
         if (targetInfo.MissCondition == SPELL_MISS_NONE)
-            if (Unit* unit = (unitCaster->GetGUID() == targetInfo.TargetGUID) ? unitCaster : ObjectAccessor::GetUnit(*unitCaster, targetInfo.TargetGUID))
+            if (Unit* unit = (playerCaster->GetGUID() == targetInfo.TargetGUID) ? playerCaster : ObjectAccessor::GetUnit(*playerCaster, targetInfo.TargetGUID))
                 unit->DelayOwnedAuras(m_spellInfo->Id, m_originalCasterGUID, delaytime);
 
     // partially interrupt persistent area auras
-    if (DynamicObject* dynObj = unitCaster->GetDynObject(m_spellInfo->Id))
+    if (DynamicObject* dynObj = playerCaster->GetDynObject(m_spellInfo->Id))
         dynObj->Delay(delaytime);
 
     SendChannelUpdate(m_timer);
@@ -7158,7 +7162,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff, Position const* lo
             if (target->GetCharmerGUID())
                 return false;
             if (int32 value = CalculateDamage(eff))
-                if ((int32)target->getLevel() > value)
+                if ((int32)target->GetLevel() > value)
                     return false;
             break;
         default:
@@ -8111,7 +8115,7 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target) const
             case TARGET_CHECK_RAID_CLASS:
                 if (!refUnit)
                     return false;
-                if (refUnit->getClass() != unitTarget->getClass())
+                if (refUnit->GetClass() != unitTarget->GetClass())
                     return false;
                 /* fallthrough */
             case TARGET_CHECK_RAID:

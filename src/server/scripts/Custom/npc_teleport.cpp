@@ -140,7 +140,7 @@ namespace
     {
         Dest dest (TabCatDest[Cat[player]].GetDest(id));
 
-        if (player->getLevel() < dest.m_level && !player->IsGameMaster())
+        if (player->GetLevel() < dest.m_level && !player->IsGameMaster())
         {
             LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
             char const* text = sObjectMgr->GetTrinityString(8000, loc_idx);

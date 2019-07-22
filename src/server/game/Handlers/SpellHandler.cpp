@@ -423,7 +423,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (spellInfo->IsPositive())
         if (Unit* target = targets.GetUnitTarget())
         {
-            SpellInfo const* actualSpellInfo = spellInfo->GetAuraRankForLevel(target->getLevel());
+            SpellInfo const* actualSpellInfo = spellInfo->GetAuraRankForLevel(target->GetLevel());
 
             // if rank not found then function return NULL but in explicit cast case original spell can be cast and later failed with appropriate error message
             if (actualSpellInfo)
@@ -632,19 +632,18 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket& recvData)
     WorldPacket data(SMSG_MIRRORIMAGE_DATA, 68);
     data << uint64(guid);
     data << uint32(creator->GetDisplayId());
-    data << uint8(creator->getRace());
-    data << uint8(creator->getGender());
-    data << uint8(creator->getClass());
+    data << uint8(creator->GetRace());
+    data << uint8(creator->GetGender());
+    data << uint8(creator->GetClass());
 
-    if (creator->GetTypeId() == TYPEID_PLAYER)
+    if (Player* player = creator->ToPlayer())
     {
-        Player* player = creator->ToPlayer();
-        data << uint8(player->GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_SKIN_ID));
-        data << uint8(player->GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_FACE_ID));
-        data << uint8(player->GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_STYLE_ID));
-        data << uint8(player->GetByteValue(PLAYER_BYTES, PLAYER_BYTES_OFFSET_HAIR_COLOR_ID));
-        data << uint8(player->GetByteValue(PLAYER_BYTES_2, PLAYER_BYTES_2_OFFSET_FACIAL_STYLE));
-        data << uint32(player->GetGuildId());                   // unk
+        data << uint8(player->GetSkinId());
+        data << uint8(player->GetFaceId());
+        data << uint8(player->GetHairStyleId());
+        data << uint8(player->GetHairColorId());
+        data << uint8(player->GetFacialStyle());
+        data << uint32(player->GetGuildId());
 
         static EquipmentSlots const itemSlots[] =
         {

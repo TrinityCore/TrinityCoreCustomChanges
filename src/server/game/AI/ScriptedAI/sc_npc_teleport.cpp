@@ -141,7 +141,7 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
         return player->GetSession()->GetAccountId() == m_catvalue.data0;
 
       case FLAG_LEVEL:
-        return player->getLevel() >= m_catvalue.data0;
+        return player->GetLevel() >= m_catvalue.data0;
 
       case FLAG_ITEM:
         return player->HasItemCount(m_catvalue.data0, m_catvalue.data1, true);
@@ -152,13 +152,13 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
         return player->GetQuestRewardStatus(m_catvalue.data0);
 
       case FLAG_GENDER:
-        return player->getGender() == m_catvalue.data0;
+        return player->GetGender() == m_catvalue.data0;
 
       case FLAG_RACE:
-        return player->getRace() == m_catvalue.data0;
+        return player->GetRace() == m_catvalue.data0;
 
       case FLAG_CLASS:
-        return player->getClass() == m_catvalue.data0;
+        return player->GetClass() == m_catvalue.data0;
 
       case FLAG_REPUTATION:
         return player->GetReputationRank(m_catvalue.data0) >= (int32)m_catvalue.data1;

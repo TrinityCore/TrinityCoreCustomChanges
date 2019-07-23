@@ -6832,13 +6832,13 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
             //  title[15..28] -> rank[5..18]
             //  title[other]  -> 0
             if (victim_title == 0)
-                victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
+                victim_guid.Clear();                     // Don't show HK: <rank> message, only log.
             else if (victim_title < HKRANKMAX)
                 victim_rank = victim_title + 4;
             else if (victim_title < (2*HKRANKMAX-1))
                 victim_rank = victim_title - (HKRANKMAX-1) + 4;
             else
-                victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
+                victim_guid.Clear();                     // Don't show HK: <rank> message, only log.
 
             // now find rank difference
             if (killer_title == 0 && victim_rank>4)
@@ -6850,7 +6850,9 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
 
 
             honor_f = std::ceil(Trinity::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
+
             honor *= 1 + sWorld->getRate(RATE_PVP_RANK_EXTRA_HONOR)*(((float)rank_diff) / 10.0f);
+
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime

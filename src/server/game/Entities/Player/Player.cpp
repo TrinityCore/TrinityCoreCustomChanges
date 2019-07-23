@@ -6807,53 +6807,54 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
             //  title[1..14]  -> rank[5..18]
             //  title[15..28] -> rank[5..18]
             //  title[other]  -> 0
-                // PLAYER__FIELD_KNOWN_TITLES describe which titles player can use,
-                // so we must find biggest pvp title , even for killer to find extra honor value
-                uint32 vtitle = victim->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
-                //uint32 victim_title = 0;
-                uint32 ktitle = GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
-                uint32 killer_title = 0;
-                if (PLAYER_TITLE_MASK_ALL_PVP & ktitle)
+
+            // PLAYER__FIELD_KNOWN_TITLES describe which titles player can use,
+            // so we must find biggest pvp title , even for killer to find extra honor value
+            uint32 vtitle = victim->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
+            //uint32 victim_title = 0;
+            uint32 ktitle = GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
+            uint32 killer_title = 0;
+            if (PLAYER_TITLE_MASK_ALL_PVP & ktitle)
+            {
+                for (int i = ((GetTeam() == ALLIANCE) ? 1:HKRANKMAX);i!=((GetTeam() == ALLIANCE) ? HKRANKMAX : (2*HKRANKMAX-1));i++)
                 {
-                    for (int i = ((GetTeam() == ALLIANCE) ? 1:HKRANKMAX);i!=((GetTeam() == ALLIANCE) ? HKRANKMAX : (2*HKRANKMAX-1));i++)
-                    {
-                        if (ktitle & (1<<i))
-                            killer_title = i;
-                    }
+                    if (ktitle & (1<<i))
+                        killer_title = i;
                 }
-                if (PLAYER_TITLE_MASK_ALL_PVP & vtitle)
+            }
+            if (PLAYER_TITLE_MASK_ALL_PVP & vtitle)
+            {
+                for (int i = ((plrVictim->GetTeam() == ALLIANCE) ? 1:HKRANKMAX);i!=((plrVictim->GetTeam() == ALLIANCE) ? HKRANKMAX : (2*HKRANKMAX-1));i++)
                 {
-                    for (int i = ((plrVictim->GetTeam() == ALLIANCE) ? 1:HKRANKMAX);i!=((plrVictim->GetTeam() == ALLIANCE) ? HKRANKMAX : (2*HKRANKMAX-1));i++)
-                    {
-                        if (vtitle & (1<<i))
-                            victim_title = i;
-                    }
+                    if (vtitle & (1<<i))
+                        victim_title = i;
                 }
+            }
 
-                // Get Killer titles, CharTitlesEntry::bit_index
-                // Ranks:
-                //  title[1..14]  -> rank[5..18]
-                //  title[15..28] -> rank[5..18]
-                //  title[other]  -> 0
-                if (victim_title == 0)
-                    victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
-                else if (victim_title < HKRANKMAX)
-                    victim_rank = victim_title + 4;
-                else if (victim_title < (2*HKRANKMAX-1))
-                    victim_rank = victim_title - (HKRANKMAX-1) + 4;
-                else
-                    victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
+            // Get Killer titles, CharTitlesEntry::bit_index
+            // Ranks:
+            //  title[1..14]  -> rank[5..18]
+            //  title[15..28] -> rank[5..18]
+            //  title[other]  -> 0
+            if (victim_title == 0)
+                victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
+            else if (victim_title < HKRANKMAX)
+                victim_rank = victim_title + 4;
+            else if (victim_title < (2*HKRANKMAX-1))
+                victim_rank = victim_title - (HKRANKMAX-1) + 4;
+            else
+                victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
 
-                // now find rank difference
-                if (killer_title == 0 && victim_rank>4)
-                    rank_diff = victim_rank - 4;
-                else if (killer_title < HKRANKMAX)
-                    rank_diff = (victim_rank>(killer_title + 4))? (victim_rank - (killer_title + 4)) : 0;
-                else if (killer_title < (2*HKRANKMAX-1))
-                    rank_diff = (victim_rank>(killer_title - (HKRANKMAX-1) +4))? (victim_rank - (killer_title - (HKRANKMAX-1) + 4)) : 0;
+            // now find rank difference
+            if (killer_title == 0 && victim_rank>4)
+                rank_diff = victim_rank - 4;
+            else if (killer_title < HKRANKMAX)
+                rank_diff = (victim_rank>(killer_title + 4))? (victim_rank - (killer_title + 4)) : 0;
+            else if (killer_title < (2*HKRANKMAX-1))
+                rank_diff = (victim_rank>(killer_title - (HKRANKMAX-1) +4))? (victim_rank - (killer_title - (HKRANKMAX-1) + 4)) : 0;
 
 
-            honor_f = ceil(Trinity::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
+            honor_f = std::ceil(Trinity::Honor::hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
             honor *= 1 + sWorld->getRate(RATE_PVP_RANK_EXTRA_HONOR)*(((float)rank_diff) / 10.0f);
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);

@@ -220,6 +220,7 @@ enum FactionTemplates
     FACTION_PREY                        = 31,
     FACTION_ESCORTEE_H_NEUTRAL_PASSIVE  = 33,
     FACTION_FRIENDLY                    = 35,
+    FACTION_TROLL_FROSTMANE             = 37,
     FACTION_OGRE                        = 45,
     FACTION_ORC_DRAGONMAW               = 62,
     FACTION_HORDE_GENERIC               = 83,
@@ -235,6 +236,7 @@ enum FactionTemplates
     FACTION_ESCORTEE_N_FRIEND_PASSIVE   = 290,
     FACTION_TITAN                       = 415,
     FACTION_ESCORTEE_N_FRIEND_ACTIVE    = 495,
+    FACTION_RATCHET                     = 637,
     FACTION_GOBLIN_DARK_IRON_BAR_PATRON = 736,
     FACTION_DARK_IRON_DWARVES           = 754,
     FACTION_ESCORTEE_A_PASSIVE          = 774,
@@ -251,7 +253,8 @@ enum FactionTemplates
     FACTION_ESCORTEE_H_ACTIVE           = 2046,
     FACTION_UNDEAD_SCOURGE_2            = 2068,
     FACTION_UNDEAD_SCOURGE_3            = 2084,
-    FACTION_SCARLET_CRUSADE             = 2089
+    FACTION_SCARLET_CRUSADE             = 2089,
+    FACTION_SCARLET_CRUSADE_2           = 2096
 };
 
 #define MIN_REPUTATION_RANK (REP_HATED)
@@ -3303,6 +3306,22 @@ enum SummonType
     SUMMON_TYPE_LIGHTWELL   = 11,
     SUMMON_TYPE_JEEVES      = 12
 };
+
+enum SummonSlot
+{
+    SUMMON_SLOT_PET                 = 0,
+    SUMMON_SLOT_TOTEM_FIRE          = 1,
+    SUMMON_SLOT_TOTEM_EARTH         = 2,
+    SUMMON_SLOT_TOTEM_WATER         = 3,
+    SUMMON_SLOT_TOTEM_AIR           = 4,
+    SUMMON_SLOT_MINIPET             = 5,
+    SUMMON_SLOT_QUEST               = 6,
+
+    MAX_SUMMON_SLOT
+};
+
+#define MAX_TOTEM_SLOT      5
+#define MAX_GAMEOBJECT_SLOT 4
 
 enum EventId
 {

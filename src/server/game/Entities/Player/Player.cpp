@@ -16123,22 +16123,22 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
                         if (quest->IsDaily())
                         {
                             if (isNotLowLevelQuest)
-                            result2 = DIALOG_STATUS_AVAILABLE_REP;
-                        else
+                                result2 = DIALOG_STATUS_AVAILABLE_REP;
+                            else
                                 result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE_REP;
                         }
                         else if (quest->IsWeekly() || quest->IsMonthly())
                         {
                             if (isNotLowLevelQuest)
-                            result2 = DIALOG_STATUS_AVAILABLE;
+                                result2 = DIALOG_STATUS_AVAILABLE;
                             else
                                 result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
-                    }
+                        }
                         else if (quest->IsAutoComplete())
                         {
                             if (isNotLowLevelQuest)
                                 result2 = DIALOG_STATUS_REWARD_REP;
-                    else
+                            else
                                 result2 = DIALOG_STATUS_LOW_LEVEL_REWARD_REP;
                         }
                         else
@@ -16146,8 +16146,8 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
                             if (isNotLowLevelQuest)
                                 result2 = DIALOG_STATUS_AVAILABLE;
                             else
-                        result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
-                }
+                                result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
+                        }
                     }
                     else if (isNotLowLevelQuest)
                         result2 = DIALOG_STATUS_AVAILABLE;
@@ -18769,10 +18769,10 @@ void Player::_LoadGroup(PreparedQueryResult result)
             SetGroup(group, subgroup);
 
             // Make sure the player's difficulty settings are always aligned with the group's settings in order to avoid issues when checking access requirements
-                SetDungeonDifficulty(group->GetDungeonDifficulty());
-                SetRaidDifficulty(group->GetRaidDifficulty());
-            }
+            SetDungeonDifficulty(group->GetDungeonDifficulty());
+            SetRaidDifficulty(group->GetRaidDifficulty());
         }
+    }
 
     if (!GetGroup() || !GetGroup()->IsLeader(GetGUID()))
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
@@ -20586,7 +20586,7 @@ void Player::UpdatePvPFlag(time_t currTime)
     }
 
     if (IsPvP() && !pvpInfo.IsHostile && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP | PLAYER_FLAGS_PVP_TIMER))
-    UpdatePvP(false);
+        UpdatePvP(false);
 }
 
 void Player::UpdateDuelFlag(time_t currTime)
@@ -23513,12 +23513,12 @@ void Player::UpdateVisibleGameobjectsOrSpellClicks()
             {
                 if (ConditionContainer const* conds = sConditionMgr->GetConditionsForSpellClickEvent(obj->GetEntry(), clickPair.second.spellId))
                 {
-                        obj->BuildValuesUpdateBlockForPlayer(&udata, this);
-                        break;
-                    }
+                    obj->BuildValuesUpdateBlockForPlayer(&udata, this);
+                    break;
                 }
             }
         }
+    }
     udata.BuildPacket(&packet);
     SendDirectMessage(&packet);
 }
@@ -23989,7 +23989,7 @@ void Player::SetClientControl(Unit* target, bool allowMove)
             SetViewpoint(target, true);
     }
 
-        SetMovedUnit(target);
+    SetMovedUnit(target);
 }
 
 void Player::UpdateZoneDependentAuras(uint32 newZone)
@@ -24622,7 +24622,7 @@ void Player::RemoveRunesByAuraEffect(AuraEffect const* aura)
 }
 
 void Player::RestoreBaseRune(uint8 index)
-        {
+{
     std::vector<AuraEffect const*> removeList;
     std::unordered_set<AuraEffect const*>& auras = m_runes->runes[index].ConvertAuras;
 
@@ -24662,11 +24662,11 @@ void Player::RestoreBaseRune(uint8 index)
         {
             if (m_runes->runes[itr].ConvertAuras.find(storedAura) != m_runes->runes[itr].ConvertAuras.end())
                 break;
-    }
+        }
 
         if (itr == MAX_RUNES)
             storedAura->GetBase()->Remove();
-}
+    }
 }
 
 void Player::ConvertRune(uint8 index, RuneType newType)

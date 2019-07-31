@@ -3136,9 +3136,12 @@ void Unit::ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData>
         if (_lastLiquid && _lastLiquid->SpellId)
             RemoveAurasDueToSpell(_lastLiquid->SpellId);
         Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
+
+        // Set _lastLiquid before casting liquid spell to avoid infinite loops
+        _lastLiquid = curLiquid;
+
         if (curLiquid && curLiquid->SpellId && (!player || !player->IsGameMaster()))
             CastSpell(this, curLiquid->SpellId, true);
-        _lastLiquid = curLiquid;
     }
 }
 
@@ -10947,8 +10950,6 @@ bool Unit::InitTamedPet(Pet* pet, uint8 level, uint32 spell_id)
 
         if (!creature->IsPet())
         {
-            creature->GetThreatManager().ClearAllThreat();
-
             // must be after setDeathState which resets dynamic flags
             if (!creature->loot.isLooted())
                 creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);

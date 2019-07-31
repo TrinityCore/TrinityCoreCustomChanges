@@ -494,7 +494,7 @@ bool Creature::InitEntry(uint32 entry, CreatureData const* data /*= nullptr*/)
         LoadEquipment();  // use default equipment (if available) for summons
     else if (data->equipmentId == 0)
         LoadEquipment(0); // 0 means no equipment for creature table
-    else                         
+    else
     {
         m_originalEquipmentId = data->equipmentId;
         LoadEquipment(data->equipmentId);
@@ -702,6 +702,9 @@ void Creature::Update(uint32 diff)
             if (m_deathState != CORPSE)
                 break;
 
+            if (IsEngaged())
+                Unit::AIUpdateTick(diff);
+
             if (m_groupLootTimer && lootingGroupLowGUID)
             {
                 if (m_groupLootTimer <= diff)
@@ -788,8 +791,6 @@ void Creature::Update(uint32 diff)
                 }
             }
 
-
-            // do not allow the AI to be changed during update
             Unit::AIUpdateTick(diff);
 
             // creature can be dead after UpdateAI call
@@ -1736,7 +1737,7 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
     if (!data)
         return false;
 
-    SQLTransaction trans = WorldDatabase.BeginTransaction();
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
     sMapMgr->DoForAllMapsWithMapId(data->spawnPoint.GetMapId(),
         [spawnId, trans](Map* map) -> void
@@ -1753,6 +1754,10 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
 
     // delete data from memory ...
     sObjectMgr->DeleteCreatureData(spawnId);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    trans = WorldDatabase.BeginTransaction();
 
     // ... and the database
     PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_DEL_CREATURE);
@@ -3268,7 +3273,7 @@ void Creature::AtDisengage()
     Unit::AtDisengage();
 
     ClearUnitState(UNIT_STATE_ATTACK_PLAYER);
-    if (HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
+    if (IsAlive() && HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, GetCreatureTemplate()->dynamicflags);
 
     if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed

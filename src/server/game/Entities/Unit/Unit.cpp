@@ -294,7 +294,7 @@ Unit::Unit(bool isWorldObject) :
     m_ControlledByPlayer(false), m_AutoRepeatFirstCast(false), m_procDeep(0), m_transformSpell(0),
     m_removedAurasCount(0), m_unitMovedByMe(nullptr), m_playerMovingMe(nullptr), m_charmer(nullptr), m_charmed(nullptr),
     i_motionMaster(new MotionMaster(this)), m_regenTimer(0), m_vehicle(nullptr), m_vehicleKit(nullptr),
-    m_unitTypeMask(UNIT_MASK_NONE), m_Diminishing(), m_isEngaged(false), m_combatManager(this), m_threatManager(this),
+    m_unitTypeMask(UNIT_MASK_NONE), m_Diminishing(), m_combatManager(this), m_threatManager(this),
     m_aiLocked(false), m_comboTarget(nullptr), m_comboPoints(0), m_spellHistory(new SpellHistory(this))
 {
     m_objectType |= TYPEMASK_UNIT;
@@ -12266,89 +12266,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId) const
     return modelid;
 }
 
-uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
-{
-    switch (GetRace())
-    {
-        case RACE_ORC:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 30758;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 30757;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 30759;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 30756;
-            }
-            break;
-        }
-        case RACE_DWARF:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 30754;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 30753;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 30755;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 30736;
-            }
-            break;
-        }
-        case RACE_TROLL:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 30762;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 30761;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 30763;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 30760;
-            }
-            break;
-        }
-        case RACE_TAUREN:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 4589;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 4588;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 4587;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 4590;
-            }
-            break;
-        }
-        case RACE_DRAENEI:
-        {
-            switch (totemType)
-            {
-                case SUMMON_TYPE_TOTEM_FIRE:    // fire
-                    return 19074;
-                case SUMMON_TYPE_TOTEM_EARTH:   // earth
-                    return 19073;
-                case SUMMON_TYPE_TOTEM_WATER:   // water
-                    return 19075;
-                case SUMMON_TYPE_TOTEM_AIR:     // air
-                    return 19071;
-            }
-            break;
-        }
-    }
-    return 0;
-}
-
 void Unit::JumpTo(float speedXY, float speedZ, bool forward)
 {
     float angle = forward ? 0 : float(M_PI);
@@ -13526,6 +13443,7 @@ std::string Unit::GetDebugInfo() const
         << std::boolalpha
         << "IsAIEnabled: " << IsAIEnabled() << " DeathState: " << std::to_string(getDeathState())
         << " UnitMovementFlags: " << GetUnitMovementFlags() << " ExtraUnitMovementFlags: " << GetExtraUnitMovementFlags()
-        << " Class: " << std::to_string(GetClass());
+        << " Class: " << std::to_string(GetClass()) << "\n"
+        << " " << (movespline ? movespline->ToString() : "Movespline: <none>");
     return sstr.str();
 }

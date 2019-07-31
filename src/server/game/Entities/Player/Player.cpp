@@ -16151,7 +16151,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
                     }
                     else if (isNotLowLevelQuest)
                         result2 = DIALOG_STATUS_AVAILABLE;
-                else
+                    else
                         result2 = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
                 }
                 else

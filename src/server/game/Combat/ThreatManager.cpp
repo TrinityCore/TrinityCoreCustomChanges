@@ -190,7 +190,7 @@ void ThreatManager::Initialize()
 
 void ThreatManager::Update(uint32 tdiff)
 {
-    if (!CanHaveThreatList() || IsThreatListEmpty())
+    if (!CanHaveThreatList() || IsThreatListEmpty(true))
         return;
     if (_updateTimer <= tdiff)
     {
@@ -578,7 +578,7 @@ ThreatReference const* ThreatManager::ReselectVictim()
 void ThreatManager::ProcessAIUpdates()
 {
     CreatureAI* ai = ASSERT_NOTNULL(_owner->ToCreature())->AI();
-    std::vector<ThreatReference const*> v(std::move(_needsAIUpdate)); // _needClientUpdate is now empty in case this triggers a recursive call
+    std::vector<ThreatReference const*> v(std::move(_needsAIUpdate)); // _needsAIUpdate is now empty in case this triggers a recursive call
     if (!ai)
         return;
     for (ThreatReference const* ref : v)

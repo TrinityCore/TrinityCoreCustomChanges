@@ -240,10 +240,16 @@ bool CreatureAI::UpdateVictim()
     if (!IsEngaged())
         return false;
 
+    if (!me->IsAlive())
+    {
+        EngagementOver();
+        return false;
+    }
+
     if (!me->HasReactState(REACT_PASSIVE))
     {
         if (Unit* victim = me->SelectVictim())
-            if (!me->IsFocusing(nullptr, true) && victim != me->GetVictim())
+            if (!me->HasSpellFocus() && victim != me->GetVictim())
                 AttackStart(victim);
 
         return me->GetVictim() != nullptr;
@@ -285,7 +291,7 @@ void CreatureAI::EngagementOver()
 
 bool CreatureAI::_EnterEvadeMode(EvadeReason /*why*/)
 {
-    if (me->IsInEvadeMode())
+    if (!IsEngaged())
         return false;
 
     if (!me->IsAlive())
@@ -302,7 +308,7 @@ bool CreatureAI::_EnterEvadeMode(EvadeReason /*why*/)
     me->ResetPlayerDamageReq();
     me->SetLastDamagedTime(0);
     me->SetCannotReachTarget(false);
-    me->DoNotReacquireTarget();
+    me->DoNotReacquireSpellFocusTarget();
     EngagementOver();
 
     return true;

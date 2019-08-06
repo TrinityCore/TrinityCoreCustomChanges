@@ -980,7 +980,7 @@ void World::LoadConfigSettings(bool reload)
         TC_LOG_ERROR("server.loading", "Quests.DailyResetTime (%i) must be in range 0..23. Set to 3.", m_int_configs[CONFIG_DAILY_QUEST_RESET_TIME_HOUR]);
         m_int_configs[CONFIG_DAILY_QUEST_RESET_TIME_HOUR] = 3;
     }
-
+    
     m_int_configs[CONFIG_WEEKLY_QUEST_RESET_TIME_WDAY] = sConfigMgr->GetIntDefault("Quests.WeeklyResetWDay", 3);
     if (m_int_configs[CONFIG_WEEKLY_QUEST_RESET_TIME_WDAY] < 0 || m_int_configs[CONFIG_WEEKLY_QUEST_RESET_TIME_WDAY] > 6)
     {
@@ -2311,7 +2311,7 @@ void World::Update(uint32 diff)
             ChannelMgr* mgr2 = ASSERT_NOTNULL(ChannelMgr::forTeam(HORDE));
             if (mgr1 != mgr2)
                 mgr2->SaveToDB();
-    }
+        }
     }
 
     CheckQuestResetTimes();
@@ -3175,7 +3175,7 @@ void World::ResetDailyQuests()
 }
 
 static time_t GetNextWeeklyResetTime(time_t t)
-        {
+{
     t = GetNextDailyResetTime(t);
     tm time = TimeBreakdown(t);
     int wday = time.tm_wday;
@@ -3184,7 +3184,7 @@ static time_t GetNextWeeklyResetTime(time_t t)
         wday -= 7;
     t += (DAY * (target - wday));
     return t;
-        }
+}
 
 void World::ResetWeeklyQuests()
 {
@@ -3208,7 +3208,7 @@ void World::ResetWeeklyQuests()
     sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(next));
 
     TC_LOG_INFO("misc", "Weekly quests for all characters have been reset.");
-    }
+}
 
 static time_t GetNextMonthlyResetTime(time_t t)
 {

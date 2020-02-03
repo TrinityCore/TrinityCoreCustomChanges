@@ -55,6 +55,7 @@ class UpdateData;
 class WorldObject;
 class WorldPacket;
 class ZoneScript;
+class CPlayer;
 struct FactionTemplateEntry;
 struct PositionFullTerrainStatus;
 struct QuaternionData;
@@ -155,6 +156,11 @@ class TC_GAME_API Object
 
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
+
+        static CPlayer* ToCPlayer(Object* o) { if (o && o->GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<CPlayer*>(o); else return nullptr; }
+        static CPlayer const* ToCPlayer(Object const* o) { if (o && o->GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<CPlayer const*>(o); else return nullptr; }
+        CPlayer* ToCPlayer() { return ToCPlayer(this); }
+        CPlayer const* ToCPlayer() const { return ToCPlayer(this); }
 
         static Player* ToPlayer(Object* o) { if (o && o->GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Player*>(o); else return nullptr; }
         static Player const* ToPlayer(Object const* o) { if (o && o->GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Player const*>(o); else return nullptr; }

@@ -21,6 +21,7 @@
 #include "Define.h"
 #include "ObjectGuid.h"
 #include <string>
+#include <boost/optional.hpp>
 
 struct CharacterCacheEntry
 {
@@ -46,7 +47,7 @@ class TC_GAME_API CharacterCache
         void AddCharacterCacheEntry(ObjectGuid const& guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level);
         void DeleteCharacterCacheEntry(ObjectGuid const& guid, std::string const& name);
 
-        void UpdateCharacterData(ObjectGuid const& guid, std::string const& name, uint8* gender = nullptr, uint8* race = nullptr);
+        void UpdateCharacterData(ObjectGuid const& guid, std::string const& name, boost::optional<uint8> gender = boost::none, boost::optional<uint8> race = boost::none);
         void UpdateCharacterLevel(ObjectGuid const& guid, uint8 level);
         void UpdateCharacterAccountId(ObjectGuid const& guid, uint32 accountId);
         void UpdateCharacterGuildId(ObjectGuid const& guid, ObjectGuid::LowType guildId);

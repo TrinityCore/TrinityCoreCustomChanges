@@ -507,6 +507,7 @@ struct SkillStatusData
     }
     uint8 pos;
     SkillUpdateState uState;
+    bool DBDelete = true;
 };
 
 typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
@@ -1747,7 +1748,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void CheckAreaExploreAndOutdoor(void);
 
         static uint32 TeamForRace(uint8 race);
-        uint32 GetTeam() const { return m_team; }
+        virtual uint32 GetTeam() const { return m_team; }
         TeamId GetTeamId() const { return m_team == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE; }
         void SetFactionForRace(uint8 race);
 

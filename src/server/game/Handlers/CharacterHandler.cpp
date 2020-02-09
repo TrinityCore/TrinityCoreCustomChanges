@@ -50,6 +50,8 @@
 #include "QueryHolder.h"
 #include "World.h"
 
+#include "CPlayer.h"
+
 class LoginQueryHolder : public SQLQueryHolder
 {
     private:
@@ -554,7 +556,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
                 return;
             }
 
-            Player newChar(this);
+            CPlayer newChar(this);
             newChar.GetMotionMaster()->Initialize();
             if (!newChar.Create(sObjectMgr->GetGenerator<HighGuid::Player>().Generate(), createInfo.get()))
 
@@ -719,7 +721,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 {
     ObjectGuid playerGuid = holder->GetGuid();
 
-    Player* pCurrChar = new Player(this);
+    Player* pCurrChar = new CPlayer(this);
      // for send server info and strings (config)
     ChatHandler chH = ChatHandler(pCurrChar->GetSession());
 
@@ -1459,7 +1461,7 @@ void WorldSession::HandleCharCustomizeCallback(std::shared_ptr<CharacterCustomiz
 
     CharacterDatabase.CommitTransaction(trans);
 
-    sCharacterCache->UpdateCharacterData(customizeInfo->Guid, customizeInfo->Name, &customizeInfo->Gender);
+    sCharacterCache->UpdateCharacterData(customizeInfo->Guid, customizeInfo->Name, customizeInfo->Gender);
 
     SendCharCustomize(RESPONSE_SUCCESS, customizeInfo.get());
 
@@ -1758,7 +1760,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
         trans->Append(stmt);
     }
 
-    sCharacterCache->UpdateCharacterData(factionChangeInfo->Guid, factionChangeInfo->Name, &factionChangeInfo->Gender, &factionChangeInfo->Race);
+    sCharacterCache->UpdateCharacterData(factionChangeInfo->Guid, factionChangeInfo->Name, factionChangeInfo->Gender, factionChangeInfo->Race);
 
     if (oldRace != factionChangeInfo->Race)
     {

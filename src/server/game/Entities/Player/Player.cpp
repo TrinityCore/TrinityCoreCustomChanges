@@ -111,6 +111,8 @@
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
 
+#include "CPlayer.h"
+
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -507,7 +509,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetObjectScale(1.0f);
 
-    SetFactionForRace(createInfo->Race);
+        SetFactionForRace(createInfo->Race);
 
     if (!IsValidGender(createInfo->Gender))
     {
@@ -525,6 +527,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetRace(createInfo->Race);
     SetClass(createInfo->Class);
+    ToCPlayer()->InitializeCFData();
     SetGender(createInfo->Gender);
     SetPowerType(Powers(powertype), false);
     InitDisplayIds();
@@ -17193,7 +17196,17 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     SetRace(fields[3].GetUInt8());
     SetClass(fields[4].GetUInt8());
+    ToCPlayer()->InitializeCFData();
+    _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
     SetGender(gender);
+    auto race = GetRace();
+
+    if (m_bgData.bgTeam &&
+        sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID, m_bgData.bgTypeID) &&
+        !ToCPlayer()->NativeTeam())
+    {
+        SetRace(ToCPlayer()->GetFRace());
+    }
 
     // check if race/class combination is valid
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(GetRace(), GetClass());
@@ -17326,7 +17339,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
     _LoadInstanceTimeRestrictions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
-    _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
 
     GetSession()->SetPlayer(this);
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
@@ -17738,6 +17750,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
     InitTalentForLevel();
     LearnDefaultSkills();
     LearnCustomSpells();
+
+    ToCPlayer()->ReplaceRacials(ToCPlayer()->NativeTeam());
 
     // must be before inventory (some items required reputation check)
     m_reputationMgr->LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_REPUTATION));
@@ -19304,7 +19318,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt32(index++, GetGUID().GetCounter());
         stmt->setUInt32(index++, GetSession()->GetAccountId());
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, GetRace());
+        stmt->setUInt8(index++, ToCPlayer()->GetORace());
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
@@ -19414,7 +19428,7 @@ void Player::SaveToDB(bool create /*=false*/)
         // Update query
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER);
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, GetRace());
+        stmt->setUInt8(index++, ToCPlayer()->GetORace());
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
@@ -20124,7 +20138,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
             continue;
         }
 
-        if (itr->second.uState == SKILL_DELETED)
+        if (itr->second.uState == SKILL_DELETED && itr->second.DBDelete)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILL_BY_SKILL);
             stmt->setUInt32(0, GetGUID().GetCounter());
@@ -20734,7 +20748,13 @@ void Player::Say(std::string const& text, Language language, WorldObject const* 
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_SAY, language, this, this, _text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), !sWorld->getBoolConfig(CONFIG_CFBG_ENABLED));
+
+    if (sWorld->getBoolConfig(CONFIG_CFBG_ENABLED))
+    {
+       ChatHandler::BuildChatPacket(data, CHAT_MSG_SAY, LANG_UNIVERSAL, this, nullptr, _text);
+       SendDirectMessage(&data);
+    }
 }
 
 void Player::Say(uint32 textId, WorldObject const* target /*= nullptr*/)
@@ -20749,7 +20769,13 @@ void Player::Yell(std::string const& text, Language language, WorldObject const*
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_YELL, language, this, this, _text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), true);
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), !sWorld->getBoolConfig(CONFIG_CFBG_ENABLED));
+
+    if (sWorld->getBoolConfig(CONFIG_CFBG_ENABLED))
+    {
+       ChatHandler::BuildChatPacket(data, CHAT_MSG_YELL, LANG_UNIVERSAL, this, nullptr, _text);
+       SendDirectMessage(&data);
+    }
 }
 
 void Player::Yell(uint32 textId, WorldObject const* target /*= nullptr*/)
@@ -20764,7 +20790,13 @@ void Player::TextEmote(std::string const& text, WorldObject const* /*= nullptr*/
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_EMOTE, LANG_UNIVERSAL, this, this, _text);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), !sWorld->getBoolConfig(CONFIG_CFBG_ENABLED), !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
+
+    if (sWorld->getBoolConfig(CONFIG_CFBG_ENABLED))
+    {
+       ChatHandler::BuildChatPacket(data, CHAT_MSG_EMOTE, LANG_UNIVERSAL, this, nullptr, _text);
+       SendDirectMessage(&data);
+    }
 }
 
 void Player::TextEmote(uint32 textId, WorldObject const* target /*= nullptr*/, bool /*isBossEmote = false*/)
@@ -22192,6 +22224,7 @@ uint32 Player::GetBGTeam() const
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
+    ToCPlayer()->CFLeaveBattleground();
     if (Battleground* bg = GetBattleground())
     {
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
@@ -24909,8 +24942,10 @@ void Player::_LoadSkills(PreparedQueryResult result)
             uint16 skill    = fields[0].GetUInt16();
             uint16 value    = fields[1].GetUInt16();
             uint16 max      = fields[2].GetUInt16();
+            uint32 race = GetRace();
 
             SkillRaceClassInfoEntry const* rcEntry = GetSkillRaceClassInfo(skill, GetRace(), GetClass());
+
             if (!rcEntry)
             {
                 TC_LOG_ERROR("entities.player", "Player::_LoadSkills: Player '%s' (%s, Race: %u, Class: %u) has forbidden skill %u for his race/class combination",

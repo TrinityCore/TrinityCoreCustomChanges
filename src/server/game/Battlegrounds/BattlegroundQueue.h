@@ -41,6 +41,7 @@ struct GroupQueueInfo                                       // stores informatio
 {
     std::map<ObjectGuid, PlayerQueueInfo*> Players;         // player queue info map
     uint32  Team;                                           // Player team (ALLIANCE/HORDE)
+    uint32  OTeam;                                          // Original Player team (ALLIANCE/HORDE)
     BattlegroundTypeId BgTypeId;                            // battleground type id
     bool    IsRated;                                        // rated
     uint8   ArenaType;                                      // 2v2, 3v3, 5v5 or 0 when BG

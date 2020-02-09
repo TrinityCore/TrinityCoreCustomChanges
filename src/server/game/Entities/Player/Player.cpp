@@ -17199,7 +17199,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
     ToCPlayer()->InitializeCFData();
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
     SetGender(gender);
-    auto race = GetRace();
 
     if (m_bgData.bgTeam &&
         sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID, m_bgData.bgTypeID) &&
@@ -24942,7 +24941,6 @@ void Player::_LoadSkills(PreparedQueryResult result)
             uint16 skill    = fields[0].GetUInt16();
             uint16 value    = fields[1].GetUInt16();
             uint16 max      = fields[2].GetUInt16();
-            uint32 race = GetRace();
 
             SkillRaceClassInfoEntry const* rcEntry = GetSkillRaceClassInfo(skill, GetRace(), GetClass());
 

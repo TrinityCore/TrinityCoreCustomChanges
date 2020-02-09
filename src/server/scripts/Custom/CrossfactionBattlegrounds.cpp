@@ -42,7 +42,7 @@ public:
         };
         return commandTable;
     }
-    static bool HandleDebugBattlegroundCommand(ChatHandler* handler, char const* args)
+    static bool HandleDebugBattlegroundCommand(ChatHandler* handler, char const* /*args*/)
     {
         auto bg = handler->GetSession()->GetPlayer()->GetBattleground();
         if (bg)

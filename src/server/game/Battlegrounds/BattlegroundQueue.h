@@ -22,6 +22,7 @@
 #include "DBCEnums.h"
 #include "Battleground.h"
 #include "EventProcessor.h"
+#include "CFBGQueue.h"
 
 #include <deque>
 

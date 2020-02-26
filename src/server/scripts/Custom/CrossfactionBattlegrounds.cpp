@@ -1,5 +1,5 @@
 #include "ScriptMgr.h"
-#include "CPlayer.h"
+#include "CFBGData.h"
 #include "Chat.h"
 #include "RBAC.h"
 #include "WorldSession.h"
@@ -14,12 +14,11 @@ public:
 
     void OnLogin(Player* player, bool /*firstLogin*/)
     {
-        CPlayer* cplayer = player->ToCPlayer();
-        if (!cplayer->NativeTeam())
+        if (!player->cfbgdata->NativeTeam())
         {
-            cplayer->SetRace(cplayer->GetFRace());
-            cplayer->SetFactionForRace(cplayer->GetRace());
-            cplayer->FakeDisplayID();
+            player->SetRace(player->cfbgdata->GetFRace());
+            player->SetFactionForRace(player->GetRace());
+            player->cfbgdata->SetRaceDisplayID();
         }
     }
 };
@@ -44,6 +43,9 @@ public:
     }
     static bool HandleDebugBattlegroundCommand(ChatHandler* handler, char const* /*args*/)
     {
+        if (!handler->GetSession())
+            return false;
+
         auto bg = handler->GetSession()->GetPlayer()->GetBattleground();
         if (bg)
         {

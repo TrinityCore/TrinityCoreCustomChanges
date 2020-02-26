@@ -24,7 +24,7 @@
 #include "BattlegroundQueue.h"
 #include <unordered_map>
 
-#include "CBattlegroundQueue.h"
+#include "CFBGQueue.h"
 
 struct BattlemasterListEntry;
 
@@ -142,7 +142,7 @@ class TC_GAME_API BattlegroundMgr
         typedef std::map<BattlegroundTypeId, BattlegroundData> BattlegroundDataContainer;
         BattlegroundDataContainer bgDataStore;
 
-        CBattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES];
+        BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES];
 
         std::vector<uint64> m_QueueUpdateScheduler;
         uint32 m_NextRatedArenaUpdate;

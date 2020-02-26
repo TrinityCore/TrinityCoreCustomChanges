@@ -43,7 +43,7 @@
 #include <utf8.h>
 #include <algorithm>
 
-#include "CPlayer.h"
+#include "CFBGData.h"
 
 inline bool isNasty(uint8 c)
 {
@@ -367,7 +367,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                         return;
                     }
                     else if (GetPlayer()->GetBattleground() != receiver->GetBattleground() &&
-                             GetPlayer()->ToCPlayer()->GetOTeam() != receiver->ToCPlayer()->GetOTeam())
+                             GetPlayer()->cfbgdata->GetOTeam() != receiver->cfbgdata->GetOTeam())
                     {
                         SendWrongFactionNotice();
                         return;

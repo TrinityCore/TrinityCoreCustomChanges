@@ -111,7 +111,7 @@
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
 
-#include "CPlayer.h"
+#include "CFBGData.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -182,6 +182,8 @@ uint32 const MAX_MONEY_AMOUNT = static_cast<uint32>(std::numeric_limits<int32>::
 
 Player::Player(WorldSession* session): Unit(true)
 {
+    cfbgdata = std::unique_ptr<CFBGData>();
+
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -511,7 +513,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetObjectScale(1.0f);
 
-        SetFactionForRace(createInfo->Race);
+    SetFactionForRace(createInfo->Race);
 
     if (!IsValidGender(createInfo->Gender))
     {
@@ -529,7 +531,7 @@ bool Player::Create(ObjectGuid::LowType guidlow, CharacterCreateInfo* createInfo
 
     SetRace(createInfo->Race);
     SetClass(createInfo->Class);
-    ToCPlayer()->InitializeCFData();
+    cfbgdata->InitializeCFData();
     SetGender(createInfo->Gender);
     SetPowerType(Powers(powertype), false);
     InitDisplayIds();
@@ -6004,7 +6006,7 @@ void Player::UpdateWeaponsSkillsToMaxSkillsForLevel()
 
 // This functions sets a skill line value (and adds if doesn't exist yet)
 // To "remove" a skill line, set it's values to zero
-void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
+void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal, bool defskill)
 {
     if (!id)
         return;
@@ -6015,6 +6017,9 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
     //has skill
     if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
     {
+        if (itr->second.defskill)
+            itr->second.defskill = defskill;
+
         currVal = SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(itr->second.pos)));
         if (newVal)
         {
@@ -17200,15 +17205,15 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
 
     SetRace(fields[3].GetUInt8());
     SetClass(fields[4].GetUInt8());
-    ToCPlayer()->InitializeCFData();
+    cfbgdata->InitializeCFData();
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
     SetGender(gender);
 
     if (m_bgData.bgTeam &&
         sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID, m_bgData.bgTypeID) &&
-        !ToCPlayer()->NativeTeam())
+        !cfbgdata->NativeTeam())
     {
-        SetRace(ToCPlayer()->GetFRace());
+        SetRace(cfbgdata->GetFRace());
     }
 
     // check if race/class combination is valid
@@ -17754,7 +17759,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
     LearnDefaultSkills();
     LearnCustomSpells();
 
-    ToCPlayer()->ReplaceRacials(ToCPlayer()->NativeTeam());
+    cfbgdata->ReplaceRacials(cfbgdata->NativeTeam());
 
     // must be before inventory (some items required reputation check)
     m_reputationMgr->LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_REPUTATION));
@@ -19321,7 +19326,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setUInt32(index++, GetGUID().GetCounter());
         stmt->setUInt32(index++, GetSession()->GetAccountId());
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, ToCPlayer()->GetORace());
+        stmt->setUInt8(index++, cfbgdata->GetORace());
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
@@ -19431,7 +19436,7 @@ void Player::SaveToDB(bool create /*=false*/)
         // Update query
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER);
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, ToCPlayer()->GetORace());
+        stmt->setUInt8(index++, cfbgdata->GetORace());
         stmt->setUInt8(index++, GetClass());
         stmt->setUInt8(index++, GetNativeGender());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
         stmt->setUInt8(index++, GetLevel());
@@ -20141,7 +20146,7 @@ void Player::_SaveSkills(SQLTransaction& trans)
             continue;
         }
 
-        if (itr->second.uState == SKILL_DELETED && itr->second.DBDelete)
+        if (itr->second.uState == SKILL_DELETED)
         {
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SKILL_BY_SKILL);
             stmt->setUInt32(0, GetGUID().GetCounter());
@@ -20156,28 +20161,31 @@ void Player::_SaveSkills(SQLTransaction& trans)
         uint16 value = SKILL_VALUE(valueData);
         uint16 max = SKILL_MAX(valueData);
 
-        switch (itr->second.uState)
+        if (!itr->second.defskill)
         {
-            case SKILL_NEW:
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_SKILLS);
-                stmt->setUInt32(0, GetGUID().GetCounter());
-                stmt->setUInt16(1, uint16(itr->first));
-                stmt->setUInt16(2, value);
-                stmt->setUInt16(3, max);
-                trans->Append(stmt);
+            switch (itr->second.uState)
+            {
+                case SKILL_NEW:
+                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_SKILLS);
+                    stmt->setUInt32(0, GetGUID().GetCounter());
+                    stmt->setUInt16(1, uint16(itr->first));
+                    stmt->setUInt16(2, value);
+                    stmt->setUInt16(3, max);
+                    trans->Append(stmt);
 
-                break;
-            case SKILL_CHANGED:
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_SKILLS);
-                stmt->setUInt16(0, value);
-                stmt->setUInt16(1, max);
-                stmt->setUInt32(2, GetGUID().GetCounter());
-                stmt->setUInt16(3, uint16(itr->first));
-                trans->Append(stmt);
+                    break;
+                case SKILL_CHANGED:
+                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_SKILLS);
+                    stmt->setUInt16(0, value);
+                    stmt->setUInt16(1, max);
+                    stmt->setUInt32(2, GetGUID().GetCounter());
+                    stmt->setUInt16(3, uint16(itr->first));
+                    trans->Append(stmt);
 
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
+            }
         }
         itr->second.uState = SKILL_UNCHANGED;
 
@@ -22218,6 +22226,7 @@ void Player::SetBGTeam(uint32 team)
 {
     m_bgData.bgTeam = team;
     SetArenaFaction(uint8(team == ALLIANCE ? 1 : 0));
+    cfbgdata->SetCFBGData();
 }
 
 uint32 Player::GetBGTeam() const
@@ -22227,7 +22236,6 @@ uint32 Player::GetBGTeam() const
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
-    ToCPlayer()->CFLeaveBattleground();
     if (Battleground* bg = GetBattleground())
     {
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
@@ -23015,7 +23023,7 @@ void Player::LearnDefaultSkill(uint32 skillId, uint16 rank)
     switch (GetSkillRangeType(rcInfo))
     {
         case SKILL_RANGE_LANGUAGE:
-            SetSkill(skillId, 0, 300, 300);
+            SetSkill(skillId, 0, 300, 300, true);
             break;
         case SKILL_RANGE_LEVEL:
         {
@@ -23032,11 +23040,11 @@ void Player::LearnDefaultSkill(uint32 skillId, uint16 rank)
             else if (skillId == SKILL_LOCKPICKING)
                 skillValue = std::max<uint16>(1, GetSkillValue(SKILL_LOCKPICKING));
 
-            SetSkill(skillId, 0, skillValue, maxValue);
+            SetSkill(skillId, 0, skillValue, maxValue, true);
             break;
         }
         case SKILL_RANGE_MONO:
-            SetSkill(skillId, 0, 1, 1);
+            SetSkill(skillId, 0, 1, 1, true);
             break;
         case SKILL_RANGE_RANK:
         {
@@ -23051,7 +23059,7 @@ void Player::LearnDefaultSkill(uint32 skillId, uint16 rank)
             else if (GetClass() == CLASS_DEATH_KNIGHT)
                 skillValue = std::min(std::max<uint16>({ uint16(1), uint16((GetLevel() - 1) * 5) }), maxValue);
 
-            SetSkill(skillId, rank, skillValue, maxValue);
+            SetSkill(skillId, rank, skillValue, maxValue, true);
             break;
         }
         default:

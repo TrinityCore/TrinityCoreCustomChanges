@@ -47,7 +47,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 
-#include "CPlayer.h"
+#include "CFBGData.h"
 
 bool BattlegroundTemplate::IsArena() const
 {
@@ -703,8 +703,6 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
 {
     if (Battleground* bg = GetBattleground(instanceId, bgTypeId))
     {
-        player->ToCPlayer()->CFJoinBattleground();
-
         uint32 mapid = bg->GetMapId();
         uint32 team = player->GetBGTeam();
         if (team == 0)

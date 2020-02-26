@@ -41,7 +41,7 @@
 #include "WorldStatePackets.h"
 #include <cstdarg>
 
-#include "CPlayer.h"
+#include "CFBGData.h"
 #include "CharacterCache.h"
 
 void BattlegroundScore::AppendToPacket(WorldPacket& data)
@@ -846,8 +846,6 @@ void Battleground::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
     if (player)
     {
-        player->ToCPlayer()->CFLeaveBattleground();
-
         // should remove spirit of redemption
         if (player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);

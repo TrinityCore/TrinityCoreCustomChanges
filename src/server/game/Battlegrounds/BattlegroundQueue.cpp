@@ -30,7 +30,7 @@
 #include "Player.h"
 #include "World.h"
 
-#include "CBattlegroundQueue.h"
+#include "CFBGQueue.h"
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -507,7 +507,7 @@ large groups are disadvantageous, because they will be kicked first if invitatio
 */
 void BattlegroundQueue::FillPlayersToBG(Battleground* bg, BattlegroundBracketId bracket_id)
 {
-    if (static_cast<CBattlegroundQueue*>(this)->MixPlayersToBG(bg, bracket_id))
+    if (CFBGQueue::MixPlayersToBG(this, bg, bracket_id))
         return;
 
     int32 hordeFree = bg->GetFreeSlotsForTeam(HORDE);
@@ -673,7 +673,7 @@ bool BattlegroundQueue::CheckPremadeMatch(BattlegroundBracketId bracket_id, uint
 // this method tries to create battleground or arena with MinPlayersPerTeam against MinPlayersPerTeam
 bool BattlegroundQueue::CheckNormalMatch(Battleground* bg_template, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers)
 {
-    if (static_cast<CBattlegroundQueue*>(this)->CheckMixedMatch(bg_template, bracket_id, minPlayers, maxPlayers))
+    if (CFBGQueue::CheckMixedMatch(this, bg_template, bracket_id, minPlayers, maxPlayers))
         return true;
 
     GroupsQueueType::const_iterator itr_team[PVP_TEAMS_COUNT];

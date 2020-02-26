@@ -50,7 +50,7 @@
 #include "QueryHolder.h"
 #include "World.h"
 
-#include "CPlayer.h"
+#include "CFBGData.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -556,7 +556,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
                 return;
             }
 
-            CPlayer newChar(this);
+            Player newChar(this);
             newChar.GetMotionMaster()->Initialize();
             if (!newChar.Create(sObjectMgr->GetGenerator<HighGuid::Player>().Generate(), createInfo.get()))
 
@@ -721,7 +721,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 {
     ObjectGuid playerGuid = holder->GetGuid();
 
-    Player* pCurrChar = new CPlayer(this);
+    Player* pCurrChar = new Player(this);
      // for send server info and strings (config)
     ChatHandler chH = ChatHandler(pCurrChar->GetSession());
 

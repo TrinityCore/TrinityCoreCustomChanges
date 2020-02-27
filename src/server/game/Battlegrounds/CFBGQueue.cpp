@@ -11,7 +11,7 @@ public:
         insert(end(), list.begin(), list.end());
     }
 
-    void SortByJoinTime()
+    void Sort()
     {
         sort([](GroupQueueInfo* a, GroupQueueInfo* b) { return a->JoinTime < b->JoinTime; });
     }
@@ -47,13 +47,16 @@ bool CFBGQueue::CFBGGroupInserter(BattlegroundQueue* queue, Battleground* bg, Ba
 
     Groups.AddGroups(queue->m_QueuedGroups[bracket_id][AllyFirst ? BG_QUEUE_NORMAL_ALLIANCE : BG_QUEUE_NORMAL_HORDE]);
     Groups.AddGroups(queue->m_QueuedGroups[bracket_id][AllyFirst ? BG_QUEUE_NORMAL_HORDE : BG_QUEUE_NORMAL_ALLIANCE]);
-    Groups.SortByJoinTime();
+    Groups.Sort();
+
+    bool startable = false;
 
     for (auto& ginfo : Groups)
     {
         if (!ginfo->IsInvitedToBGInstanceGUID)
         {
             bool AddAsAlly = AllyFree == HordeFree ? ginfo->OTeam == ALLIANCE : AllyFree > HordeFree;
+            AddAsAlly = !AddAsAlly;
 
             ginfo->Team = AddAsAlly ? ALLIANCE : HORDE;
 
@@ -66,15 +69,18 @@ bool CFBGQueue::CFBGGroupInserter(BattlegroundQueue* queue, Battleground* bg, Ba
             if (queue->m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount() >= MinPlayers &&
                 queue->m_SelectionPools[TEAM_HORDE].GetPlayerCount() >= MinPlayers &&
                 !Filling)
-                return true;
+                startable = true;
         }
     }
+
+    if (startable)
+        return true;
 
     // If we're in BG testing one player is enough
     if (sBattlegroundMgr->isTesting() && queue->m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount() + queue->m_SelectionPools[TEAM_HORDE].GetPlayerCount() > 0)
         return true;
 
-    // Filling always returns true unless we're not actually having CFBG enabled
+    // Filling always returns true
     if (Filling)
         return true;
 

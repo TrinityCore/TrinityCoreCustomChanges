@@ -1,5 +1,6 @@
 #include "CFBGData.h"
 #include "Player.h"
+#include "Item.h"
 #include "WorldSession.h"
 #include "World.h"
 #include "MiscPackets.h"
@@ -17,7 +18,7 @@ void CFBGData::SetCFBGData()
 
     player->SetByteValue(UNIT_FIELD_BYTES_0, 0, NativeTeam() ? GetORace() : GetFRace());
     player->SetFaction(NativeTeam() ? GetOFaction() : GetFFaction());
-    ReplaceRacials(NativeTeam());
+    ReplaceRacials();
     SetRaceDisplayID();
 
     // Calling this in BattleGround::AddPlayer fixes scoreboard
@@ -52,10 +53,12 @@ void CFBGData::SetRaceDisplayID()
     }
 }
 
-void CFBGData::ReplaceRacials(bool native)
+void CFBGData::ReplaceRacials()
 {
     if (!sWorld->getBoolConfig(CONFIG_CFBG_ENABLED))
         return;
+
+    ReplaceItems();
 
     std::unordered_map<uint16, bool> skills;
 
@@ -82,7 +85,7 @@ void CFBGData::ReplaceRacials(bool native)
     for (uint8 i = 0; i < MAX_RACES; ++i)
         updateskills(i, player->GetClass(), false);
 
-    updateskills(native ? GetORace() : GetFRace(), player->GetClass(), true);
+    updateskills(NativeTeam() ? GetORace() : GetFRace(), player->GetClass(), true);
 
     for (std::pair<uint16 const, bool>& skillinfo : skills)
     {
@@ -93,6 +96,33 @@ void CFBGData::ReplaceRacials(bool native)
     }
 
     player->SendUpdateToPlayer(player);
+}
+
+void CFBGData::ReplaceItems()
+{
+    if (!sWorld->getBoolConfig(CONFIG_CFBG_ENABLED))
+        return;
+
+    for (std::pair<uint32 const, uint32>& itempair : sObjectMgr->FactionChangeItems)
+    {
+        uint32 item_alliance = itempair.first;
+        uint32 item_horde = itempair.second;
+
+        auto replaceitem = [&] (uint32 sourceitem, uint32 destinationitem) -> void
+        {
+            while (Item* item = player->GetItemByEntry(sourceitem))
+            {
+                item->SetEntry(destinationitem);
+                item->SetState(ITEM_CHANGED);
+            }
+        };
+
+        if (player->GetTeam() == ALLIANCE)
+            replaceitem(item_horde, item_alliance);
+        else
+            replaceitem(item_alliance, item_horde);
+    }
+
 }
 
 void CFBGData::InitializeCFData()

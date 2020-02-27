@@ -182,7 +182,7 @@ uint32 const MAX_MONEY_AMOUNT = static_cast<uint32>(std::numeric_limits<int32>::
 
 Player::Player(WorldSession* session): Unit(true)
 {
-    cfbgdata = std::unique_ptr<CFBGData>();
+    cfbgdata = std::make_unique<CFBGData>(this);
 
     m_speakTime = 0;
     m_speakCount = 0;
@@ -17759,7 +17759,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
     LearnDefaultSkills();
     LearnCustomSpells();
 
-    cfbgdata->ReplaceRacials(cfbgdata->NativeTeam());
+    cfbgdata->ReplaceRacials();
 
     // must be before inventory (some items required reputation check)
     m_reputationMgr->LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_REPUTATION));
@@ -22231,7 +22231,7 @@ void Player::SetBGTeam(uint32 team)
 
 uint32 Player::GetBGTeam() const
 {
-    return m_bgData.bgTeam ? m_bgData.bgTeam : GetTeam();
+    return m_bgData.bgTeam ? m_bgData.bgTeam : m_team;
 }
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)

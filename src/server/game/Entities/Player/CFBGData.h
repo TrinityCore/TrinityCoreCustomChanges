@@ -21,7 +21,8 @@ public:
     uint32 GetFFaction() const { return m_fFaction; }
     uint32 GetOTeam() const { return m_oTeam; }
     void SetCFBGData();
-    void ReplaceRacials(bool native);
+    void ReplaceRacials();
+    void ReplaceItems();
     void InitializeCFData();
     void SetRaceDisplayID();
 

@@ -32,12 +32,12 @@ public:
     {
         static std::vector<ChatCommand> debugCommandTable =
         {
-            { "battleground", rbac::RBAC_PERM_COMMAND_DEBUG, false, &HandleDebugBattlegroundCommand, "" },
+            { "startbg", rbac::RBAC_PERM_COMMAND_DEBUG, false, &HandleDebugBattlegroundCommand, "" },
         };
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "debug",	rbac::RBAC_PERM_COMMAND_DEBUG, true, nullptr, "", debugCommandTable },
+            { "cfbg",	rbac::RBAC_PERM_COMMAND_DEBUG, true, nullptr, "", debugCommandTable },
         };
         return commandTable;
     }

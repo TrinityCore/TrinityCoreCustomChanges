@@ -17,7 +17,6 @@
 
 // This is where scripts' loading functions should be declared:
 
-void AddSC_CrossfactionBattlegrounds();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -30,7 +29,7 @@ void AddSC_CrossfactionBattlegrounds();
 // 6
 // 7
 // 8
-// 9
+void AddSC_CrossfactionBattlegrounds();
 // 10
 // 11
 // 12
@@ -73,7 +72,7 @@ void AddCustomScripts()
     // 6
     // 7
     // 8
-    // 9
+    AddSC_CrossfactionBattlegrounds();
     // 10
     // 11
     // 12

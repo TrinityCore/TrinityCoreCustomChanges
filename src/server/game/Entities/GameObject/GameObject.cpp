@@ -241,6 +241,10 @@ void GameObject::RemoveFromWorld()
             if (GetMap()->ContainsGameObjectModel(*m_model))
                 GetMap()->RemoveGameObjectModel(*m_model);
 
+        // If linked trap exists, despawn it
+        if (GameObject* linkedTrap = GetLinkedTrap())
+            linkedTrap->DespawnOrUnsummon();
+
         WorldObject::RemoveFromWorld();
 
         if (m_spawnId)
@@ -649,7 +653,7 @@ void GameObject::Update(uint32 diff)
                     if (Unit* owner = GetOwner())
                     {
                         // Hunter trap: Search units which are unfriendly to the trap's owner
-                        Trinity::NearestAttackableNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
+                        Trinity::NearestAttackableNoTotemUnitInObjectRangeCheck checker(this, radius);
                         Trinity::UnitLastSearcher<Trinity::NearestAttackableNoTotemUnitInObjectRangeCheck> searcher(this, target, checker);
                         Cell::VisitAllObjects(this, searcher, radius);
                     }
@@ -907,10 +911,6 @@ void GameObject::DespawnOrUnsummon(Milliseconds delay, Seconds forceRespawnTime)
 
 void GameObject::Delete()
 {
-    // If nearby linked trap exists, despawn it
-    if (GameObject* linkedTrap = GetLinkedTrap())
-        linkedTrap->DespawnOrUnsummon();
-
     SetLootState(GO_NOT_READY);
     RemoveFromOwner();
 

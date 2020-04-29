@@ -37,7 +37,7 @@ public:
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "cfbg",	rbac::RBAC_PERM_COMMAND_DEBUG, true, nullptr, "", debugCommandTable },
+            { "cfbg", rbac::RBAC_PERM_COMMAND_DEBUG, true, nullptr, "", debugCommandTable },
         };
         return commandTable;
     }

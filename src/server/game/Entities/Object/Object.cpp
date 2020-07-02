@@ -1058,7 +1058,7 @@ void WorldObject::_Create(ObjectGuid::LowType guidlow, HighGuid guidhigh, uint32
 void WorldObject::UpdatePositionData()
 {
     PositionFullTerrainStatus data;
-    GetMap()->GetFullTerrainStatusForPosition(GetPositionX(), GetPositionY(), GetPositionZ(), data, MAP_ALL_LIQUIDS, GetCollisionHeight());
+    GetMap()->GetFullTerrainStatusForPosition(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ(), data, MAP_ALL_LIQUIDS, GetCollisionHeight());
     ProcessPositionDataChanged(data);
 }
 
@@ -1076,7 +1076,7 @@ void WorldObject::ProcessPositionDataChanged(PositionFullTerrainStatus const& da
 void WorldObject::AddToWorld()
 {
     Object::AddToWorld();
-    GetBaseMap()->GetZoneAndAreaId(m_zoneId, m_areaId, GetPositionX(), GetPositionY(), GetPositionZ());
+    GetMap()->GetZoneAndAreaId(GetPhaseMask(), m_zoneId, m_areaId, GetPositionX(), GetPositionY(), GetPositionZ());
 }
 
 void WorldObject::RemoveFromWorld()
@@ -1825,12 +1825,6 @@ void WorldObject::ResetMap()
     //maybe not for corpse
     //m_mapId = 0;
     //m_InstanceId = 0;
-}
-
-Map const* WorldObject::GetBaseMap() const
-{
-    ASSERT(m_currMap);
-    return m_currMap->GetParent();
 }
 
 void WorldObject::AddObjectToRemoveList()
@@ -2887,19 +2881,24 @@ bool WorldObject::IsValidAttackTarget(WorldObject const* target, SpellInfo const
     if (unitTarget && unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NON_ATTACKABLE_2))
         return false;
 
+    Unit const* unitOrOwner = unit;
+    if (GameObject const* go = ToGameObject())
+        if (go->GetGoType() == GAMEOBJECT_TYPE_TRAP)
+            unitOrOwner = go->GetOwner();
+
     // ignore immunity flags when assisting
-    if (unit && unitTarget && !(isPositiveSpell && bySpell->HasAttribute(SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG)))
+    if (unitOrOwner && unitTarget && !(isPositiveSpell && bySpell->HasAttribute(SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG)))
     {
-        if (!unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitTarget->IsImmuneToNPC())
+        if (!unitOrOwner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitTarget->IsImmuneToNPC())
             return false;
 
-        if (!unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unit->IsImmuneToNPC())
+        if (!unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitOrOwner->IsImmuneToNPC())
             return false;
 
-        if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitTarget->IsImmuneToPC())
+        if (unitOrOwner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitTarget->IsImmuneToPC())
             return false;
 
-        if (unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unit->IsImmuneToPC())
+        if (unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitOrOwner->IsImmuneToPC())
             return false;
     }
 
@@ -2947,7 +2946,7 @@ bool WorldObject::IsValidAttackTarget(WorldObject const* target, SpellInfo const
 
     // PvP case - can't attack when attacker or target are in sanctuary
     // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-    if (unitTarget && unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unit && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && (unitTarget->IsInSanctuary() || unit->IsInSanctuary()))
+    if (unitTarget && unitTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unitOrOwner && unitOrOwner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && (unitTarget->IsInSanctuary() || unitOrOwner->IsInSanctuary()))
         return false;
 
     // additional checks - only PvP case

@@ -30,7 +30,6 @@
 #include "Pet.h"
 #include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
-#include "ScriptMgr.h"
 #include "SmartAI.h"
 #include "SpellAuras.h"
 #include "SpellHistory.h"
@@ -487,7 +486,7 @@ public:
                 return;
 
             running = true;
-            events.ScheduleEvent(EVENT_CAST_RED_FIRE_RING, 1);
+            events.ScheduleEvent(EVENT_CAST_RED_FIRE_RING, 1ms);
         }
 
         bool checkNearbyPlayers()

@@ -7038,10 +7038,10 @@ float Unit::SpellCritChanceTaken(Unit const* caster, SpellInfo const* spellInfo,
                     {
                         case 911: // Shatter (Rank 3)
                             modChance += 16.f;
-                            /* fallthrough */
+                            [[fallthrough]];
                         case 910: // Shatter (Rank 2)
                             modChance += 17.f;
-                            /* fallthrough */
+                            [[fallthrough]];
                         case 849: // Shatter (Rank 1)
                             modChance += 17.f;
                             if (!HasAuraState(AURA_STATE_FROZEN, spellInfo, caster))
@@ -7163,8 +7163,8 @@ float Unit::SpellCritChanceTaken(Unit const* caster, SpellInfo const* spellInfo,
                         break;
                 }
             }
+            [[fallthrough]]; // Calculate critical strike chance for both Ranged and Melee spells
         }
-        /* fallthrough - Calculate critical strike chance for both Ranged and Melee spells*/
         case SPELL_DAMAGE_CLASS_RANGED:
             if (caster)
                 crit_chance = GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
@@ -10070,7 +10070,7 @@ void Unit::ProcSkillsAndReactives(bool isVictim, Unit* procTarget, uint32 typeMa
 
 void Unit::GetProcAurasTriggeredOnEvent(AuraApplicationProcContainer& aurasTriggeringProc, AuraApplicationList* procAuras, ProcEventInfo& eventInfo)
 {
-    std::chrono::steady_clock::time_point now = GameTime::GetGameTimeSteadyPoint();
+    TimePoint now = GameTime::Now();
 
     // use provided list of auras which can proc
     if (procAuras)
@@ -10602,6 +10602,7 @@ uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectTyp
                         ++effects;
                         break;
                 }
+                break;
             default:
                 break;
         }

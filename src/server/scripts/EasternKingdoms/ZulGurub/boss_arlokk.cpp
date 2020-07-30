@@ -165,7 +165,7 @@ class boss_arlokk : public CreatureScript
                 BossAI::EnterEvadeMode(why);
                 if (GameObject* object = instance->GetGameObject(DATA_GONG_BETHEKK))
                     object->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                me->DespawnOrUnsummon(4000);
+                me->DespawnOrUnsummon(4s);
             }
 
             void SetData(uint32 id, uint32 /*value*/) override
@@ -392,7 +392,7 @@ class npc_zulian_prowler : public CreatureScript
                     if (arlokk->IsAlive())
                         arlokk->GetAI()->SetData(_sideData, 0);
                 }
-                me->DespawnOrUnsummon(4000);
+                me->DespawnOrUnsummon(4s);
             }
 
             void UpdateAI(uint32 diff) override
@@ -453,7 +453,7 @@ class go_gong_of_bethekk : public GameObjectScript
             {
                 me->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                 me->SendCustomAnim(0);
-                me->SummonCreature(NPC_ARLOKK, PosSummonArlokk[0], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 600000);
+                me->SummonCreature(NPC_ARLOKK, PosSummonArlokk[0], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10min);
                 return true;
             }
         };

@@ -395,7 +395,7 @@ class TrashJumpEvent : public BasicEvent
                 case 0:
                     _owner->CastSpell(nullptr, SPELL_LEAP);
                     ++_stage;
-                    _owner->m_Events.AddEvent(this, eventTime + 2000);
+                    _owner->m_Events.AddEvent(this, Milliseconds(eventTime) + 2s);
                     return false;
                 case 1:
                     _owner->SetReactState(REACT_AGGRESSIVE);
@@ -426,7 +426,7 @@ class LightningFieldEvent : public BasicEvent
                 if (instance->GetBossState(BOSS_THORIM) == IN_PROGRESS)
                 {
                     _owner->CastSpell(nullptr, SPELL_LIGHTNING_FIELD);
-                    _owner->m_Events.AddEvent(this, eventTime + 1000);
+                    _owner->m_Events.AddEvent(this, Milliseconds(eventTime) + 1s);
                     return false;
                 }
             }
@@ -485,7 +485,7 @@ class boss_thorim : public CreatureScript
 
                 // Spawn Pre Phase Adds
                 for (SummonLocation const& s : PreAddLocations)
-                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
 
                 if (GameObject* lever = instance->GetGameObject(DATA_THORIM_LEVER))
                     lever->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -550,7 +550,7 @@ class boss_thorim : public CreatureScript
                     if (Creature* sif = instance->GetCreature(DATA_SIF))
                     {
                         sif->AI()->Talk(SAY_SIF_DESPAWN);
-                        sif->DespawnOrUnsummon(6000);
+                        sif->DespawnOrUnsummon(6s);
                         _hardMode = false;
                     }
                 }
@@ -588,7 +588,7 @@ class boss_thorim : public CreatureScript
                     if (Creature* sif = instance->GetCreature(DATA_SIF))
                     {
                         summons.Despawn(sif);
-                        sif->DespawnOrUnsummon(10000);
+                        sif->DespawnOrUnsummon(10s);
                     }
                 }
 
@@ -599,7 +599,7 @@ class boss_thorim : public CreatureScript
                 events.ScheduleEvent(EVENT_OUTRO_2, _hardMode ? 8s : 11s);
                 events.ScheduleEvent(EVENT_OUTRO_3, _hardMode ? 19s : 21s);
 
-                me->m_Events.AddEvent(new UlduarKeeperDespawnEvent(me), me->m_Events.CalculateTime(35000));
+                me->m_Events.AddEvent(new UlduarKeeperDespawnEvent(me), me->m_Events.CalculateTime(35s));
             }
 
             void MovementInform(uint32 type, uint32 id) override
@@ -668,7 +668,7 @@ class boss_thorim : public CreatureScript
                     case NPC_DARK_RUNE_EVOKER:
                     case NPC_DARK_RUNE_COMMONER:
                         summon->SetReactState(REACT_PASSIVE);
-                        summon->m_Events.AddEvent(new TrashJumpEvent(summon), summon->m_Events.CalculateTime(3000));
+                        summon->m_Events.AddEvent(new TrashJumpEvent(summon), summon->m_Events.CalculateTime(3s));
                         break;
                     case NPC_SIF:
                         summon->SetReactState(REACT_PASSIVE);
@@ -771,9 +771,9 @@ class boss_thorim : public CreatureScript
                                 return LightningFieldCenter.GetExactDist2dSq(bunny) > 1296.0f;
                             });
 
-                            uint64 timer = 1000;
+                            Milliseconds timer = 1s;
                             for (Creature* bunny : triggers)
-                                bunny->m_Events.AddEvent(new LightningFieldEvent(bunny), bunny->m_Events.CalculateTime(timer += 100));
+                                bunny->m_Events.AddEvent(new LightningFieldEvent(bunny), bunny->m_Events.CalculateTime(timer += 100ms));
 
                             triggers.remove_if([](Creature* bunny)
                             {
@@ -879,7 +879,7 @@ class boss_thorim : public CreatureScript
                         GetTrashSpawnTriggers(triggers, urand(5, 6));
 
                         for (Creature* bunny : triggers)
-                            me->SummonCreature(StaticThorimTrashInfo[6 + 3].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            me->SummonCreature(StaticThorimTrashInfo[6 + 3].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
 
                         ++_waveType;
                         break;
@@ -892,7 +892,7 @@ class boss_thorim : public CreatureScript
                             GetTrashSpawnTriggers(triggers, urand(2, 4));
 
                             for (Creature* bunny : triggers)
-                                me->SummonCreature(StaticThorimTrashInfo[6 + RAND(0, 2)].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                me->SummonCreature(StaticThorimTrashInfo[6 + RAND(0, 2)].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
                         }
                         else
                         {
@@ -901,7 +901,7 @@ class boss_thorim : public CreatureScript
                             GetTrashSpawnTriggers(triggers);
 
                             for (Creature* bunny : triggers)
-                                me->SummonCreature(StaticThorimTrashInfo[6 + 1].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                me->SummonCreature(StaticThorimTrashInfo[6 + 1].Entry, *bunny, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
                         }
                         --_waveType;
                         break;
@@ -1403,7 +1403,7 @@ class npc_runic_colossus : public CreatureScript
                 // Spawn trashes
                 _summons.DespawnAll();
                 for (SummonLocation const& s : ColossusAddLocations)
-                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
             }
 
             void MoveInLineOfSight(Unit* /*who*/) override
@@ -1524,7 +1524,7 @@ class npc_ancient_rune_giant : public CreatureScript
                 // Spawn trashes
                 _summons.DespawnAll();
                 for (SummonLocation const& s : GiantAddLocations)
-                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                    me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
             }
 
             void JustEngagedWith(Unit* /*who*/) override
@@ -2044,8 +2044,8 @@ class spell_thorim_runic_smash : public SpellScriptLoader
                 GetCaster()->GetCreatureListWithEntryInGrid(triggers, GetSpellInfo()->Id == SPELL_RUNIC_SMASH_LEFT ? NPC_GOLEM_LEFT_HAND_BUNNY : NPC_GOLEM_RIGHT_HAND_BUNNY, 150.0f);
                 for (Creature* trigger : triggers)
                 {
-                    float dist = GetCaster()->GetExactDist(trigger);
-                    trigger->m_Events.AddEvent(new RunicSmashExplosionEvent(trigger), trigger->m_Events.CalculateTime(uint64(dist * 30.f)));
+                    Milliseconds time = Milliseconds(uint64(GetCaster()->GetExactDist(trigger) * 30.f));
+                    trigger->m_Events.AddEvent(new RunicSmashExplosionEvent(trigger), trigger->m_Events.CalculateTime(time));
                 };
             }
 

@@ -851,7 +851,7 @@ uint64 Spell::CalculateDelayMomentForDst() const
 void Spell::RecalculateDelayMomentForDst()
 {
     m_delayMoment = CalculateDelayMomentForDst();
-    m_caster->m_Events.ModifyEventTime(_spellEvent, GetDelayStart() + m_delayMoment);
+    m_caster->m_Events.ModifyEventTime(_spellEvent, Milliseconds(GetDelayStart() + m_delayMoment));
 }
 
 void Spell::SelectEffectImplicitTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType, uint32& processedEffectMask)
@@ -2158,7 +2158,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         targetInfo.ReflectResult = unitCaster->SpellHitResult(unitCaster, m_spellInfo, false); // can't reflect twice
 
         // Proc spell reflect aura when missile hits the original target
-        target->m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target->m_Events.CalculateTime(targetInfo.TimeDelay));
+        target->m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target->m_Events.CalculateTime(Milliseconds(targetInfo.TimeDelay)));
 
         // Increase time interval for reflected spells by 1.5
         targetInfo.TimeDelay += targetInfo.TimeDelay >> 1;
@@ -3034,7 +3034,7 @@ SpellCastResult Spell::prepare(SpellCastTargets const& targets, AuraEffect const
 
     // create and add update event for this spell
     _spellEvent = new SpellEvent(this);
-    m_caster->m_Events.AddEvent(_spellEvent, m_caster->m_Events.CalculateTime(1));
+    m_caster->m_Events.AddEvent(_spellEvent, m_caster->m_Events.CalculateTime(1ms));
 
     // check disables
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
@@ -7480,7 +7480,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     if (n_offset)
                     {
                         // re-add us to the queue
-                        m_Spell->GetCaster()->m_Events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
+                        m_Spell->GetCaster()->m_Events.AddEvent(this, Milliseconds(m_Spell->GetDelayStart() + n_offset), false);
                         return false;                       // event not complete
                     }
                     // event complete
@@ -7492,7 +7492,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 // delaying had just started, record the moment
                 m_Spell->SetDelayStart(e_time);
                 // re-plan the event for the delay moment
-                m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
+                m_Spell->GetCaster()->m_Events.AddEvent(this, Milliseconds(e_time + m_Spell->GetDelayMoment()), false);
                 return false;                               // event not complete
             }
             break;
@@ -7506,7 +7506,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
     }
 
     // spell processing not complete, plan event on the next update interval
-    m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + 1, false);
+    m_Spell->GetCaster()->m_Events.AddEvent(this, Milliseconds(e_time + 1), false);
     return false;                                           // event not complete
 }
 

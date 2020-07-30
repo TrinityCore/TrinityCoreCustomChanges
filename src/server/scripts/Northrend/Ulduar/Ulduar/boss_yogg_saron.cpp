@@ -649,7 +649,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                 switch (summon->GetEntry())
                 {
                     case NPC_GUARDIAN_OF_YOGG_SARON:
-                        summon->m_Events.AddEvent(new StartAttackEvent(me, summon), summon->m_Events.CalculateTime(1000));
+                        summon->m_Events.AddEvent(new StartAttackEvent(me, summon), summon->m_Events.CalculateTime(1s));
                         break;
                     case NPC_YOGG_SARON:
                         summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
@@ -661,7 +661,7 @@ class boss_voice_of_yogg_saron : public CreatureScript
                     case NPC_CORRUPTOR_TENTACLE:
                         summon->SetReactState(REACT_PASSIVE);
                         summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        summon->m_Events.AddEvent(new StartAttackEvent(me, summon), summon->m_Events.CalculateTime(5000));
+                        summon->m_Events.AddEvent(new StartAttackEvent(me, summon), summon->m_Events.CalculateTime(5s));
                         break;
                     case NPC_DESCEND_INTO_MADNESS:
                         summon->CastSpell(summon, SPELL_TELEPORT_PORTAL_VISUAL, true);
@@ -883,7 +883,7 @@ class boss_sara : public CreatureScript
                             pos.m_positionX = YoggSaronSpawnPos.GetPositionX() + radius * cosf(angle);
                             pos.m_positionY = YoggSaronSpawnPos.GetPositionY() + radius * sinf(angle);
                             pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), YoggSaronSpawnPos.GetPositionZ() + 5.0f);
-                            me->SummonCreature(NPC_DEATH_RAY, pos, TEMPSUMMON_TIMED_DESPAWN, 20000);
+                            me->SummonCreature(NPC_DEATH_RAY, pos, TEMPSUMMON_TIMED_DESPAWN, 20s);
                         }
                         break;
                     case NPC_DEATH_RAY:
@@ -1554,7 +1554,7 @@ class npc_observation_ring_keeper : public CreatureScript
                     return false;
 
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                me->DespawnOrUnsummon(2000);
+                me->DespawnOrUnsummon(2s);
                 DoCast(SPELL_TELEPORT);
                 Talk(SAY_KEEPER_CHOSEN_1, player);
                 Talk(SAY_KEEPER_CHOSEN_2, player);

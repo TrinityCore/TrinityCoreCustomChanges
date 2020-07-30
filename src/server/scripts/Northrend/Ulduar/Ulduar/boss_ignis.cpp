@@ -263,13 +263,13 @@ class boss_ignis : public CreatureScript
                         case EVENT_SCORCH:
                             Talk(SAY_SCORCH);
                             if (Unit* target = me->GetVictim())
-                                me->SummonCreature(NPC_GROUND_SCORCH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45000);
+                                me->SummonCreature(NPC_GROUND_SCORCH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45s);
                             DoCast(SPELL_SCORCH);
                             events.ScheduleEvent(EVENT_SCORCH, 25s);
                             break;
                         case EVENT_CONSTRUCT:
                             Talk(SAY_SUMMON);
-                            DoSummon(NPC_IRON_CONSTRUCT, ConstructSpawnPosition[urand(0, CONSTRUCT_SPAWN_POINTS - 1)], 30000, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+                            DoSummon(NPC_IRON_CONSTRUCT, ConstructSpawnPosition[urand(0, CONSTRUCT_SPAWN_POINTS - 1)], 30s, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
                             DoCast(SPELL_STRENGHT);
                             DoCast(me, SPELL_ACTIVATE_CONSTRUCT);
                             events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40s, 30s));
@@ -332,7 +332,7 @@ class npc_iron_construct : public CreatureScript
                         if (ignis->AI())
                             ignis->AI()->DoAction(ACTION_REMOVE_BUFF);
 
-                    me->DespawnOrUnsummon(1000);
+                    me->DespawnOrUnsummon(1s);
                 }
             }
 

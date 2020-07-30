@@ -205,7 +205,7 @@ class boss_rotface : public CreatureScript
                         case EVENT_SLIME_SPRAY:
                             if (Unit* target = SelectTarget(SelectTargetMethod::Random, 1, 0.0f, true))
                             {
-                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
+                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8s, TEMPSUMMON_TIMED_DESPAWN);
                                 Talk(EMOTE_SLIME_SPRAY);
                                 DoCast(me, SPELL_SLIME_SPRAY);
                             }
@@ -769,7 +769,7 @@ class spell_rotface_unstable_ooze_explosion_init : public SpellScriptLoader
 
                 float x, y, z;
                 GetHitUnit()->GetPosition(x, y, z);
-                Creature* dummy = GetCaster()->SummonCreature(NPC_UNSTABLE_EXPLOSION_STALKER, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                Creature* dummy = GetCaster()->SummonCreature(NPC_UNSTABLE_EXPLOSION_STALKER, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1min);
                 GetCaster()->CastSpell(dummy, SPELL_UNSTABLE_OOZE_EXPLOSION_TRIGGER, true);
             }
 
@@ -840,7 +840,7 @@ class spell_rotface_unstable_ooze_explosion_suicide : public SpellScriptLoader
 
                 target->RemoveAllAuras();
                 target->SetVisible(false);
-                target->ToCreature()->DespawnOrUnsummon(60000);
+                target->ToCreature()->DespawnOrUnsummon(60s);
             }
 
             void Register() override

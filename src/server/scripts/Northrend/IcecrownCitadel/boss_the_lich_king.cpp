@@ -499,7 +499,7 @@ class TriggerWickedSpirit : public BasicEvent
 
             if (--_counter)
             {
-                _owner->m_Events.AddEvent(this, _owner->m_Events.CalculateTime(3000));
+                _owner->m_Events.AddEvent(this, _owner->m_Events.CalculateTime(3s));
                 return false;
             }
 
@@ -743,7 +743,7 @@ class boss_the_lich_king : public CreatureScript
                         summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
                         summon->SetReactState(REACT_PASSIVE);
                         summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        summon->m_Events.AddEvent(new LichKingStartMovementEvent(me, summon), summon->m_Events.CalculateTime(5000));
+                        summon->m_Events.AddEvent(new LichKingStartMovementEvent(me, summon), summon->m_Events.CalculateTime(5s));
                         break;
                     case NPC_SHADOW_TRAP:
                         summon->CastSpell(summon, SPELL_SHADOW_TRAP_VISUAL, true);
@@ -783,7 +783,7 @@ class boss_the_lich_king : public CreatureScript
                         summon->SetSpeedRate(MOVE_FLIGHT, 0.5f);
                         summon->GetMotionMaster()->MoveRandom(10.0f);
                         if (!events.IsInPhase(PHASE_FROSTMOURNE))
-                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15000));
+                            summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15s));
                         return;
                     }
                     case NPC_STRANGULATE_VEHICLE:
@@ -1060,7 +1060,7 @@ class boss_the_lich_king : public CreatureScript
                                     if (summon->GetEntry() == NPC_VILE_SPIRIT)
                                     {
                                         summon->m_Events.KillAllEvents(true);
-                                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(56500));
+                                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(56500ms));
                                         summon->SetReactState(REACT_PASSIVE);
                                         summon->CombatStop(true);
                                         summon->RemoveAurasDueToSpell(SPELL_VILE_SPIRIT_MOVE_SEARCH);
@@ -1086,7 +1086,7 @@ class boss_the_lich_king : public CreatureScript
                                     spawner->SetFarVisible(true);
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
-                                    spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3000));
+                                    spawner->m_Events.AddEvent(new TriggerWickedSpirit(spawner), spawner->m_Events.CalculateTime(3s));
                                 }
                             }
                             break;
@@ -1558,7 +1558,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                         if (IsHeroic())
                             ScheduleHeroicEvents();
                         else
-                            me->DespawnOrUnsummon(1000);
+                            me->DespawnOrUnsummon(1s);
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
@@ -1743,7 +1743,7 @@ class npc_strangulate_vehicle : public CreatureScript
                         case EVENT_DESPAWN_SELF:
                             if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_THE_LICH_KING)))
                                 lichKing->AI()->SummonedCreatureDespawn(me);
-                            me->DespawnOrUnsummon(1);
+                            me->DespawnOrUnsummon(1ms);
                             break;
                         default:
                             break;
@@ -1800,7 +1800,7 @@ class npc_terenas_menethil : public CreatureScript
                         break;
                     case ACTION_TELEPORT_BACK:
                         me->CastSpell(nullptr, SPELL_RESTORE_SOUL, TRIGGERED_NONE);
-                        me->DespawnOrUnsummon(3000);
+                        me->DespawnOrUnsummon(3s);
                         break;
                     default:
                         break;
@@ -1830,10 +1830,10 @@ class npc_terenas_menethil : public CreatureScript
                         if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
                         {
                             warden->CastSpell(nullptr, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
-                            warden->DespawnOrUnsummon(2000);
+                            warden->DespawnOrUnsummon(2s);
                         }
 
-                        me->DespawnOrUnsummon(2000);
+                        me->DespawnOrUnsummon(2s);
                     }
                 }
             }
@@ -2017,7 +2017,7 @@ class npc_spirit_bomb : public CreatureScript
                 {
                     me->RemoveAllAuras();
                     DoCastAOE(SPELL_EXPLOSION);
-                    me->DespawnOrUnsummon(1000);
+                    me->DespawnOrUnsummon(1s);
                 }
             }
 
@@ -2425,7 +2425,7 @@ class spell_the_lich_king_ice_burst_target_search : public SpellScriptLoader
                 {
                     GetCaster()->ToCreature()->SetReactState(REACT_PASSIVE);
                     GetCaster()->AttackStop();
-                    GetCaster()->ToCreature()->DespawnOrUnsummon(500);
+                    GetCaster()->ToCreature()->DespawnOrUnsummon(500ms);
                 }
             }
 
@@ -2855,7 +2855,7 @@ class spell_the_lich_king_vile_spirit_damage_target_search : public SpellScriptL
                     if (Unit* summoner = summon->GetSummonerUnit())
                         summoner->GetAI()->SetData(DATA_VILE, 1);
                 GetCaster()->CastSpell(nullptr, SPELL_SPIRIT_BURST, true);
-                GetCaster()->ToCreature()->DespawnOrUnsummon(3000);
+                GetCaster()->ToCreature()->DespawnOrUnsummon(3s);
                 GetCaster()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 

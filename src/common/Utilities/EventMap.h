@@ -26,7 +26,7 @@ class TC_COMMON_API EventMap
 {
     /**
     * Internal storage type.
-    * Key: Time as uint32 when the event should occur.
+    * Key: Time as TimePoint when the event should occur.
     * Value: The event data as uint32.
     *
     * Structure of event data:
@@ -35,10 +35,10 @@ class TC_COMMON_API EventMap
     * - Bit 24 - 31: Phase
     * - Pattern: 0xPPGGEEEE
     */
-    typedef std::multimap<uint32, uint32> EventStore;
+    typedef std::multimap<TimePoint, uint32> EventStore;
 
 public:
-    EventMap() : _time(0), _phase(0), _lastEvent(0) { }
+    EventMap() : _time(TimePoint::min()), _phase(0), _lastEvent(0) { }
 
     /**
     * @name Reset
@@ -52,6 +52,16 @@ public:
     * @param time Value in ms to be added to time.
     */
     void Update(uint32 time)
+    {
+        Update(Milliseconds(time));
+    }
+
+    /**
+    * @name Update
+    * @brief Updates the timer of the event map.
+    * @param time Value in ms to be added to time.
+    */
+    void Update(Milliseconds time)
     {
         _time += time;
     }
@@ -105,7 +115,7 @@ public:
 
     /**
     * @name ScheduleEvent
-    * @brief Schedules a new event.
+    * @brief Schedules a new event. An existing event is not canceled.
     * @param eventId The id of the new event.
     * @param time The time until the event occurs as std::chrono type.
     * @param group The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.
@@ -115,7 +125,7 @@ public:
 
     /**
     * @name ScheduleEvent
-    * @brief Schedules a new event.
+    * @brief Schedules a new event. An existing event is not canceled.
     * @param eventId The id of the new event.
     * @param minTime The minimum time until the event occurs as std::chrono type.
     * @param maxTime The maximum time until the event occurs as std::chrono type.
@@ -169,7 +179,7 @@ public:
 
     /**
     * @name DelayEvents
-    * @brief Delays all events. If delay is greater than or equal internal timer, delay will be 0.
+    * @brief Delays all events.
     * @param delay Amount of delay as std::chrono type.
     */
     void DelayEvents(Milliseconds delay);
@@ -209,11 +219,11 @@ public:
 
     /**
     * @name GetTimeUntilEvent
-    * @brief Returns time in milliseconds until next event.
+    * @brief Returns time as std::chrono type until next event.
     * @param eventId of the event.
-    * @return Time of next event.
+    * @return Time of next event. If event is not scheduled returns Milliseconds::max()
     */
-    uint32 GetTimeUntilEvent(uint32 eventId) const;
+    Milliseconds GetTimeUntilEvent(uint32 eventId) const;
 
 private:
     /**
@@ -226,7 +236,7 @@ private:
     * has reached their time value. Its value is changed in the
     * Update method.
     */
-    uint32 _time;
+    TimePoint _time;
 
     /**
     * @name _phase

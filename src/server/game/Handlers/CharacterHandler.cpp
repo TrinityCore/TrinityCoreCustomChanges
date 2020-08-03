@@ -124,14 +124,13 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_ACTIONS, stmt);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_MAILCOUNT);
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAIL);
     stmt->setUInt32(0, lowGuid);
-    stmt->setUInt64(1, uint64(GameTime::GetGameTime()));
-    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_MAIL_COUNT, stmt);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_MAILS, stmt);
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_MAILDATE);
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAILITEMS);
     stmt->setUInt32(0, lowGuid);
-    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_MAIL_DATE, stmt);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_MAIL_ITEMS, stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_SOCIALLIST);
     stmt->setUInt32(0, lowGuid);
@@ -729,7 +728,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
         return;
     }
 
-    _charLoginCallback = CharacterDatabase.DelayQueryHolder(holder);
+    AddQueryHolderCallback(CharacterDatabase.DelayQueryHolder(holder)).AfterComplete([this](SQLQueryHolderBase* holder)
+    {
+        HandlePlayerLogin(static_cast<LoginQueryHolder*>(holder));
+    });
 }
 
 void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)

@@ -1035,6 +1035,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetXP(uint32 xp) { SetUInt32Value(PLAYER_XP, xp); }
         void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f);
         void GiveLevel(uint8 level);
+        bool IsMaxLevel() const;
 
         void InitStatsForLevel(bool reapplyMods = false);
 
@@ -1792,7 +1793,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         JoinedChannelsList const& GetJoinedChannels() const { return m_channels; }
 
         void UpdateDefense();
-        void UpdateWeaponSkill (WeaponAttackType attType);
+        void UpdateWeaponSkill(Unit* victim, WeaponAttackType attType);
         void UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool defense);
 
         void SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal);

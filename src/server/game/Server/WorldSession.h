@@ -24,6 +24,7 @@
 
 #include "Common.h"
 #include "AsyncCallbackProcessor.h"
+#include "AuthDefines.h"
 #include "DatabaseEnvFwd.h"
 #include "LockedQueue.h"
 #include "ObjectGuid.h"
@@ -34,7 +35,6 @@
 #include <unordered_map>
 #include <boost/circular_buffer.hpp>
 
-class BigNumber;
 class Creature;
 class GameObject;
 class InstanceSave;
@@ -155,6 +155,9 @@ namespace WorldPackets
         class RandomRollClient;
         class TogglePvP;
         class WorldTeleport;
+        class ReclaimCorpse;
+        class RepopRequest;
+        class ResurrectResponse;
     }
 
     namespace Pet
@@ -420,7 +423,7 @@ class TC_GAME_API WorldSession
         void SetPlayer(Player* player);
         uint8 Expansion() const { return m_expansion; }
 
-        void InitWarden(BigNumber* k, std::string const& os);
+        void InitWarden(SessionKey const& k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }
@@ -626,7 +629,7 @@ class TC_GAME_API WorldSession
         void HandleMoveTeleportAck(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAck(WorldPacket& recvData);
 
-        void HandleRepopRequestOpcode(WorldPacket& recvPacket);
+        void HandleRepopRequest(WorldPackets::Misc::RepopRequest& packet);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
         void HandleLootMoneyOpcode(WorldPacket& recvPacket);
         void HandleLootOpcode(WorldPacket& recvPacket);
@@ -881,10 +884,10 @@ class TC_GAME_API WorldSession
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);
         void HandleChatIgnoredOpcode(WorldPacket& recvPacket);
 
-        void HandleReclaimCorpseOpcode(WorldPacket& recvPacket);
+        void HandleReclaimCorpse(WorldPackets::Misc::ReclaimCorpse& packet);
         void HandleCorpseQueryOpcode(WorldPacket& recvPacket);
         void HandleCorpseMapPositionQuery(WorldPacket& recvPacket);
-        void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
+        void HandleResurrectResponse(WorldPackets::Misc::ResurrectResponse& packet);
         void HandleSummonResponseOpcode(WorldPacket& recvData);
 
         void HandleJoinChannel(WorldPacket& recvPacket);

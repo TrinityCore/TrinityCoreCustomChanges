@@ -416,7 +416,7 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
     return true;
 }
 
-bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
+bool WStrToUtf8(wchar_t const* wstr, size_t size, std::string& utf8str)
 {
     try
     {
@@ -611,7 +611,7 @@ bool Utf8ToUpperOnlyLatin(std::string& utf8String)
     return WStrToUtf8(wstr, utf8String);
 }
 
-std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse /* = false */)
+std::string ByteArrayToHexStr(uint8 const* bytes, size_t arrayLen, bool reverse /* = false */)
 {
     int32 init = 0;
     int32 end = arrayLen;

@@ -1234,7 +1234,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 y += e.target.y;
                 z += e.target.z;
                 o += e.target.o;
-                if (Creature* summon = baseObj->SummonCreature(e.action.summonCreature.creature, x, y, z, o, (TempSummonType)e.action.summonCreature.type, e.action.summonCreature.duration))
+                if (Creature* summon = baseObj->SummonCreature(e.action.summonCreature.creature, x, y, z, o, (TempSummonType)e.action.summonCreature.type, Milliseconds(e.action.summonCreature.duration)))
                     if (e.action.summonCreature.attackInvoker)
                         summon->AI()->AttackStart(target->ToUnit());
             }
@@ -1242,7 +1242,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (e.GetTargetType() != SMART_TARGET_POSITION)
                 break;
 
-            if (Creature* summon = baseObj->SummonCreature(e.action.summonCreature.creature, e.target.x, e.target.y, e.target.z, e.target.o, (TempSummonType)e.action.summonCreature.type, e.action.summonCreature.duration))
+            if (Creature* summon = baseObj->SummonCreature(e.action.summonCreature.creature, e.target.x, e.target.y, e.target.z, e.target.o, (TempSummonType)e.action.summonCreature.type, Milliseconds(e.action.summonCreature.duration)))
                 if (unit && e.action.summonCreature.attackInvoker)
                     summon->AI()->AttackStart(unit);
             break;
@@ -1256,14 +1256,14 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             {
                 Position pos = target->GetPositionWithOffset(Position(e.target.x, e.target.y, e.target.z, e.target.o));
                 QuaternionData rot = QuaternionData::fromEulerAnglesZYX(pos.GetOrientation(), 0.f, 0.f);
-                GetBaseObject()->SummonGameObject(e.action.summonGO.entry, pos, rot, e.action.summonGO.despawnTime, GOSummonType(e.action.summonGO.summonType));
+                GetBaseObject()->SummonGameObject(e.action.summonGO.entry, pos, rot, Seconds(e.action.summonGO.despawnTime), GOSummonType(e.action.summonGO.summonType));
             }
 
             if (e.GetTargetType() != SMART_TARGET_POSITION)
                 break;
 
             QuaternionData rot = QuaternionData::fromEulerAnglesZYX(e.target.o, 0.f, 0.f);
-            GetBaseObject()->SummonGameObject(e.action.summonGO.entry, Position(e.target.x, e.target.y, e.target.z, e.target.o), rot, e.action.summonGO.despawnTime, GOSummonType(e.action.summonGO.summonType));
+            GetBaseObject()->SummonGameObject(e.action.summonGO.entry, Position(e.target.x, e.target.y, e.target.z, e.target.o), rot, Seconds(e.action.summonGO.despawnTime), GOSummonType(e.action.summonGO.summonType));
             break;
         }
         case SMART_ACTION_KILL_UNIT:
@@ -3630,6 +3630,9 @@ void SmartScript::OnUpdate(uint32 const diff)
     if ((mScriptType == SMART_SCRIPT_TYPE_CREATURE || mScriptType == SMART_SCRIPT_TYPE_GAMEOBJECT) && !GetBaseObject())
         return;
 
+    if (me && me->IsInEvadeMode())
+        return;
+
     InstallEvents();//before UpdateTimers
 
     for (SmartScriptHolder& mEvent : mEvents)
@@ -3693,7 +3696,7 @@ void SmartScript::FillScript(SmartAIEventList e, WorldObject* obj, AreaTriggerEn
         if (obj)
             TC_LOG_DEBUG("scripts.ai", "SmartScript: EventMap for Entry %u is empty but is using SmartScript.", obj->GetEntry());
         if (at)
-            TC_LOG_DEBUG("scripts.ai", "SmartScript: EventMap for AreaTrigger %u is empty but is using SmartScript.", at->id);
+            TC_LOG_DEBUG("scripts.ai", "SmartScript: EventMap for AreaTrigger %u is empty but is using SmartScript.", at->ID);
         return;
     }
     for (SmartScriptHolder& scriptholder : e)
@@ -3737,7 +3740,7 @@ void SmartScript::GetScript()
     }
     else if (trigger)
     {
-        e = sSmartScriptMgr->GetScript((int32)trigger->id, mScriptType);
+        e = sSmartScriptMgr->GetScript((int32)trigger->ID, mScriptType);
         FillScript(e, nullptr, trigger);
     }
 }
@@ -3764,7 +3767,7 @@ void SmartScript::OnInitialize(WorldObject* obj, AreaTriggerEntry const* at)
                     mScriptType = SMART_SCRIPT_TYPE_AREATRIGGER;
                     trigger = at;
                     atPlayer = obj->ToPlayer();
-                    TC_LOG_DEBUG("scripts.ai", "SmartScript::OnInitialize: source is AreaTrigger %u, triggered by player %s", trigger->id, atPlayer->GetGUID().ToString().c_str());
+                    TC_LOG_DEBUG("scripts.ai", "SmartScript::OnInitialize: source is AreaTrigger %u, triggered by player %s", trigger->ID, atPlayer->GetGUID().ToString().c_str());
                 }
                 else
                     TC_LOG_ERROR("misc", "SmartScript::OnInitialize: !WARNING! Player TypeID is only allowed for AreaTriggers");

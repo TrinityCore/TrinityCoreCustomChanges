@@ -22,7 +22,7 @@ void CFBGData::SetCFBGData()
     SetRaceDisplayID();
 
     // Calling this in BattleGround::AddPlayer fixes scoreboard
-    sCharacterCache->UpdateCharacterData(player->GetGUID(), player->GetName(), boost::none, player->GetRace());
+    sCharacterCache->UpdateCharacterData(player->GetGUID(), player->GetName(), {}, player->GetRace());
 }
 
 void CFBGData::SetRaceDisplayID()
@@ -70,9 +70,9 @@ void CFBGData::ReplaceRacials()
             {
                 if (SkillLineEntry const* skill = sSkillLineStore.LookupEntry(i.SkillId))
                 {
-                    if ((skill->categoryId == SKILL_CATEGORY_LANGUAGES &&
+                    if ((skill->CategoryID == SKILL_CATEGORY_LANGUAGES &&
                          sWorld->getBoolConfig(CONFIG_CFBG_REPLACELANGUAGES)) ||
-                        (skill->categoryId != SKILL_CATEGORY_LANGUAGES &&
+                        (skill->CategoryID != SKILL_CATEGORY_LANGUAGES &&
                          sWorld->getBoolConfig(CONFIG_CFBG_REPLACERACIALS)))
                     {
                         skills[i.SkillId] = add;

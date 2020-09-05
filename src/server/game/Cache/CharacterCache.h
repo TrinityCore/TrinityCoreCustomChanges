@@ -22,7 +22,6 @@
 #include "ObjectGuid.h"
 #include "Optional.h"
 #include <string>
-#include <boost/optional.hpp>
 
 struct CharacterCacheEntry
 {

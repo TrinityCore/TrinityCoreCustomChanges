@@ -2,10 +2,10 @@
 #define __CFBGQUEUE_H
 
 #include "Common.h"
+#include "DBCEnums.h"
 
 class BattlegroundQueue;
 class Battleground;
-enum BattlegroundBracketId;
 
 class TC_GAME_API CFBGQueue
 {

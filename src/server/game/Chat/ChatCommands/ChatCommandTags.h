@@ -21,8 +21,11 @@
 #include "advstd.h"
 #include "ChatCommandHelpers.h"
 #include "Hyperlinks.h"
+#include "ObjectGuid.h"
 #include "Optional.h"
 #include "Util.h"
+#include <boost/preprocessor/repetition/repeat.hpp>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -33,6 +36,9 @@
 #include <utility>
 #include <variant>
 
+class ChatHandler;
+class Player;
+
 namespace Trinity::Impl::ChatCommands
 {
     struct ContainerTag {};
@@ -41,6 +47,22 @@ namespace Trinity::Impl::ChatCommands
     {
         using type = typename T::value_type;
     };
+
+    template <size_t N>
+    inline constexpr char GetChar(char const (&s)[N], size_t i)
+    {
+        static_assert(N <= 25, "The EXACT_SEQUENCE macro can only be used with up to 25 character long literals. Specify them char-by-char (null terminated) as parameters to ExactSequence<> instead.");
+        return i >= N ? '\0' : s[i];
+    }
+
+#define CHATCOMMANDS_IMPL_SPLIT_LITERAL_EXTRACT_CHAR(z, i, strliteral) \
+        BOOST_PP_COMMA_IF(i) Trinity::Impl::ChatCommands::GetChar(strliteral, i)
+
+#define CHATCOMMANDS_IMPL_SPLIT_LITERAL_CONSTRAINED(maxlen, strliteral)  \
+        BOOST_PP_REPEAT(maxlen, CHATCOMMANDS_IMPL_SPLIT_LITERAL_EXTRACT_CHAR, strliteral)
+
+    // this creates always 25 elements - "abc" -> 'a', 'b', 'c', '\0', '\0', ... up to 25
+#define CHATCOMMANDS_IMPL_SPLIT_LITERAL(strliteral) CHATCOMMANDS_IMPL_SPLIT_LITERAL_CONSTRAINED(25, strliteral)
 }
 
 namespace Trinity::ChatCommands
@@ -56,38 +78,35 @@ namespace Trinity::ChatCommands
     |*                                                                                      *|
     \****************************************************************************************/
 
-    template <char c1, char... chars>
+    template <char... chars>
     struct ExactSequence : Trinity::Impl::ChatCommands::ContainerTag
     {
         using value_type = void;
 
-        static constexpr size_t N = (sizeof...(chars) + 1);
-
-        static bool Match(char const* pos)
-        {
-            if (*(pos++) != c1)
-                return false;
-            else if constexpr (sizeof...(chars) > 0)
-                return ExactSequence<chars...>::Match(pos);
-            else
-                return true;
-        }
-
         Optional<std::string_view> TryConsume(std::string_view args) const
         {
-            if ((N <= args.length()) && ExactSequence::Match(args.data()))
+            if (StringStartsWithI(args, _string))
             {
-                auto [remainingToken, tail] = Trinity::Impl::ChatCommands::tokenize(args.substr(N));
+                auto [remainingToken, tail] = Trinity::Impl::ChatCommands::tokenize(args.substr(_string.length()));
                 if (remainingToken.empty()) // if this is not empty, then we did not consume the full token
                     return tail;
             }
             return std::nullopt;
         }
+
+        private:
+            static constexpr std::array<char, sizeof...(chars)> _storage = { chars... };
+            static_assert(!_storage.empty() && (_storage.back() == '\0'), "ExactSequence parameters must be null terminated! Use the EXACT_SEQUENCE macro to make this easier!");
+            static constexpr std::string_view _string = { _storage.data() };
     };
+
+#define EXACT_SEQUENCE(str) Trinity::ChatCommands::ExactSequence<CHATCOMMANDS_IMPL_SPLIT_LITERAL(str)>
 
     struct Tail : std::string_view, Trinity::Impl::ChatCommands::ContainerTag
     {
         using value_type = std::string_view;
+
+        using std::string_view::operator=;
 
         Optional<std::string_view> TryConsume(std::string_view args)
         {
@@ -100,6 +119,8 @@ namespace Trinity::ChatCommands
     {
         using value_type = std::wstring;
 
+        using std::wstring::operator=;
+
         Optional<std::string_view> TryConsume(std::string_view args)
         {
             if (Utf8toWStr(args, *this))
@@ -109,39 +130,97 @@ namespace Trinity::ChatCommands
         }
     };
 
+    struct QuotedString : std::string, Trinity::Impl::ChatCommands::ContainerTag
+    {
+        using value_type = std::string;
+
+        TC_GAME_API Optional<std::string_view> TryConsume(std::string_view args);
+    };
+
+    struct TC_GAME_API AccountIdentifier : Trinity::Impl::ChatCommands::ContainerTag
+    {
+        using value_type = uint32;
+
+        operator uint32() const { return _id; }
+        operator std::string const& () const { return _name; }
+        operator std::string_view() const { return { _name }; }
+
+        uint32 GetID() const { return _id; }
+        std::string const& GetName() const { return _name; }
+
+        Optional<std::string_view> TryConsume(std::string_view args);
+
+        private:
+            uint32 _id;
+            std::string _name;
+    };
+
+    struct TC_GAME_API PlayerIdentifier : Trinity::Impl::ChatCommands::ContainerTag
+    {
+        using value_type = Player*;
+
+        PlayerIdentifier() : _name(), _guid(), _player(nullptr) {}
+        PlayerIdentifier(Player& player);
+
+        operator ObjectGuid() const { return _guid; }
+        operator std::string const&() const { return _name; }
+        operator std::string_view() const { return _name; }
+
+        std::string const& GetName() const { return _name; }
+        ObjectGuid GetGUID() const { return _guid; }
+        bool IsConnected() const { return (_player != nullptr); }
+        Player* GetConnectedPlayer() const { return _player; }
+
+        Optional<std::string_view> TryConsume(std::string_view args);
+
+        static Optional<PlayerIdentifier> FromTarget(ChatHandler* handler);
+        static Optional<PlayerIdentifier> FromSelf(ChatHandler* handler);
+        static Optional<PlayerIdentifier> FromTargetOrSelf(ChatHandler* handler)
+        {
+            if (Optional<PlayerIdentifier> fromTarget = FromTarget(handler))
+                return fromTarget;
+            else
+                return FromSelf(handler);
+        }
+
+        private:
+            std::string _name;
+            ObjectGuid _guid;
+            Player* _player;
+    };
+
     template <typename linktag>
     struct Hyperlink : Trinity::Impl::ChatCommands::ContainerTag
     {
         using value_type = typename linktag::value_type;
         using storage_type = advstd::remove_cvref_t<value_type>;
 
-        public:
-            operator value_type() const { return val; }
-            value_type operator*() const { return val; }
-            storage_type const* operator->() const { return &val; }
+        operator value_type() const { return val; }
+        value_type operator*() const { return val; }
+        storage_type const* operator->() const { return &val; }
 
-            Optional<std::string_view> TryConsume(std::string_view args)
-            {
-                Trinity::Hyperlinks::HyperlinkInfo info = Trinity::Hyperlinks::ParseSingleHyperlink(args);
-                // invalid hyperlinks cannot be consumed
-                if (!info)
-                    return std::nullopt;
+        Optional<std::string_view> TryConsume(std::string_view args)
+        {
+            Trinity::Hyperlinks::HyperlinkInfo info = Trinity::Hyperlinks::ParseSingleHyperlink(args);
+            // invalid hyperlinks cannot be consumed
+            if (!info)
+                return std::nullopt;
 
-                // check if we got the right tag
-                if (info.tag != linktag::tag())
-                    return std::nullopt;
+            // check if we got the right tag
+            if (info.tag != linktag::tag())
+                return std::nullopt;
 
-                // store value
-                if (!linktag::StoreTo(val, info.data))
-                    return std::nullopt;
+            // store value
+            if (!linktag::StoreTo(val, info.data))
+                return std::nullopt;
 
-                // finally, skip any potential delimiters
-                auto [token, next] = Trinity::Impl::ChatCommands::tokenize(info.tail);
-                if (token.empty()) /* empty token = first character is delimiter, skip past it */
-                    return next;
-                else
-                    return info.tail;
-            }
+            // finally, skip any potential delimiters
+            auto [token, next] = Trinity::Impl::ChatCommands::tokenize(info.tail);
+            if (token.empty()) /* empty token = first character is delimiter, skip past it */
+                return next;
+            else
+                return info.tail;
+        }
 
         private:
             storage_type val;
@@ -150,10 +229,6 @@ namespace Trinity::ChatCommands
     // pull in link tags for user convenience
     using namespace ::Trinity::Hyperlinks::LinkTags;
 }
-
-/************************** VARIANT TAG LOGIC *********************************\
-|* This has some special handling over in ChatCommand.h                       *|
-\******************************************************************************/
 
 namespace Trinity::Impl
 {
@@ -192,6 +267,9 @@ namespace Trinity::ChatCommands
             return operator*();
         }
 
+        template <bool C = have_operators>
+        std::enable_if_t<C, bool> operator!() const { return !**this; }
+
         template <typename T>
         Variant& operator=(T&& arg) { base::operator=(std::forward<T>(arg)); return *this; }
 
@@ -211,17 +289,13 @@ namespace Trinity::ChatCommands
 
         template <typename T>
         constexpr bool holds_alternative() const { return std::holds_alternative<T>(static_cast<base const&>(*this)); }
-    };
-}
 
-/* make the correct operator<< to use explicit, because otherwise the compiler gets confused with the implicit std::variant conversion */
-namespace std
-{
-    template <typename... Ts>
-    auto operator<<(std::ostream& os, Trinity::ChatCommands::Variant<Ts...> const& v) -> std::enable_if_t<Trinity::ChatCommands::Variant<Ts...>::have_operators, std::ostream&>
-    {
-        return (os << *v);
-    }
+        template <bool C = have_operators>
+        friend std::enable_if_t<C, std::ostream&> operator<<(std::ostream& os, Trinity::ChatCommands::Variant<T1, Ts...> const& v)
+        {
+            return (os << *v);
+        }
+    };
 }
 
 #endif

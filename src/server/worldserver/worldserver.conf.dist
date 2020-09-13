@@ -37,6 +37,7 @@
 #    LOGGING SYSTEM SETTINGS
 #    PACKET SPOOF PROTECTION SETTINGS
 #    METRIC SETTINGS
+#    SOLO LFG
 #
 ###################################################################################################
 
@@ -4079,6 +4080,26 @@ Metric.OverallStatusInterval = 1
 
 #Metric.Threshold.world_update_sessions_time = 100
 #Metric.Threshold.worldsession_update_opcode_time = 50
+
+#
+###################################################################################################
+
+###################################################################################################
+# SOLO LFG
+#
+#    SoloLFG.Enable
+#        Description: Enable the module.
+#        Default:     1  - (Enabled)
+#                     0  - (Disabled)
+
+SoloLFG.Enable = 1
+
+#    SoloLFG.Announce
+#        Description: Announce the module.
+#        Default:     1  - (Enabled)
+#                     0  - (Disabled)
+
+SoloLFG.Announce = 1
 
 #
 ###################################################################################################

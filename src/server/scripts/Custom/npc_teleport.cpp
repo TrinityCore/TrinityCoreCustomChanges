@@ -176,7 +176,7 @@ class npc_teleport_gossip : public CreatureScript
         {
             npc_teleport_gossipAI(Creature* creature) : ScriptedAI(creature) { }
 
-            bool GossipHello(Player* player) override
+            bool OnGossipHello(Player* player) override
             {
                 PageC(player) = PageD(player) = Cat(player) = 0;
 

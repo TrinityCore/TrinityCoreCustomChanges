@@ -587,7 +587,7 @@ class go_kalecgos_spectral_rift : public GameObjectScript
         {
             go_kalecgos_spectral_riftAI(GameObject* go) : GameObjectAI(go) { }
 
-            bool GossipHello(Player* player) override
+            bool OnGossipHello(Player* player) override
             {
                 if (!player->HasAura(SPELL_SPECTRAL_EXHAUSTION))
                     player->CastSpell(player, SPELL_SPECTRAL_REALM_TRIGGER, true);
@@ -803,6 +803,6 @@ void AddSC_boss_kalecgos()
     RegisterSpellScript(spell_kalecgos_tap_check);
     RegisterSpellScript(spell_kalecgos_spectral_blast);
     RegisterSpellScript(spell_kalecgos_spectral_realm_trigger);
-    RegisterAuraScript(spell_kalecgos_spectral_realm_aura);
-    RegisterAuraScript(spell_kalecgos_curse_of_boundless_agony);
+    RegisterSpellScript(spell_kalecgos_spectral_realm_aura);
+    RegisterSpellScript(spell_kalecgos_curse_of_boundless_agony);
 }

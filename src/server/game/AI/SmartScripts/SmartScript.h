@@ -66,6 +66,7 @@ class TC_GAME_API SmartScript
         void OnMoveInLineOfSight(Unit* who);
 
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff) const;
+        Unit* DoSelectLowestHpPercentFriendly(float range, uint32 minHpPct, uint32 maxHpPct) const;
         void DoFindFriendlyCC(std::vector<Creature*>& creatures, float range) const;
         void DoFindFriendlyMissingBuff(std::vector<Creature*>& creatures, float range, uint32 spellid) const;
         Unit* DoFindClosestFriendlyInRange(float range, bool playerOnly) const;
@@ -100,6 +101,9 @@ class TC_GAME_API SmartScript
         void SetPhase(uint32 p);
         bool IsInPhase(uint32 p) const;
 
+        void SortEvents(SmartAIEventList& events);
+        void RaisePriority(SmartScriptHolder& e);
+
         SmartAIEventList mEvents;
         SmartAIEventList mInstallEvents;
         SmartAIEventList mTimedActionList;
@@ -122,6 +126,12 @@ class TC_GAME_API SmartScript
         uint32 mLastTextID;
         uint32 mTalkerEntry;
         bool mUseTextTimer;
+        uint32 mCurrentPriority;
+        bool mEventSortingRequired;
+        uint32 mNestedEventsCounter;
+
+        // Max number of nested ProcessEventsFor() calls to avoid infinite loops
+        static constexpr uint32 MAX_NESTED_EVENTS = 10;
 
         ObjectVectorMap _storedTargets;
 

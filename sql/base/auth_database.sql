@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
 -- Host: localhost    Database: auth
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	5.7.30-0ubuntu0.18.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -25,13 +25,10 @@ DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
   `username` varchar(32) NOT NULL DEFAULT '',
-  `salt` BINARY(32),
-  `verifier` BINARY(32),
-  `session_key_auth` BINARY(40) DEFAULT NULL,
-  `session_key_bnet` VARBINARY(64) DEFAULT NULL,
-  `sha_pass_hash` varchar(40) NOT NULL DEFAULT '',
-  `v` varchar(64) NOT NULL DEFAULT 'dummy value, use `verifier` instead',
-  `s` varchar(64) NOT NULL DEFAULT 'dummy value, use `salt` instead',
+  `salt` binary(32) NOT NULL,
+  `verifier` binary(32) NOT NULL,
+  `session_key_auth` binary(40) DEFAULT NULL,
+  `session_key_bnet` varbinary(64) DEFAULT NULL,
   `totp_secret` varbinary(128) DEFAULT NULL,
   `email` varchar(255) NOT NULL DEFAULT '',
   `reg_mail` varchar(255) NOT NULL DEFAULT '',
@@ -1786,7 +1783,8 @@ INSERT INTO `rbac_permissions` VALUES
 (876,'Command: lookup item id'),
 (877,'Command: lookup quest id'),
 (878,'Command: debug questreset'),
-(879,'Command: debug poolstatus');
+(879,'Command: debug poolstatus'),
+(880,'Command: pdump copy');
 /*!40000 ALTER TABLE `rbac_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1967,11 +1965,16 @@ INSERT INTO `updates` VALUES
 ('2020_05_15_00_auth.sql','765389B45F97A02160A58B373D63166F7F7D4427','ARCHIVED','2020-05-15 08:55:56',0),
 ('2020_06_15_00_auth.sql','3158036285CC9A4AB7D39063F9687649A21D0A94','ARCHIVED','2020-06-15 07:48:08',0),
 ('2020_06_20_00_auth.sql','85345FAF20B91DA7B157AE1E17DF5B6446C2E109','ARCHIVED','2020-06-11 10:48:00',0),
-('2020_07_15_00_auth.sql','56748440894EA78C3BE72C4A3F2E97E256E6EE40','RELEASED','2020-07-15 00:00:00',0),
-('2020_08_02_00_auth.sql','B0290F6558C59262D9DDD8071060A8803DD56930','RELEASED','2020-08-02 00:00:00',0),
-('2020_08_03_00_auth.sql','492CA77C0FAEEEF3E0492121B3A92689373ECFA3','RELEASED','2020-08-03 00:00:00',0),
-('2020_08_03_01_auth.sql','EC1063396CA20A2303D83238470D41EF4439EC72','RELEASED','2020-08-03 00:00:01',0),
-('2020_08_11_00_auth.sql','14C99177E43003D83A4D6F2227722F15FC15A1D0','RELEASED','2020-08-11 00:00:00',0);
+('2020_07_15_00_auth.sql','56748440894EA78C3BE72C4A3F2E97E256E6EE40','ARCHIVED','2020-07-15 00:00:00',0),
+('2020_08_02_00_auth.sql','B0290F6558C59262D9DDD8071060A8803DD56930','ARCHIVED','2020-08-02 00:00:00',0),
+('2020_08_03_00_auth.sql','492CA77C0FAEEEF3E0492121B3A92689373ECFA3','ARCHIVED','2020-08-03 00:00:00',0),
+('2020_08_03_01_auth.sql','EC1063396CA20A2303D83238470D41EF4439EC72','ARCHIVED','2020-08-03 00:00:01',0),
+('2020_08_11_00_auth.sql','14C99177E43003D83A4D6F2227722F15FC15A1D0','ARCHIVED','2020-08-11 00:00:00',0),
+('2020_08_15_00_auth.sql','A49F4A776E1583B1FF63DFE99BC0E0DD97A74674','ARCHIVED','2020-08-15 00:00:00',0),
+('2020_08_22_00_auth.sql','060A87FCC8F836A96D9D55BEDC32CBAD05008B4C','ARCHIVED','2020-08-22 00:00:00',0),
+('2020_09_06_00_auth.sql','DC4B5D4C65EB138D5609F137799C3289B9CC2493','ARCHIVED','2020-09-06 00:00:00',0),
+('2020_09_15_00_auth.sql','0AA5BCA384A372DC789647F838657766D51D8CC7','ARCHIVED','2020-09-15 19:35:18',0),
+('2020_09_17_00_auth.sql','BBC0A8B2BBED38A57A83999909EB066753A893C5','ARCHIVED','2020-09-17 00:00:00',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2047,6 +2050,10 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Dumping routines for database 'auth'
+--
+
+--
 -- Final view structure for view `vw_log_history`
 --
 
@@ -2073,4 +2080,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-07-15 10:35:47
+-- Dump completed on 2020-09-15 19:35:20

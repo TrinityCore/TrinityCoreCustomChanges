@@ -194,7 +194,7 @@ class npc_teleport_gossip : public CreatureScript
                 return true;
             }
 
-            bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+            bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
             {
                 uint32 const sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
                 uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);

@@ -22,7 +22,6 @@
 // 5
 // 6
 // 7
-#include "AnticheatMgr.h"
 // 8
 // 9
 // 10
@@ -30,6 +29,7 @@
 #include "Player.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
+#include "AnticheatMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "Bag.h"

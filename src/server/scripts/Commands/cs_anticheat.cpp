@@ -93,7 +93,7 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatDeleteCommand(ChatHandler* handler, Variant<EXACT_SEQUENCE("deleteall"), PlayerIdentifier> command)
+    static bool HandleAntiCheatDeleteCommand(ChatHandler* /*handler*/, Variant<EXACT_SEQUENCE("deleteall"), PlayerIdentifier> command)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;

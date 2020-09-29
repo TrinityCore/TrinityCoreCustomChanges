@@ -43,7 +43,7 @@ public:
         };
         return commandTable;
     }
-    static bool HandleDebugBattlegroundCommand(ChatHandler* handler, char const* /*args*/)
+    static bool HandleDebugBattlegroundCommand(ChatHandler* handler)
     {
         if (!handler->GetSession())
             return false;

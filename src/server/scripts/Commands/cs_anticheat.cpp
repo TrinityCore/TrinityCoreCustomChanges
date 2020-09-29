@@ -23,26 +23,28 @@
 #include "World.h"
 #include "WorldSession.h"
 
+using namespace Trinity::ChatCommands;
+
 class anticheat_commandscript : public CommandScript
 {
 public:
     anticheat_commandscript() : CommandScript("anticheat_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const override
+    ChatCommandTable GetCommands() const override
     {
-        static std::vector<ChatCommand> anticheatCommandTable =
+        static ChatCommandTable anticheatCommandTable =
         {
-            { "global",         SEC_GAMEMASTER,     true,  &HandleAntiCheatGlobalCommand,         "" },
-            { "player",         SEC_GAMEMASTER,     true,  &HandleAntiCheatPlayerCommand,         "" },
-            { "delete",         SEC_ADMINISTRATOR,  true,  &HandleAntiCheatDeleteCommand,         "" },
-            { "handle",         SEC_ADMINISTRATOR,  true,  &HandleAntiCheatHandleCommand,         "" },
-            { "jail",           SEC_GAMEMASTER,     true,  &HandleAnticheatJailCommand,         "" },
-            { "warn",           SEC_GAMEMASTER,     true,  &HandleAnticheatWarnCommand,         "" },
+            { "global",      HandleAntiCheatGlobalCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "player",      HandleAntiCheatPlayerCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "delete",      HandleAntiCheatDeleteCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
+            { "handle",      HandleAntiCheatHandleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
+            { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "warn",        HandleAnticheatWarnCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
         };
 
-        static std::vector<ChatCommand> commandTable =
+        static ChatCommandTable commandTable =
         {
-            { "anticheat",      SEC_GAMEMASTER,     true, NULL,                     "",  anticheatCommandTable},
+            { "anticheat", anticheatCommandTable},
         };
 
         return commandTable;

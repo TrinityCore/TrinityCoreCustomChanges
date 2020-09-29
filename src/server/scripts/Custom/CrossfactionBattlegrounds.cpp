@@ -7,6 +7,8 @@
 #include "World.h"
 #include "Config.h"
 
+using namespace Trinity::ChatCommands;
+
 class CrossFactionBattlegroundPlayerScript : public PlayerScript
 {
 public:
@@ -28,16 +30,16 @@ class CrossFactionBattlegroundCommandScript : public CommandScript
 public:
     CrossFactionBattlegroundCommandScript() : CommandScript("CrossFactionBattlegroundCommandScript") { }
 
-    std::vector<ChatCommand> GetCommands() const override
+    ChatCommandTable GetCommands() const override
     {
-        static std::vector<ChatCommand> debugCommandTable =
+        static ChatCommandTable debugCommandTable =
         {
-            { "startbg", rbac::RBAC_PERM_COMMAND_DEBUG, false, &HandleDebugBattlegroundCommand, "" },
+            { "startbg", HandleDebugBattlegroundCommand, rbac::RBAC_PERM_COMMAND_DEBUG, Console::No },
         };
 
-        static std::vector<ChatCommand> commandTable =
+        static ChatCommandTable commandTable =
         {
-            { "cfbg", rbac::RBAC_PERM_COMMAND_DEBUG, true, nullptr, "", debugCommandTable },
+            { "cfbg", debugCommandTable },
         };
         return commandTable;
     }

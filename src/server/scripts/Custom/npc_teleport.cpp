@@ -233,7 +233,7 @@ class npc_teleport_gossip : public CreatureScript
 
                     // Display main menu
                     case GOSSIP_MAIN_MENU:
-                        GossipHello(player);
+                        OnGossipHello(player);
                         break;
 
                     // Teleportation

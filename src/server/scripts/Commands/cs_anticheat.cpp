@@ -50,7 +50,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleAnticheatWarnCommand(ChatHandler* handler, const char* args)
+    static bool HandleAnticheatWarnCommand(ChatHandler* handler, Tail command)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;
@@ -59,9 +59,7 @@ public:
 
         std::string strCommand;
 
-        char* command = strtok((char*)args, " ");
-
-        if (command)
+        if (!command.empty())
         {
             strCommand = command;
             normalizePlayerName(strCommand);
@@ -89,7 +87,7 @@ public:
         return true;
     }
 
-    static bool HandleAnticheatJailCommand(ChatHandler* handler, const char* args)
+    static bool HandleAnticheatJailCommand(ChatHandler* handler, Tail command)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;
@@ -98,9 +96,7 @@ public:
 
         std::string strCommand;
 
-        char* command = strtok((char*)args, " ");
-
-        if (command)
+        if (!command.empty())
         {
             strCommand = command;
             normalizePlayerName(strCommand);
@@ -138,16 +134,14 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatDeleteCommand(ChatHandler* handler, const char* args)
+    static bool HandleAntiCheatDeleteCommand(ChatHandler* handler, Tail command)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;
 
         std::string strCommand;
 
-        char* command = strtok((char*)args, " "); // get entered name
-
-        if (!command)
+        if (command.empty())
             return true;
 
         strCommand = command;
@@ -167,19 +161,17 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatPlayerCommand(ChatHandler* handler, const char* args)
+    static bool HandleAntiCheatPlayerCommand(ChatHandler* handler, Tail command)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;
 
         std::string strCommand;
 
-        char* command = strtok((char*)args, " ");
-
         uint32 guid = 0;
         Player* player = NULL;
 
-        if (command)
+        if (!command.empty())
         {
             strCommand = command;
 
@@ -219,13 +211,11 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatHandleCommand(ChatHandler* handler, const char* args)
+    static bool HandleAntiCheatHandleCommand(ChatHandler* handler, Tail command)
     {
         std::string strCommand;
 
-        char* command = strtok((char*)args, " ");
-
-        if (!command)
+        if (command.empty())
             return true;
 
         if (!handler->GetSession()->GetPlayer())

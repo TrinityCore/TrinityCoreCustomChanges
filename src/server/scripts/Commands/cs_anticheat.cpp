@@ -64,7 +64,7 @@ public:
             return false;
         }
 
-        ChatHandler(target->GetConnectedPlayer()).SendSysMessage("The anticheat system has reported several times that you may be cheating. You will be monitored to confirm if this is accurate.");
+        ChatHandler(player->GetConnectedPlayer()->GetSession()).SendSysMessage("The anticheat system has reported several times that you may be cheating. You will be monitored to confirm if this is accurate.");
         return true;
     }
 
@@ -81,9 +81,9 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        
+
         Player* pTarget = player->GetConnectedPlayer();
-        
+
         // teleport both to jail.
         WorldLocation jail {1, 16226.5f, 16403.6f, -64.5f, 3.2f};
         pTarget->TeleportTo(jail);
@@ -101,7 +101,7 @@ public:
         if (command.holds_alternative<EXACT_SEQUENCE("deleteall")>())
             sAnticheatMgr->AnticheatDeleteCommand(0);
         else
-            sAnticheatMgr->AnticheatDeleteCommand(command.get<PlayerIdentifier>.GetGUID().GetCounter());
+            sAnticheatMgr->AnticheatDeleteCommand(command.get<PlayerIdentifier>().GetGUID().GetCounter());
 
         return true;
     }
@@ -119,7 +119,7 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        
+
         uint32 guid = player->GetGUID().GetCounter();
 
         float average = sAnticheatMgr->GetAverage(guid);

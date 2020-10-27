@@ -144,7 +144,7 @@ INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `minlevel`, `maxle
 (100000, 26502, 'TeleNPC2', 83, 83, 35, 1, 1, 1.14286, 2, 1, 1, 1, 1, 2, 2048, 3, 1, 1, 1, 1, 1, 1, 1, 2, 'npc_teleport');
 
 SET @Id=8000;
-delete from trinity_string where entry between @Id and @Id+2;
-insert into trinity_string (`entry`, `content_default`, `content_loc2`, `content_loc3`, `content_loc6` `content_loc7`) values
-(@Id+0, "You do not have the required level. This destination requires level", "", "Ihr habt nicht das erforderliche Level. Dieses Ziel benötigt Level,"No tienes el nivel requerido. Este destino requiere nivel","No tienes el nivel requerido. Este destino requiere nivel"),
-(@Id+1, "You do not have enough money. The price for teleportation is", "", "Ihr habt nicht genug Geld. Der Preis für die Teleportation beträg,"No tienes suficiente dinero. El precio del destino es","No tienes suficiente dinero. El precio del destino es"),
+DELETE FROM trinity_string WHERE entry BETWEEN @Id AND @Id+2;
+INSERT INTO trinity_string (`entry`, `content_default`, `content_loc2`, `content_loc3`, `content_loc6`, `content_loc7`) VALUES
+(@Id+0, "You do not have the required level. This destination requires level", "", "Ihr habt nicht das erforderliche Level. Dieses Ziel benötigt Level","No tienes el nivel requerido. Este destino requiere nivel","No tienes el nivel requerido. Este destino requiere nivel"),
+(@Id+1, "You do not have enough money. The price for teleportation is", "", "Ihr habt nicht genug Geld. Der Preis für die Teleportation beträg","No tienes suficiente dinero. El precio del destino es","No tienes suficiente dinero. El precio del destino es");

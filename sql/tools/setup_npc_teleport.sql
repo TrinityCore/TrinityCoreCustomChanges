@@ -138,15 +138,9 @@ REPLACE INTO `npc_text` (`ID`, `text0_0`,`BroadcastTextID0`) VALUES
    (100000, 'Choose your Category.', 0),
    (100001, 'Choose your Destination.', 49777);
 
-insert ignore into locales_npc_text (ID) value (100000);
-insert ignore into locales_npc_text (ID) value (100001);
-update locales_npc_text set Text0_0_loc3="Wählt Eure Kategorie" where ID=100000;
-update locales_npc_text set Text0_0_loc3="Wählt Euren Zielort" where ID=10000;
-
 -- `creature_template`
 DELETE FROM `creature_template` where entry=100000;
-INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `minlevel`, `maxlevel`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `InhabitType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `DamageModifier`, `ExperienceModifier`, `RegenHealth`, `flags_extra`, `ScriptName`) VALUES
-
+INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `minlevel`, `maxlevel`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `DamageModifier`, `ExperienceModifier`, `RegenHealth`, `flags_extra`, `ScriptName`) VALUES
 (100000, 26502, 'TeleNPC2', 83, 83, 35, 1, 1, 1.14286, 2, 1, 1, 1, 1, 2, 2048, 3, 1, 1, 1, 1, 1, 1, 1, 2, 'npc_teleport');
 
 SET @Id=8000;

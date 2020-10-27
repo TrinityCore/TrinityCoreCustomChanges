@@ -54,10 +54,10 @@ CREATE TABLE `custom_npc_tele_association` (
 
 TRUNCATE `custom_npc_tele_category`;
 INSERT INTO `custom_npc_tele_category`
-  (`id`, `name`, `size`, `colour`, `name`, `flag`, `data0`, `data1`, name_loc2, name_loc3)
+  (`id`, `icon`, `size`, `colour`, `name`, `flag`, `data0`, `data1`, name_loc2, name_loc3)
 VALUES
-   (1, 'inv_misc_shadowegg', 30, 000000, 'Cities', 0, 1, 0, "", "Städte"),
-   (2, 'inv_misc_shadowegg', 30, 000000, 'Cities', 0, 2, 0, "", "Städte"),
+   (1, 'inv_misc_shadowegg', 30, 000000, 'Cities', 0, 1, 0, "", "StÃ¤dte"),
+   (2, 'inv_misc_shadowegg', 30, 000000, 'Cities', 0, 2, 0, "", "StÃ¤dte"),
    (3, 'inv_misc_shadowegg', 30, 000000, 'Battlegrounds', 0, 1, 0, "", "Schlachtfelder"),
    (4, 'inv_misc_shadowegg', 30, 000000, 'Battlegrounds', 0, 2, 0, "", "Schlachtfelder"),
    (5, 'inv_misc_shadowegg', 30, 000000, 'Arenas', 0, 0, 0, "", "Kampf-Arenen"),
@@ -68,7 +68,7 @@ VALUES
 
 TRUNCATE `custom_npc_tele_destination`;
 INSERT INTO `custom_npc_tele_destination`
-   (`id`, `name`, `size`, `colour`, `name`, `pos_X`, `pos_Y`, `pos_Z`, `map`, `orientation`, `level`, `cost`, name_loc2, name_loc3)
+   (`id`, `icon`, `size`, `colour`, `name`, `pos_X`, `pos_Y`, `pos_Z`, `map`, `orientation`, `level`, `cost`, name_loc2, name_loc3)
 VALUES
    (1, 'inv_misc_shadowegg', 30, 000000, 'Alterac Valley', 883.187, -489.375, 96.7618, 30, 3.06932, 0, 0, "", "Alteractal"),
    (2, 'inv_misc_shadowegg', 30, 000000, 'Alterac Valley', -818.155, -623.043, 54.0884, 30, 2.1, 0, 0, "", "Alteractal"),
@@ -79,18 +79,18 @@ VALUES
    (7, 'inv_misc_shadowegg', 30, 000000, 'Blackrock Depths', -7301.03, -913.19, 165.37, 0, 0.08, 0, 0, "", "Schwarzfelstiefen"),
    (8, 'inv_misc_shadowegg', 30, 000000, 'Blackrock Spire', -7535.43, -1212.04, 285.45, 0, 5.29, 0, 0, "", "Schwarzfelsspitze"),
    (9, 'inv_misc_shadowegg', 30, 000000, 'Blackwing Lair', -7665.55, -1102.49, 400.679, 469, 0, 0, 0, "", "Pechschwingenhort"),
-   (10, 'inv_misc_shadowegg', 30, 000000, 'Caverns of Time', -8173.66, -4746.36, 33.8423, 1, 4.93989, 0, 0, "", "Höhlen der Zeit"),
+   (10, 'inv_misc_shadowegg', 30, 000000, 'Caverns of Time', -8173.66, -4746.36, 33.8423, 1, 4.93989, 0, 0, "", "HÃ¶hlen der Zeit"),
    (11, 'inv_misc_shadowegg', 30, 000000, 'Circle of Blood', 2839.44, 5930.17, 11.1002, 530, 3.16284, 0, 0, "", "Zirkels des Blutes"),
    (12, 'inv_misc_shadowegg', 30, 000000, 'Coilfang Reservoir', 517.288, 6976.28, 32.0072, 530, 0, 0, 0, "", "Der Echsenkessel"),
    (13, 'inv_misc_shadowegg', 30, 000000, 'Darnassus', 9947.52, 2482.73, 1316.21, 1, 0, 0, 0, "", "Darnassus"),
-   (14, 'inv_misc_shadowegg', 30, 000000, 'Dire Maul', -3982.47, 1127.79, 161.02, 1, 0.05, 0, 0, "", "Düsterbruch"),
+   (14, 'inv_misc_shadowegg', 30, 000000, 'Dire Maul', -3982.47, 1127.79, 161.02, 1, 0.05, 0, 0, "", "DÃ¼sterbruch"),
    (15, 'inv_misc_shadowegg', 30, 000000, 'Exodar', -4073.03, -12020.4, -1.47, 530, 0, 0, 0, "", "Die Exodar"),
    (16, 'inv_misc_shadowegg', 30, 000000, 'Eye of the Storm', 2487.72, 1609.12, 1224.64, 566, 3.35671, 0, 0, "", "Auge des Sturms"),
    (17, 'inv_misc_shadowegg', 30, 000000, 'Eye of the Storm', 1843.73, 1529.77, 1224.43, 566, 0.297579, 0, 0, "", "Auge des Sturms"),
    (18, 'inv_misc_shadowegg', 30, 000000, 'Goldshire', -9464, 62, 56, 0, 0, 0, 0, "", "Goldhain"),
    (19, 'inv_misc_shadowegg', 30, 000000, "Gruul's Lair", 3539.01, 5082.36, 1.69107, 530, 0, 0, 0, "", "Gruuls Unterschlupf"),
    (20, 'inv_misc_shadowegg', 30, 000000, 'Gurubashi', -13261.3, 168.294, 35.0792, 0, 1.00688, 0, 0, "", "Gurubashi"),
-   (21, 'inv_misc_shadowegg', 30, 000000, 'Hellfire Citadel', -305.816, 3056.4, -2.47318, 530, 2.01, 0, 0, "", "Höllenfeuer"),
+   (21, 'inv_misc_shadowegg', 30, 000000, 'Hellfire Citadel', -305.816, 3056.4, -2.47318, 530, 2.01, 0, 0, "", "HÃ¶llenfeuer"),
    (22, 'inv_misc_shadowegg', 30, 000000, 'Ironforge', -4924.07, -951.95, 501.55, 0, 5.4, 0, 0, "", "Eisenschmiede"),
    (23, 'inv_misc_shadowegg', 30, 000000, "Isle Of Quel'Danas", 12947.4, -6893.31, 5.68398, 530, 3.09154, 0, 0, "", "Insel von Quel'Danas"),
    (24, 'inv_misc_shadowegg', 30, 000000, 'Karazhan', -11118.8, -2010.84, 47.0807, 0, 0, 0, 0, "", "Karazhan"),
@@ -99,10 +99,10 @@ VALUES
    (27, 'inv_misc_shadowegg', 30, 000000, 'Naxxramas', 3125.18, -3748.02, 136.049, 0, 0, 0, 0, "", "Naxxramas"),
    (28, 'inv_misc_shadowegg', 30, 000000, "Onyxia's Lair", -4707.44, -3726.82, 54.6723, 1, 3.8, 0, 0, "", "Onyxias Hort"),
    (29, 'inv_misc_shadowegg', 30, 000000, 'Orgrimmar', 1552.5, -4420.66, 8.94802, 1, 0, 0, 0, "", "Orgrimmar"),
-   (30, 'inv_misc_shadowegg', 30, 000000, 'Razor Hill', 315.721, -4743.4, 10.4867, 1, 0, 0, 0, "", "Klingenhügel"),
-   (31, 'inv_misc_shadowegg', 30, 000000, 'Razorfen Downs', -4645.08, -2470.85, 85.53, 1, 4.39, 0, 0, "", "Hügel der Klingenhauer"),
+   (30, 'inv_misc_shadowegg', 30, 000000, 'Razor Hill', 315.721, -4743.4, 10.4867, 1, 0, 0, 0, "", "KlingenhÃ¼gel"),
+   (31, 'inv_misc_shadowegg', 30, 000000, 'Razorfen Downs', -4645.08, -2470.85, 85.53, 1, 4.39, 0, 0, "", "HÃ¼gel der Klingenhauer"),
    (32, 'inv_misc_shadowegg', 30, 000000, 'Razorfen Kraul', -4484.04, -1739.4, 86.47, 1, 1.23, 0, 0, "", "Kral der Klingenhauer"),
-   (33, 'inv_misc_shadowegg', 30, 000000, 'Ring of Trials', -1999.94, 6581.71, 11.32, 530, 2.3, 0, 0, "", "Der Ring der Prüfung"),
+   (33, 'inv_misc_shadowegg', 30, 000000, 'Ring of Trials', -1999.94, 6581.71, 11.32, 530, 2.3, 0, 0, "", "Der Ring der PrÃ¼fung"),
    (34, 'inv_misc_shadowegg', 30, 000000, "Ruins of Ahn'Qiraj", -8409.03, 1498.83, 27.3615, 1, 2.49757, 0, 0, "", "Ruinen von Ahn'Qiraj"),
    (35, 'inv_misc_shadowegg', 30, 000000, 'Scholomance', 1219.01, -2604.66, 85.61, 0, 0.5, 0, 0, "", "Scholomance"),
    (36, 'inv_misc_shadowegg', 30, 000000, 'Shadowfang Keep', -254.47, 1524.68, 76.89, 0, 1.56, 0, 0, "", "Burg Schattenfang"),
@@ -110,13 +110,13 @@ VALUES
    (38, 'inv_misc_shadowegg', 30, 000000, 'Silvermoon', 9338.74, -7277.27, 13.7895, 530, 0, 0, 0, "", "Silbermond"),
    (39, 'inv_misc_shadowegg', 30, 000000, 'Stormwind', -8960.14, 516.266, 96.3568, 0, 0, 0, 0, "", "Sturmwind"),
    (40, 'inv_misc_shadowegg', 30, 000000, 'Stratholme', 3263.54, -3379.46, 143.59, 0, 0, 0, 0, "", "Stratholme"),
-   (41, 'inv_misc_shadowegg', 30, 000000, 'Tempest Keep', 3089.58, 1399.05, 187.653, 530, 4.79407, 0, 0, "", "Die Festung der Stürme"),
+   (41, 'inv_misc_shadowegg', 30, 000000, 'Tempest Keep', 3089.58, 1399.05, 187.653, 530, 4.79407, 0, 0, "", "Die Festung der StÃ¼rme"),
    (42, 'inv_misc_shadowegg', 30, 000000, "Temple of Ahn'Qiraj", -8245.84, 1983.74, 129.072, 1, 0.936195, 0, 0, "", "Ahn'Qiraj"),
    (43, 'inv_misc_shadowegg', 30, 000000, 'The Deadmines', -11212, 1658.58, 25.67, 0, 1.45, 0, 0, "", "Die Todesminen"),
-   (44, 'inv_misc_shadowegg', 30, 000000, 'The Maul', -3761.49, 1133.43, 132.083, 1, 4.57259, 0, 0, "", "Düsterbruch"),
+   (44, 'inv_misc_shadowegg', 30, 000000, 'The Maul', -3761.49, 1133.43, 132.083, 1, 4.57259, 0, 0, "", "DÃ¼sterbruch"),
    (45, 'inv_misc_shadowegg', 30, 000000, 'The Scarlet Monastery', 2843.89, -693.74, 139.32, 0, 5.11, 0, 0, "", "Das Scharlachrote Kloster"),
    (46, 'inv_misc_shadowegg', 30, 000000, 'The Sunken Temple', -10346.9, -3851.9, -43.41, 0, 6.09, 0, 0, "", "Versunkener Tempel"),
-   (47, 'inv_misc_shadowegg', 30, 000000, 'The Wailing Caverns', -722.53, -2226.3, 16.94, 1, 2.71, 0, 0, "", "Die Hühlen des Wehklagens"),
+   (47, 'inv_misc_shadowegg', 30, 000000, 'The Wailing Caverns', -722.53, -2226.3, 16.94, 1, 2.71, 0, 0, "", "Die HÃ¼hlen des Wehklagens"),
    (48, 'inv_misc_shadowegg', 30, 000000, 'Thunder Bluff', -1290, 147.034, 129.682, 1, 4.919, 0, 0, "", "Donnerfels"),
    (49, 'inv_misc_shadowegg', 30, 000000, 'Uldaman', -6119.7, -2957.3, 204.11, 0, 0.03, 0, 0, "", "Uldaman"),
    (50, 'inv_misc_shadowegg', 30, 000000, 'Undercity', 1819.71, 238.79, 60.5321, 0, 0, 0, 0, "", "Unterstadt"),
@@ -140,8 +140,8 @@ REPLACE INTO `npc_text` (`ID`, `text0_0`,`BroadcastTextID0`) VALUES
 
 insert ignore into locales_npc_text (ID) value (100000);
 insert ignore into locales_npc_text (ID) value (100001);
-update locales_npc_text set Text0_0_loc3="Wählt Eure Kategorie" where ID=100000;
-update locales_npc_text set Text0_0_loc3="Wählt Euren Zielort" where ID=10000;
+update locales_npc_text set Text0_0_loc3="WÃ¤hlt Eure Kategorie" where ID=100000;
+update locales_npc_text set Text0_0_loc3="WÃ¤hlt Euren Zielort" where ID=10000;
 
 -- `creature_template`
 DELETE FROM `creature_template` where entry=100000;
@@ -152,5 +152,5 @@ INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `minlevel`, `maxle
 SET @Id=8000;
 delete from trinity_string where entry between @Id and @Id+2;
 insert into trinity_string (`entry`, `content_default`, `content_loc2`, `content_loc3`, `content_loc6` `content_loc7`) values
-(@Id+0, "You do not have the required level. This destination requires level", "", "Ihr habt nicht das erforderliche Level. Dieses Ziel benötigt Level,"No tienes el nivel requerido. Este destino requiere nivel","No tienes el nivel requerido. Este destino requiere nivel"),
-(@Id+1, "You do not have enough money. The price for teleportation is", "", "Ihr habt nicht genug Geld. Der Preis für die Teleportation beträg,"No tienes suficiente dinero. El precio del destino es","No tienes suficiente dinero. El precio del destino es"),
+(@Id+0, "You do not have the required level. This destination requires level", "", "Ihr habt nicht das erforderliche Level. Dieses Ziel benÃ¶tigt Level,"No tienes el nivel requerido. Este destino requiere nivel","No tienes el nivel requerido. Este destino requiere nivel"),
+(@Id+1, "You do not have enough money. The price for teleportation is", "", "Ihr habt nicht genug Geld. Der Preis fÃ¼r die Teleportation betrÃ¤g,"No tienes suficiente dinero. El precio del destino es","No tienes suficiente dinero. El precio del destino es"),

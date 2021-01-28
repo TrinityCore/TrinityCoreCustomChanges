@@ -287,7 +287,7 @@ public:
         damage = _Modifer_DealDamage(target, attacker, damage);
         }
 
-        void ModifyHealRecieved(Unit * target, Unit * attacker, uint32 & damage)
+        void ModifyHealRecieved(Unit * target, Unit * attacker, uint32 & damage) override
         {
         damage = _Modifer_DealDamage(target, attacker, damage);
         }

@@ -2152,6 +2152,9 @@ void World::SetInitialWorldSettings()
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
+	
+    TC_LOG_INFO("server.loading", "Loading Autobalance...");
+    sScriptMgr->SetInitialWorldSettings();
 
     TC_LOG_INFO("server.loading", "Initialize AuctionHouseBot...");
     sAuctionBot->Initialize();

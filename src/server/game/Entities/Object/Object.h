@@ -20,6 +20,7 @@
 
 #include "Common.h"
 #include "Duration.h"
+#include "DataMap.h"
 #include "EventProcessor.h"
 #include "GridReference.h"
 #include "GridRefManager.h"
@@ -195,6 +196,7 @@ class TC_GAME_API Object
 
         virtual std::string GetDebugInfo() const;
 
+		DataMap CustomData;
     protected:
         Object();
 

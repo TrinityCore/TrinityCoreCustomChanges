@@ -32,6 +32,7 @@
 #include "SpawnData.h"
 #include "Timer.h"
 #include "Transaction.h"
+#include "DataMap.h"
 #include <boost/heap/fibonacci_heap.hpp>
 #include <bitset>
 #include <list>
@@ -650,6 +651,7 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
 
         virtual std::string GetDebugInfo() const;
 
+		DataMap CustomData;
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);

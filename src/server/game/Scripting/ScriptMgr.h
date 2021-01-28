@@ -326,7 +326,6 @@ public:
          virtual void OnPlayerLeaveAll(Map* /*map*/, Player* /*player*/) { }
 };
 
-
 template<class TMap> class MapScript : public UpdatableScript<TMap>
 {
     MapEntry const* _mapEntry;
@@ -472,7 +471,6 @@ public:
         // Called from End of Creature SelectLevel.
         virtual void Creature_SelectLevel(const CreatureTemplate* /*cinfo*/, Creature* /*creature*/) { }
 };
-
 
 class TC_GAME_API GameObjectScript : public ScriptObject
 {

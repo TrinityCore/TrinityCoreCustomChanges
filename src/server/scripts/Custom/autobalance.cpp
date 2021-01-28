@@ -155,14 +155,14 @@ class AutoBalance_WorldScript : public WorldScript
 public:
     AutoBalance_WorldScript() : WorldScript("AutoBalance_WorldScript") {}
 
-        void OnConfigLoad(bool reload) override
+        void OnConfigLoad(bool /*reload*/) override
         {
         SetInitialWorldSettings();
         }
 
         void OnStartup() override { }
 
-        void SetInitialWorldSettings()
+        void SetInitialWorldSettings() override
         {
         forcedCreatureIds.clear();
         LoadForcedCreatureIdsFromString(sConfigMgr->GetStringDefault("AutoBalance.ForcedID40", ""), 40);

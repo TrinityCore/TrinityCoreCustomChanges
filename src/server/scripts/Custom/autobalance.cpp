@@ -743,7 +743,7 @@ public:
         {
             damageMul = MinDamageModifier;
         }
-        
+
         if (!useDefStats && LevelScaling && !skipLevel)
         {
             float origDmgBase = origCreatureStats->GenerateBaseDamage(creatureTemplate);

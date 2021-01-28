@@ -276,7 +276,7 @@ class TC_GAME_API WorldScript : public ScriptObject
 
         // Called when the world is actually shut down.
         virtual void OnShutdown() { }
-		
+
         // Called at End of SetInitialWorldSettings.
         virtual void SetInitialWorldSettings() { }
 };
@@ -434,7 +434,7 @@ class TC_GAME_API UnitScript : public ScriptObject
 
         // Called when an unit exits a vehicle
         virtual void ModifyVehiclePassengerExitPos(Unit* /*passenger*/, Vehicle* /*vehicle*/, Position& /*pos*/) { }
-		
+
         //Auto Balance VAS
         virtual void ModifyHealRecieved(Unit* /*target*/, Unit* /*attacker*/, uint32& /*damage*/) { }
 };
@@ -927,8 +927,8 @@ class TC_GAME_API ScriptMgr
     public: /* Unloading */
 
         void Unload();
-		
-	public: /* {VAS} Script Hooks */
+
+    public: /* {VAS} Script Hooks */
     
         float VAS_Script_Hooks();
 
@@ -957,8 +957,8 @@ class TC_GAME_API ScriptMgr
         void OnWorldUpdate(uint32 diff);
         void OnStartup();
         void OnShutdown();
-		void SetInitialWorldSettings();
-		
+        void SetInitialWorldSettings();
+
     public: /* FormulaScript */
 
         void OnHonorCalculation(float& honor, uint8 level, float multiplier);

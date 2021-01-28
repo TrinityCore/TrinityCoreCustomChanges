@@ -196,7 +196,8 @@ class TC_GAME_API Object
 
         virtual std::string GetDebugInfo() const;
 
-		DataMap CustomData;
+        DataMap CustomData;
+
     protected:
         Object();
 

@@ -6382,7 +6382,7 @@ int32 Unit::HealBySpell(HealInfo& healInfo, bool critical /*= false*/)
     Unit * victim = healInfo.GetTarget();
     uint32 addhealth = healInfo.GetHeal();
     Unit::CalcHealAbsorb(healInfo);
-	sScriptMgr->ModifyHealRecieved(this, victim, addhealth);
+    sScriptMgr->ModifyHealRecieved(this, victim, addhealth);
     Unit::DealHeal(healInfo);
     SendHealSpellLog(healInfo, critical);
     return healInfo.GetEffectiveHeal();

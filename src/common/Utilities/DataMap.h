@@ -23,7 +23,7 @@ class Base
     public:
     virtual ~Base() = default;
 };
-    
+
 /**
  * Returns a pointer to object of requested type stored with given key or nullptr
  */
@@ -56,7 +56,7 @@ Container.emplace(k, std::unique_ptr<T>(v));
 return v;
 
 }
-    
+
 /**
  * Stores a new object that inherits the Base class with the given key
  */
@@ -67,7 +67,7 @@ void Set(std::string const& k, Base * v) { Container[k] = std::unique_ptr<Base>(
  */
 
 bool Erase(std::string const& k) { return Container.erase(k) != 0; }
-    
+
 private:
     std::unordered_map<std::string, std::unique_ptr<Base>> Container;
 };

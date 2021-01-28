@@ -86,7 +86,7 @@ InflectionPointRaid10MHeroic, InflectionPointRaid25MHeroic, BossInflectionMult;
 
 int GetValidDebugLevel() {
     int debugLevel = sConfigMgr->GetIntDefault("AutoBalance.DebugLevel", 2);
-    if ((debugLevel < 0) || (debugLevel > 3)) 
+    if ((debugLevel < 0) || (debugLevel > 3))
     {
         return 1;
 
@@ -676,7 +676,7 @@ public:
             {
             creatureABInfo->HealthMultiplier = MinHPModifier;
             }
-        
+
             float hpStatsRate = 1.0f;
         if (!useDefStats && LevelScaling && !skipLevel)
         {
@@ -698,7 +698,7 @@ public:
                     newBaseHealth *= creatureABInfo->selectedLevel >= 75 && originalLevel < 75 ? float(creatureABInfo->selectedLevel - 70) * 0.3f : 1;
                 }
             }
-            
+
             float newHealth = newBaseHealth * creatureTemplate->ModHealth;
             // allows health to be different with creatures that originally
             // differentiate their health by different level instead of multiplier field.
@@ -714,10 +714,10 @@ public:
             }
             hpStatsRate = newHealth / float(baseHealth);
         }
-        
+
         creatureABInfo->HealthMultiplier *= hpStatsRate;
         scaledHealth = round(((float)baseHealth * creatureABInfo->HealthMultiplier) + 1.0f);
-        
+
                 // Getting the list of Classes in this group
                 // This will be used later on to determine what additional scaling will be required based on the ratio of tank/dps/healer
                 // Update playerClassList with the list of all the participating Classes
@@ -729,13 +729,13 @@ public:
             float newMana = creatureStats->GenerateMana(creatureTemplate);
             manaStatsRate = newMana / float(baseMana);
         }
-        
+
             creatureABInfo->ManaMultiplier = manaStatsRate * manaMultiplier * defaultMultiplier * globalRate;
         if (creatureABInfo->ManaMultiplier <= MinManaModifier)
         {
             creatureABInfo->ManaMultiplier = MinManaModifier;
         }
-        
+
         scaledMana = round(baseMana * creatureABInfo->ManaMultiplier);
         float damageMul = defaultMultiplier * globalRate * damageMultiplier;
         // Can not be less then Min_D_Mod
@@ -765,9 +765,9 @@ public:
             }
 
             damageMul *= newDmgBase / origDmgBase;
-            
+
         }
-        
+
         creatureABInfo->ArmorMultiplier = defaultMultiplier * globalRate * armorMultiplier;
         uint32 newBaseArmor = round(creatureABInfo->ArmorMultiplier *
         ((useDefStats || !LevelScaling || skipLevel) ? origCreatureStats->GenerateArmor(creatureTemplate)
@@ -777,7 +777,7 @@ public:
         uint32 prevHealth = creature->GetHealth();
         uint32 prevPower = creature->GetPower(POWER_MANA);
         Powers pType = creature->GetPowerType();
-        
+
         creature->SetArmor(newBaseArmor);
         creature->SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, (float)newBaseArmor);
         creature->SetCreateHealth(scaledHealth);
@@ -790,10 +790,10 @@ public:
         creature->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, (float)scaledHealth);
         creature->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, (float)scaledMana);
         creatureABInfo->DamageMultiplier = damageMul;
-        
+
         uint32 scaledCurHealth = prevHealth && prevMaxHealth ? float(scaledHealth) / float(prevMaxHealth) * float(prevHealth) : 0;
         uint32 scaledCurPower = prevPower && prevMaxPower ? float(scaledMana) / float(prevMaxPower) * float(prevPower) : 0;
-        
+
         creature->SetHealth(scaledCurHealth);
         if (pType == POWER_MANA)
         {
@@ -805,9 +805,9 @@ public:
             creature->SetPowerType(pType);
         }
         creature->UpdateAllStats();
-        
+
         }
-    
+
 };
 
 using namespace Trinity::ChatCommands;
@@ -816,7 +816,7 @@ class AutoBalance_CommandScript : public CommandScript
 {
 public:
     AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") {}
-    
+
     ChatCommandTable GetCommands() const override
         {
         static ChatCommandTable ABCommandTable =
@@ -832,9 +832,9 @@ public:
             {"vas", ABCommandTable},
             };
         return commandTable;
-        
+
         }
-    
+
         static bool HandleABSetOffsetCommand(ChatHandler * handler, const char* args)
         {
         if (!*args)
@@ -842,18 +842,18 @@ public:
             handler->PSendSysMessage(".vas setoffset #");
             handler->PSendSysMessage("Sets the Player Difficulty Offset for instances. Example: (You + offset(1) = 2 player difficulty).");
             return false;
-            
+
         }
         char* offset = strtok((char*)args, " ");
         int32 offseti = -1;
-        
+
             if (offset)
             {
             offseti = (uint32)atoi(offset);
             handler->PSendSysMessage("Changing Player Difficulty Offset to %i.", offseti);
             PlayerCountDifficultyOffset = offseti;
             return true;
-            
+
             }
             else
             {
@@ -861,28 +861,28 @@ public:
             }
         return false;
         }
-    
+
         static bool HandleABGetOffsetCommand(ChatHandler * handler, const char* /*args*/)
         {
         handler->PSendSysMessage("Current Player Difficulty Offset = %i", PlayerCountDifficultyOffset);
         return true;
         }
-    
+
         static bool HandleABCheckMapCommand(ChatHandler * handler, const char* args)
         {
         Player * pl = handler->getSelectedPlayer();
-        
+
             if (!pl)
             {
             handler->SendSysMessage(LANG_SELECT_PLAYER_OR_PET);
             handler->SetSentErrorMessage(true);
             return false;
-            
+
             }
-        
+
         AutoBalanceMapInfo * mapABInfo = pl->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
         mapABInfo->playerCount = pl->GetMap()->GetPlayersCountExceptGMs();
-        
+
         Map::PlayerList const& playerList = pl->GetMap()->GetPlayers();
         uint8 level = 0;
         if (!playerList.isEmpty())
@@ -895,19 +895,19 @@ public:
                     if (playerHandle->GetLevel() > level)
                     {
                         mapABInfo->mapLevel = level = playerHandle->GetLevel();
-                        
+
                     }
-                    
+
                 }
-                
+
             }
-            
+
         }
         HandleABMapStatsCommand(handler, args);
         return true;
-        
+
     }
-    
+
         static bool HandleABMapStatsCommand(ChatHandler * handler, const char* /*args*/)
         {
         Player * pl = handler->getSelectedPlayer();
@@ -916,28 +916,28 @@ public:
             handler->SendSysMessage(LANG_SELECT_PLAYER_OR_PET);
             handler->SetSentErrorMessage(true);
             return false;
-            
+
         }
-        
+
         AutoBalanceMapInfo * mapABInfo = pl->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
         handler->PSendSysMessage("Players on map: %u", mapABInfo->playerCount);
         handler->PSendSysMessage("Max level of players in this map: %u", mapABInfo->mapLevel);
         return true;
-        
+
     }
-    
+
         static bool HandleABCreatureStatsCommand(ChatHandler * handler, const char* /*args*/)
         {
         Creature * target = handler->getSelectedCreature();
-        
+
             if (!target)
             {
             handler->SendSysMessage(LANG_SELECT_CREATURE);
             handler->SetSentErrorMessage(true);
             return false;
-            
+
             }
-        
+
         AutoBalanceCreatureInfo * creatureABInfo = target->CustomData.GetDefault<AutoBalanceCreatureInfo>("AutoBalanceCreatureInfo");
         handler->PSendSysMessage("Instance player Count: %u", creatureABInfo->instancePlayerCount);
         handler->PSendSysMessage("Selected level: %u", creatureABInfo->selectedLevel);
@@ -946,9 +946,9 @@ public:
         handler->PSendSysMessage("Mana multiplier: %.6f", creatureABInfo->ManaMultiplier);
         handler->PSendSysMessage("Armor multiplier: %.6f", creatureABInfo->ArmorMultiplier);
         return true;
-        
+
         }
-    
+
 };
 
 void AddSC_AutoBalance()
@@ -959,5 +959,5 @@ void AddSC_AutoBalance()
     new AutoBalance_AllCreatureScript;
     new AutoBalance_AllMapScript;
     new AutoBalance_CommandScript;
-    
+
 }

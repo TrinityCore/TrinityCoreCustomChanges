@@ -211,7 +211,7 @@ class AutoBalance_PlayerScript : public PlayerScript
 public:
     AutoBalance_PlayerScript() : PlayerScript("AutoBalance_PlayerScript") { }
 
-        void OnLogin(Player * Player, bool firstLogin) override
+        void OnLogin(Player * Player, bool /*firstLogin*/) override
         {
             if (sConfigMgr->GetBoolDefault("AutoBalanceAnnounce.enable", true))
             {

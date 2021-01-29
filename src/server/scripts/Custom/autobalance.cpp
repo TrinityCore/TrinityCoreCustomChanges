@@ -815,22 +815,22 @@ using namespace Trinity::ChatCommands;
 class AutoBalance_CommandScript : public CommandScript
 {
 public:
-    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") {}
+    AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") { }
 
     ChatCommandTable GetCommands() const override
-        {
+    {
         static ChatCommandTable ABCommandTable =
-            {
-            { "setoffset", HandleABSetOffsetCommand, rbac::RBAC_ROLE_GAMEMASTER, Console::Yes /*"Sets the global Player Difficulty Offset for instances. Example: (You + offset(1) = 2 player difficulty)."*/},
-            { "getoffset", HandleABGetOffsetCommand, rbac::RBAC_ROLE_GAMEMASTER, Console::Yes /*"Shows current global player offset value"*/},
-            { "checkmap", HandleABCheckMapCommand, rbac::RBAC_ROLE_GAMEMASTER, Console::Yes /*"Run a check for current map/instance, it can help in case you're testing autobalance with GM."*/},
-            { "mapstat", HandleABMapStatsCommand, rbac::RBAC_ROLE_GAMEMASTER, Console::Yes /*"Shows current autobalance information for this map-"*/},
-            { "crstat", HandleABCreatureStatsCommand, rbac::RBAC_ROLE_GAMEMASTER, Console::Yes /*"Shows current autobalance information for selected creature."*/},
-            };
+        {
+            { "setoffset",      HandleABSetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "getoffset",      HandleABGetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "checkmap",       HandleABCheckMapCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "mapstat",        HandleABMapStatsCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "crstat",         HandleABCreatureStatsCommand,           rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+        };
         static ChatCommandTable commandTable =
-            {
-            { "vas", ABCommandTable },
-            };
+        {
+            { "vas",        ABCommandTable },
+        };
         return commandTable;
 
         }

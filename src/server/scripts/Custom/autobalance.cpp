@@ -821,11 +821,11 @@ public:
     {
         static std::vector<ChatCommandBuilder> ABCommandTable =
         {
-            { "setoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABSetOffsetCommand,                   "" },
-            { "getoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABGetOffsetCommand,                   "" },
-            { "checkmap",       rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABCheckMapCommand,                    "" },
-            { "mapstat",        rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABMapStatsCommand,                    "" },
-            { "crstat",         rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABCreatureStatsCommand,               "" },
+            { "setoffset",      HandleABSetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "getoffset",      HandleABGetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "checkmap",       HandleABCheckMapCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "mapstat",        HandleABMapStatsCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "crstat",         HandleABCreatureStatsCommand,           rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
         };
         static std::vector<ChatCommandBuilder> commandTable =
         {

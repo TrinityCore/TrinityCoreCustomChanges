@@ -817,9 +817,9 @@ class AutoBalance_CommandScript : public CommandScript
 public:
     AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") { }
 
-    std::vector<ChatCommandTable> GetCommands() const override
+    std::vector<ChatCommandBuilder> GetCommands() const override
     {
-        static std::vector<ChatCommandTable> ABCommandTable =
+        static std::vector<ChatCommandBuilder> ABCommandTable =
         {
             { "setoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABSetOffsetCommand,                   "" },
             { "getoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABGetOffsetCommand,                   "" },
@@ -827,7 +827,7 @@ public:
             { "mapstat",        rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABMapStatsCommand,                    "" },
             { "crstat",         rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABCreatureStatsCommand,               "" },
         };
-        static std::vector<ChatCommandTable> commandTable =
+        static std::vector<ChatCommandBuilder> commandTable =
         {
             { "vas",        rbac::RBAC_ROLE_GAMEMASTER,                 true,  nullptr,                                     "",  ABCommandTable },
         };

@@ -311,7 +311,7 @@ class TC_GAME_API FormulaScript : public ScriptObject
         virtual void OnGroupRateCalculation(float& /*rate*/, uint32 /*count*/, bool /*isRaid*/) { }
 };
 
-class AllMapScript : public ScriptObject
+class TC_GAME_API AllMapScript : public ScriptObject
 {
 protected:
 

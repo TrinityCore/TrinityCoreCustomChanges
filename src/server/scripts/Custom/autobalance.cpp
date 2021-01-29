@@ -822,40 +822,20 @@ public:
 
     }
 
-    static bool HandleABSetOffsetCommand(ChatHandler* handler, const char* args)
+    static bool HandleABSetOffsetCommand(ChatHandler* handler, uint32 offseti)
     {
-        if (!*args)
-        {
-            handler->PSendSysMessage(".vas setoffset #");
-            handler->PSendSysMessage("Sets the Player Difficulty Offset for instances. Example: (You + offset(1) = 2 player difficulty).");
-            return false;
-
-        }
-        char* offset = strtok((char*)args, " ");
-        int32 offseti = -1;
-
-        if (offset)
-        {
-            offseti = (uint32)atoi(offset);
-            handler->PSendSysMessage("Changing Player Difficulty Offset to %i.", offseti);
-            PlayerCountDifficultyOffset = offseti;
-            return true;
-
-        }
-        else
-        {
-            handler->PSendSysMessage("Error changing Player Difficulty Offset! Please try again.");
-        }
-        return false;
+        handler->PSendSysMessage("Changing Player Difficulty Offset to %i.", offseti);
+        PlayerCountDifficultyOffset = offseti;
+        return true;
     }
 
-    static bool HandleABGetOffsetCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleABGetOffsetCommand(ChatHandler* handler)
     {
         handler->PSendSysMessage("Current Player Difficulty Offset = %i", PlayerCountDifficultyOffset);
         return true;
     }
 
-    static bool HandleABCheckMapCommand(ChatHandler* handler, const char* args)
+    static bool HandleABCheckMapCommand(ChatHandler* handler)
     {
         Player* pl = handler->getSelectedPlayer();
 
@@ -890,12 +870,12 @@ public:
             }
 
         }
-        HandleABMapStatsCommand(handler, args);
+        HandleABMapStatsCommand(handler);
         return true;
 
     }
 
-    static bool HandleABMapStatsCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleABMapStatsCommand(ChatHandler* handler)
     {
         Player* pl = handler->getSelectedPlayer();
         if (!pl)
@@ -913,7 +893,7 @@ public:
 
     }
 
-    static bool HandleABCreatureStatsCommand(ChatHandler* handler, const char* /*args*/)
+    static bool HandleABCreatureStatsCommand(ChatHandler* handler)
     {
         Creature* target = handler->getSelectedCreature();
 

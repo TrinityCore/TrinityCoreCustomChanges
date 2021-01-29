@@ -817,19 +817,19 @@ class AutoBalance_CommandScript : public CommandScript
 public:
     AutoBalance_CommandScript() : CommandScript("AutoBalance_CommandScript") { }
 
-    ChatCommandTable GetCommands() const override
+    std::vector<ChatCommand> GetCommands() const override
     {
-        static ChatCommandTable ABCommandTable =
+        static std::vector<ChatCommand> ABCommandTable =
         {
-            { "setoffset",      HandleABSetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
-            { "getoffset",      HandleABGetOffsetCommand,               rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
-            { "checkmap",       HandleABCheckMapCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
-            { "mapstat",        HandleABMapStatsCommand,                rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
-            { "crstat",         HandleABCreatureStatsCommand,           rbac::RBAC_ROLE_GAMEMASTER,                     Console::Yes },
+            { "setoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABSetOffsetCommand,                   "" },
+            { "getoffset",      rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABGetOffsetCommand,                   "" },
+            { "checkmap",       rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABCheckMapCommand,                    "" },
+            { "mapstat",        rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABMapStatsCommand,                    "" },
+            { "crstat",         rbac::RBAC_ROLE_GAMEMASTER,             true,  &HandleABCreatureStatsCommand,               "" },
         };
-        static ChatCommandTable commandTable =
+        static std::vector<ChatCommand> commandTable =
         {
-            { "vas",        ABCommandTable },
+            { "vas",        rbac::RBAC_ROLE_GAMEMASTER,                 true,  nullptr,                                     "",  ABCommandTable },
         };
         return commandTable;
 

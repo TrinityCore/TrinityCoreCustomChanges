@@ -105,9 +105,9 @@ public:
             {548, sConfigMgr->GetIntDefault("Solocraft.CoilfangRaid.Level", 70) },                        // Serpentshrine Cavern
             {550, sConfigMgr->GetIntDefault("Solocraft.TempestKeepRaid.Level", 70) },                     // The Eye
             {552, sConfigMgr->GetIntDefault("Solocraft.TempestKeepArcane.Level", 68) },                   // The Arcatraz
-            {553, sConfigMgr->GetIntDefault("Solocraft.TempestKeepAtrium.Level", 68) },                   // The Botanica  
+            {553, sConfigMgr->GetIntDefault("Solocraft.TempestKeepAtrium.Level", 68) },                   // The Botanica
             {554, sConfigMgr->GetIntDefault("Solocraft.TempestKeepFactory.Level", 68) },                  // The Mechanar
-            {555, sConfigMgr->GetIntDefault("Solocraft.AuchindounShadow.Level", 68) },                    // Shadow Labyrinth    
+            {555, sConfigMgr->GetIntDefault("Solocraft.AuchindounShadow.Level", 68) },                    // Shadow Labyrinth
             {556, sConfigMgr->GetIntDefault("Solocraft.AuchindounDemon.Level", 68) },                     // Sethekk Halls
             {557, sConfigMgr->GetIntDefault("Solocraft.AuchindounEthereal.Level", 68) },                  // Mana-Tombs
             {558, sConfigMgr->GetIntDefault("Solocraft.AuchindounDraenei.Level", 68) },                   // Auchenai Crypts
@@ -169,7 +169,7 @@ public:
             {229, sConfigMgr->GetFloatDefault("Solocraft.BlackRockSpire", 10.0) },
             {230, sConfigMgr->GetFloatDefault("Solocraft.BlackrockDepths", 5.0) },
             {249, sConfigMgr->GetFloatDefault("Solocraft.OnyxiaLairInstance", 40.0) },
-            {289, sConfigMgr->GetFloatDefault("Solocraft.SchoolofNecromancy", 5.0) },                     // Scholo  
+            {289, sConfigMgr->GetFloatDefault("Solocraft.SchoolofNecromancy", 5.0) },                     // Scholo
             {309, sConfigMgr->GetFloatDefault("Solocraft.Zul'gurub", 20.0) },
             {329, sConfigMgr->GetFloatDefault("Solocraft.Stratholme", 5.0) },
             {349, sConfigMgr->GetFloatDefault("Solocraft.Mauradon", 5.0) },
@@ -187,17 +187,17 @@ public:
             {540, sConfigMgr->GetFloatDefault("Solocraft.HellfireMilitary", 5.0) },                       // The Shattered Halls
             {542, sConfigMgr->GetFloatDefault("Solocraft.HellfireDemon", 5.0) },                          // The Blood Furnace
             {543, sConfigMgr->GetFloatDefault("Solocraft.HellfireRampart", 5.0) },
-            {544, sConfigMgr->GetFloatDefault("Solocraft.HellfireRaid", 25.0) },                          // Magtheridon's Lair  
+            {544, sConfigMgr->GetFloatDefault("Solocraft.HellfireRaid", 25.0) },                          // Magtheridon's Lair
             {545, sConfigMgr->GetFloatDefault("Solocraft.CoilfangPumping", 5.0) },                        // The Steamvault
             {546, sConfigMgr->GetFloatDefault("Solocraft.CoilfangMarsh", 5.0) },                          // The Underbog
-            {547, sConfigMgr->GetFloatDefault("Solocraft.CoilfangDraenei", 5.0) },                        // The Slavepens  
+            {547, sConfigMgr->GetFloatDefault("Solocraft.CoilfangDraenei", 5.0) },                        // The Slavepens
             {548, sConfigMgr->GetFloatDefault("Solocraft.CoilfangRaid", 25.0) },                          // Serpentshrine Cavern
             {550, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepRaid", 25.0) },                       // The Eye
             {552, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepArcane", 5.0) },                      // The Arcatraz
-            {553, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepAtrium", 5.0) },                      // The Botanica    
-            {554, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepFactory", 5.0) },                     // The Mechanar    
-            {555, sConfigMgr->GetFloatDefault("Solocraft.AuchindounShadow", 5.0) },                       // Shadow Labyrinth    
-            {556, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDemon", 5.0) },                        // Sethekk Halls  
+            {553, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepAtrium", 5.0) },                      // The Botanica
+            {554, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepFactory", 5.0) },                     // The Mechanar
+            {555, sConfigMgr->GetFloatDefault("Solocraft.AuchindounShadow", 5.0) },                       // Shadow Labyrinth
+            {556, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDemon", 5.0) },                        // Sethekk Halls
             {557, sConfigMgr->GetFloatDefault("Solocraft.AuchindounEthereal", 5.0) },                     // Mana-Tombs
             {558, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDraenei", 5.0) },                      // Auchenai Crypts
             {560, sConfigMgr->GetFloatDefault("Solocraft.HillsbradPast", 5.0) },                          // Old Hillsbrad Foothills
@@ -227,37 +227,37 @@ public:
             {631, sConfigMgr->GetFloatDefault("Solocraft.IcecrownCitadel", 10.0) },                       // Icecrown Citadel 10
             {632, sConfigMgr->GetFloatDefault("Solocraft.IcecrownCitadel5Man", 5.0) },                    // The Forge of Souls
             {649, sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaid", 10.0) },                  // Trial of the Crusader 10
-            {650, sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentDungeon", 5.0) },                // Trial of the Champion 
+            {650, sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentDungeon", 5.0) },                // Trial of the Champion
             {658, sConfigMgr->GetFloatDefault("Solocraft.QuarryOfTears", 5.0) },                          // Pit of Saron
             {668, sConfigMgr->GetFloatDefault("Solocraft.HallsOfReflection", 5.0) },                      // Halls of Reflection
             {724, sConfigMgr->GetFloatDefault("Solocraft.ChamberOfAspectsRed", 10.0) },                   // The Ruby Sanctum 10
         };
 
 
-        // Heroics 
+        // Heroics
         diff_Multiplier_Heroics =
         {
             // BC Instances Heroics
             {269, sConfigMgr->GetFloatDefault("Solocraft.CavernsOfTimeH", 5.0) },                         // Black Morass H
-            {540, sConfigMgr->GetFloatDefault("Solocraft.HellfireMilitaryH", 5.0) },                      // The Shattered Halls H    
+            {540, sConfigMgr->GetFloatDefault("Solocraft.HellfireMilitaryH", 5.0) },                      // The Shattered Halls H
             {542, sConfigMgr->GetFloatDefault("Solocraft.HellfireDemonH", 5.0) },                         // The Blood Furnace H
             {543, sConfigMgr->GetFloatDefault("Solocraft.HellfireRampartH", 5.0) },                       // Heroic
-            {545, sConfigMgr->GetFloatDefault("Solocraft.CoilfangPumpingH", 5.0) },                       // The Steamvault    
+            {545, sConfigMgr->GetFloatDefault("Solocraft.CoilfangPumpingH", 5.0) },                       // The Steamvault
             {546, sConfigMgr->GetFloatDefault("Solocraft.CoilfangMarshH", 5.0) },                         // The Underbog
             {547, sConfigMgr->GetFloatDefault("Solocraft.CoilfangDraeneiH", 5.0) },                       // The Slavepens  H
-            {552, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepArcaneH", 5.0) },                     // The Arcatraz H    
-            {553, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepAtriumH", 5.0) },                     // The Botanica H    
-            {554, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepFactoryH", 5.0) },                    // The Mechanar H    
-            {555, sConfigMgr->GetFloatDefault("Solocraft.AuchindounShadowH", 5.0) },                      // Shadow Labyrinth H    
-            {556, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDemonH", 5.0) },                       // Sethekk Halls H  
-            {557, sConfigMgr->GetFloatDefault("Solocraft.AuchindounEtherealH", 5.0) },                    // Mana-Tombs H  
+            {552, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepArcaneH", 5.0) },                     // The Arcatraz H
+            {553, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepAtriumH", 5.0) },                     // The Botanica H
+            {554, sConfigMgr->GetFloatDefault("Solocraft.TempestKeepFactoryH", 5.0) },                    // The Mechanar H
+            {555, sConfigMgr->GetFloatDefault("Solocraft.AuchindounShadowH", 5.0) },                      // Shadow Labyrinth H
+            {556, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDemonH", 5.0) },                       // Sethekk Halls H
+            {557, sConfigMgr->GetFloatDefault("Solocraft.AuchindounEtherealH", 5.0) },                    // Mana-Tombs H
             {558, sConfigMgr->GetFloatDefault("Solocraft.AuchindounDraeneiH", 5.0) },                     // Auchenai Crypts H
             {560, sConfigMgr->GetFloatDefault("Solocraft.HillsbradPastH", 5.0) },                         // Old Hillsbrad Foothills H
             {568, sConfigMgr->GetFloatDefault("Solocraft.ZulAmanH", 5.0) },                               // Zul'Aman H
-            {585, sConfigMgr->GetFloatDefault("Solocraft.Sunwell5ManFixH", 5.0) },                        // Magister's Terrace H  
+            {585, sConfigMgr->GetFloatDefault("Solocraft.Sunwell5ManFixH", 5.0) },                        // Magister's Terrace H
 
             // WOTLK Instances Heroics
-            {533, sConfigMgr->GetFloatDefault("Solocraft.StratholmeRaidH", 25.0) },                       // Naxxramas 25    
+            {533, sConfigMgr->GetFloatDefault("Solocraft.StratholmeRaidH", 25.0) },                       // Naxxramas 25
             {574, sConfigMgr->GetFloatDefault("Solocraft.Valgarde70H", 5.0) },                            // Utgarde Keep H
             {575, sConfigMgr->GetFloatDefault("Solocraft.UtgardePinnacleH", 5.0) },                       // Utgarde Pinnacle H
             {576, sConfigMgr->GetFloatDefault("Solocraft.Nexus70H", 5.0) },                               // The Nexus H
@@ -267,7 +267,7 @@ public:
             {600, sConfigMgr->GetFloatDefault("Solocraft.DrakTheronKeepH", 5.0) },                        // Drak'Tharon Keep H
             {601, sConfigMgr->GetFloatDefault("Solocraft.Azjol_UppercityH", 5.0) },                       // Azjol-Nerub H
             {602, sConfigMgr->GetFloatDefault("Solocraft.Ulduar80H", 5.0) },                              // Halls of Lighting H
-            {603, sConfigMgr->GetFloatDefault("Solocraft.UlduarRaidH", 25.0) },                           // Ulduar 25    
+            {603, sConfigMgr->GetFloatDefault("Solocraft.UlduarRaidH", 25.0) },                           // Ulduar 25
             {604, sConfigMgr->GetFloatDefault("Solocraft.GunDrakH", 5.0) },                               // Gundrak H
             {608, sConfigMgr->GetFloatDefault("Solocraft.DalaranPrisonH", 5.0) },                         // Violet Hold H
             {615, sConfigMgr->GetFloatDefault("Solocraft.ChamberOfAspectsBlackH", 25.0) },                // The Obsidian Sanctum 25
@@ -346,7 +346,7 @@ private:
                     return D649H25;  //Heroic Grand Trial of the Crusader
                 }
                 else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
-                    return D25; //map not found returns the catch all value    
+                    return D25; //map not found returns the catch all value
                 }
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
@@ -360,7 +360,7 @@ private:
                     return D649H10;
                 }
                 else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
-                    return D10; //map not found returns the catch all value    
+                    return D10; //map not found returns the catch all value
                 }
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
@@ -388,10 +388,10 @@ private:
     int CalculateDungeonLevel(Map* map, Player* /*player*/) {
         if (dungeons.find(map->GetId()) == dungeons.end())
         {
-            return SolocraftDungeonLevel; //map not found returns the catch all value    
+            return SolocraftDungeonLevel; //map not found returns the catch all value
         }
         else
-            return dungeons[map->GetId()]; //return the specific dungeon's level         
+            return dungeons[map->GetId()]; //return the specific dungeon's level
     }
 
 
@@ -511,7 +511,7 @@ private:
                     QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = %u", itr->guid);
                     if (result)
                     {
-                        //Test for debuffs already give to other members - They cannot be used to determine the total offset because negative numbers will skew the total difficulty offset 
+                        //Test for debuffs already give to other members - They cannot be used to determine the total offset because negative numbers will skew the total difficulty offset
                         if ((*result)[1].GetFloat() > 0)
                         {
                             GroupDifficulty = GroupDifficulty + (*result)[1].GetFloat();

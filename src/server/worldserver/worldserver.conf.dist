@@ -4105,10 +4105,10 @@ Solocraft.Announce = 1
 #  Balancing - Groups (Overloading), Spellpower, and Stats
 ###################################################################################################
 
-# Enable Debuff of new party members who enter the dungeon to avoid overloading the dungeon? 
-# Overloading is when a group member already in the dungeon has the full offset/buff of the 
+# Enable Debuff of new party members who enter the dungeon to avoid overloading the dungeon?
+# Overloading is when a group member already in the dungeon has the full offset/buff of the
 # dungeon applied then they invite new group members who enter the dungeon and also receive an
-# offset which creates a huge imbalance. 
+# offset which creates a huge imbalance.
 # The debuff will make the new members weak until all members leave the instance/dungeon
 # instance/dungeon and re-enter which will then split the offset among all the group members.
 
@@ -4120,7 +4120,7 @@ SoloCraft.Debuff.Enable = 1
 # Spellpower Bonus Multiplier
 # Spellcasters spellpower bonus multiplier to offset no spellpower received from stats
 # Formula: (player->level * multiplier) * difficulty
-# Example Level 24 Mage with default modifier and  a dungeon difficulty of 5 will receive a base 
+# Example Level 24 Mage with default modifier and  a dungeon difficulty of 5 will receive a base
 # Spellpower increase of 300.
 
 # Default:  2.5
@@ -4142,7 +4142,7 @@ SoloCraft.Stats.Mult = 100.0
 
 # Difficulty Multipliers
 # Defaults: 5, 10, 25, 40
-Solocraft.Dungeon = 5.0 
+Solocraft.Dungeon = 5.0
 Solocraft.Heroic = 10.0
 Solocraft.Raid25 = 25.0
 Solocraft.Raid40 = 40.0
@@ -4236,7 +4236,7 @@ Solocraft.AuchindounDemonH = 5.0
 Solocraft.AuchindounEthereal = 5.0
 Solocraft.AuchindounEtherealH = 5.0
 # Auchenai Crypts
-Solocraft.AuchindounDraenei = 5.0 
+Solocraft.AuchindounDraenei = 5.0
 Solocraft.AuchindounDraeneiH = 5.0
 # Old Hillsbrad Foothills
 Solocraft.HillsbradPast = 5.0
@@ -4327,10 +4327,10 @@ Solocraft.ChamberOfAspectsRedH = 5.0
 
 
 ################################################################################################
-#Player Level Thresholds 
+#Player Level Thresholds
 ################################################################################################
 
-#Max player level difference over the Dungeon's Level for Solocraft to apply the 
+#Max player level difference over the Dungeon's Level for Solocraft to apply the
 # difficulty offset buff.
 # Default: 10
 # Disable: 80

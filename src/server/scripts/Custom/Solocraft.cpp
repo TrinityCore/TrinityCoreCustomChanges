@@ -364,7 +364,7 @@ private:
                 }
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
-			}
+            }
 
 
             if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end()) {

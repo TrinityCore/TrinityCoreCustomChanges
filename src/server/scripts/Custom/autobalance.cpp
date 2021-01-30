@@ -81,8 +81,8 @@ static std::map<int, int> forcedCreatureIds;
 static int8 PlayerCountDifficultyOffset, LevelScaling, higherOffset, lowerOffset;
 static bool enabled, LevelEndGameBoost, DungeonsOnly, PlayerChangeNotify, LevelUseDb, DungeonScaleDownXP;
 static float globalRate, healthMultiplier, manaMultiplier, armorMultiplier, damageMultiplier, MinHPModifier, MinManaModifier, MinDamageModifier,
-InflectionPoint, InflectionPointRaid, InflectionPointRaid10M, InflectionPointRaid25M, InflectionPointHeroic, InflectionPointRaidHeroic,
-InflectionPointRaid10MHeroic, InflectionPointRaid25MHeroic, BossInflectionMult;
+InflectionPoint, InflectionPointRaid, InflectionPointRaid10M, InflectionPointRaid25M, InflectionPointRaid25M, InflectionPointHeroic, InflectionPointRaidHeroic,
+InflectionPointRaid10MHeroic, InflectionPointRaid25MHeroic, InflectionPointRaid30MHeroic, BossInflectionMult;
 
 int GetValidDebugLevel() {
     int debugLevel = sConfigMgr->GetIntDefault("AutoBalance.DebugLevel", 2);
@@ -183,10 +183,12 @@ public:
 
         InflectionPoint = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPoint", 0.5f);
         InflectionPointRaid = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid", InflectionPoint);
+        InflectionPointRaid30M = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid30M", InflectionPointRaid);
         InflectionPointRaid25M = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid25M", InflectionPointRaid);
         InflectionPointRaid10M = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid10M", InflectionPointRaid);
         InflectionPointHeroic = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointHeroic", InflectionPoint);
         InflectionPointRaidHeroic = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaidHeroic", InflectionPointRaid);
+        InflectionPointRaid30MHeroic = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid30MHeroic", InflectionPointRaid30M);
         InflectionPointRaid25MHeroic = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid25MHeroic", InflectionPointRaid25M);
         InflectionPointRaid10MHeroic = sConfigMgr->GetFloatDefault("AutoBalance.InflectionPointRaid10MHeroic", InflectionPointRaid10M);
         BossInflectionMult = sConfigMgr->GetFloatDefault("AutoBalance.BossInflectionMult", 1.0f);
@@ -618,6 +620,9 @@ public:
                     case 25:
                         inflectionValue *= InflectionPointRaid25MHeroic;
                         break;
+                    case 30:
+                        inflectionValue *= InflectionPointRaid30MHeroic;
+                        break;
                     default:
                         inflectionValue *= InflectionPointRaidHeroic;
                     }
@@ -638,6 +643,9 @@ public:
                         break;
                     case 25:
                         inflectionValue *= InflectionPointRaid25M;
+                        break;
+                    case 30:
+                        inflectionValue *= InflectionPointRaid30M;
                         break;
                     default:
                         inflectionValue *= InflectionPointRaid;

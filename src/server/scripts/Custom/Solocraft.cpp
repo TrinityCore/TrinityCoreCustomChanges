@@ -336,7 +336,8 @@ private:
     int CalculateDifficulty(Map* map, Player* /*player*/) {
         //float difficulty = 0.0;//changed from 1.0
 
-        if (map) {
+        if (map) 
+        {
             //WOTLK 25 Man raids
             if (map->Is25ManRaid())
             {
@@ -347,7 +348,7 @@ private:
                     return D25; //map not found returns the catch all value    
                 }
                 else
-                    return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level 					
+                    return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
             }
 
 
@@ -361,8 +362,8 @@ private:
                     return D10; //map not found returns the catch all value    
                 }
                 else
-                    return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level 					
-            }
+                    return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
+			}
 
 
             if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end()) {
@@ -375,7 +376,7 @@ private:
                 }
             }
             else
-                return diff_Multiplier[map->GetId()]; //return the specific dungeon's level 					
+                return diff_Multiplier[map->GetId()]; //return the specific dungeon's level
         }
         return 0; //return 0
     }
@@ -549,7 +550,6 @@ private:
             {
                 // remove spellpower bonus
                 player->ApplySpellPowerBonus(SpellPowerBonus, false);
-                //sLog->outError("%u: spellpower Bonus removed: %i", player->GetGUID(), SpellPowerBonus);				
             }
 
             //Remove database entry as the player is no longer in an instance

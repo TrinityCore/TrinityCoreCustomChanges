@@ -4112,8 +4112,8 @@ Solocraft.Announce = 1
 # The debuff will make the new members weak until all members leave the instance/dungeon
 # instance/dungeon and re-enter which will then split the offset among all the group members.
 
-# Default: 	1 (on)
-#			0 (off)
+# Default:  1 (on)
+#           0 (off)
 SoloCraft.Debuff.Enable = 1
 
 
@@ -4123,16 +4123,16 @@ SoloCraft.Debuff.Enable = 1
 # Example Level 24 Mage with default modifier and  a dungeon difficulty of 5 will receive a base 
 # Spellpower increase of 300.
 
-# Default:	2.5
-#			0.0 (Disable)
+# Default:  2.5
+#           0.0 (Disable)
 SoloCraft.Spellpower.Mult = 2.5
 
 
 # Stats Percentage Bonus Multiplier
 # Forumla: player->Stats * (difficulty * multiplier)
 
-# Default: 	100.0
-#			0.0	(Disable)
+# Default:  100.0
+#           0.0 (Disable)
 SoloCraft.Stats.Mult = 100.0
 
 
@@ -4220,17 +4220,17 @@ Solocraft.TempestKeepRaid = 25.0
 # The Arcatraz
 Solocraft.TempestKeepArcane = 5.0
 Solocraft.TempestKeepArcaneH = 5.0
-# The Botanica	
+# The Botanica
 Solocraft.TempestKeepAtrium = 5.0
 Solocraft.TempestKeepAtriumH = 5.0
 # The Mechanar
 Solocraft.TempestKeepFactory = 5.0
 Solocraft.TempestKeepFactoryH = 5.0
-# Shadow Labyrinth		
-Solocraft.AuchindounShadow = 5.0	
+# Shadow Labyrinth
+Solocraft.AuchindounShadow = 5.0
 Solocraft.AuchindounShadowH = 5.0	
 # Sethekk Halls
-Solocraft.AuchindounDemon = 5.0 	
+Solocraft.AuchindounDemon = 5.0
 Solocraft.AuchindounDemonH = 5.0
 # Mana-Tombs
 Solocraft.AuchindounEthereal = 5.0
@@ -4332,7 +4332,7 @@ Solocraft.ChamberOfAspectsRedH = 5.0
 
 #Max player level difference over the Dungeon's Level for Solocraft to apply the 
 # difficulty offset buff.
-# Default: 	10
+# Default: 10
 # Disable: 80
 Solocraft.Max.Level.Diff = 10
 
@@ -4409,11 +4409,11 @@ Solocraft.CoilfangRaid.Level = 70
 Solocraft.TempestKeepRaid.Level = 70
 # The Arcatraz
 Solocraft.TempestKeepArcane.Level = 68
-# The Botanica	
+# The Botanica
 Solocraft.TempestKeepAtrium.Level = 68
 # The Mechanar
 Solocraft.TempestKeepFactory.Level = 68
-# Shadow Labyrinth		
+# Shadow Labyrinth
 Solocraft.AuchindounShadow.Level = 68
 # Sethekk Halls
 Solocraft.AuchindounDemon.Level = 68

@@ -4093,65 +4093,48 @@ Metric.OverallStatusInterval = 1
 ###################################################################################################
 #  SOLOCRAFT  #
 ###############
-
 # Enable the module? (1: true | 0: false)
 Solocraft.Enable = 1
-
 # Announce the module when the player logs in?
 Solocraft.Announce = 1
-
-
 ###################################################################################################
 #  Balancing - Groups (Overloading), Spellpower, and Stats
 ###################################################################################################
-
 # Enable Debuff of new party members who enter the dungeon to avoid overloading the dungeon?
 # Overloading is when a group member already in the dungeon has the full offset/buff of the
 # dungeon applied then they invite new group members who enter the dungeon and also receive an
 # offset which creates a huge imbalance.
 # The debuff will make the new members weak until all members leave the instance/dungeon
 # instance/dungeon and re-enter which will then split the offset among all the group members.
-
 # Default:  1 (on)
 #           0 (off)
 SoloCraft.Debuff.Enable = 1
-
-
 # Spellpower Bonus Multiplier
 # Spellcasters spellpower bonus multiplier to offset no spellpower received from stats
 # Formula: (player->level * multiplier) * difficulty
 # Example Level 24 Mage with default modifier and  a dungeon difficulty of 5 will receive a base
 # Spellpower increase of 300.
-
 # Default:  2.5
 #           0.0 (Disable)
 SoloCraft.Spellpower.Mult = 2.5
-
-
 # Stats Percentage Bonus Multiplier
 # Forumla: player->Stats * (difficulty * multiplier)
-
 # Default:  100.0
 #           0.0 (Disable)
 SoloCraft.Stats.Mult = 100.0
-
-
+#
 ################################################################################################
 #Catch all Bucket - Difficulty Offset Defaults
 ################################################################################################
-
 # Difficulty Multipliers
 # Defaults: 5, 10, 25, 40
 Solocraft.Dungeon = 5.0
 Solocraft.Heroic = 10.0
 Solocraft.Raid25 = 25.0
 Solocraft.Raid40 = 40.0
-
-
 ################################################################################################
 #Classic Instances - Difficulty
 ################################################################################################
-
 Solocraft.ShadowfangKeep = 5.0
 Solocraft.Stockades = 5.0
 Solocraft.Deadmines = 5.0
@@ -4182,12 +4165,9 @@ Solocraft.BlackwingLair = 40.0
 # Ruins of Ahn'Qiraj
 Solocraft.AhnQiraj = 20.0
 Solocraft.AhnQirajTemple = 40.0
-
-
 ################################################################################################
 #BC Instances - Difficulty
 ################################################################################################
-
 # The Black Morass
 Solocraft.CavernsOfTime = 5.0
 Solocraft.CavernsOfTimeH = 5.0
@@ -4249,12 +4229,9 @@ Solocraft.SunwellPlateau = 25.0
 # Magister's Terrace
 Solocraft.Sunwell5ManFix = 5.0
 Solocraft.Sunwell5ManFixH = 5.0
-
-
 ################################################################################################
 #WOTLK Instances - Difficulty
 ################################################################################################
-
 # Naxxramas
 Solocraft.StratholmeRaid = 10.0
 Solocraft.StratholmeRaidH = 25.0
@@ -4324,31 +4301,22 @@ Solocraft.HallsOfReflectionH = 5.0
 # The Ruby Sanctum
 Solocraft.ChamberOfAspectsRed = 5.0
 Solocraft.ChamberOfAspectsRedH = 5.0
-
-
 ################################################################################################
 #Player Level Thresholds
 ################################################################################################
-
 #Max player level difference over the Dungeon's Level for Solocraft to apply the
 # difficulty offset buff.
 # Default: 10
 # Disable: 80
 Solocraft.Max.Level.Diff = 10
-
-
 ################################################################################################
 #Dungeon Base Levels
 ################################################################################################
-
 #Catch All - Default 80
 Solocraft.Dungeon.Level = 80
-
-
 ################################################################################################
 #Classic Instances - Base Level
 ################################################################################################
-
 Solocraft.ShadowfangKeep.Level = 15
 Solocraft.Stockades.Level = 22
 Solocraft.Deadmines.Level = 18
@@ -4379,12 +4347,9 @@ Solocraft.BlackwingLair.Level = 40
 # Ruins of Ahn'Qiraj
 Solocraft.AhnQiraj.Level = 60
 Solocraft.AhnQirajTemple.Level = 60
-
-
 ################################################################################################
 #BC Instances - Base Level
 ################################################################################################
-
 # The Black Morass
 Solocraft.CavernsOfTime.Level = 68
 Solocraft.Karazahn.Level = 68
@@ -4429,12 +4394,9 @@ Solocraft.ZulAman.Level = 68
 Solocraft.SunwellPlateau.Level = 70
 # Magister's Terrace
 Solocraft.Sunwell5ManFix.Level = 68
-
-
 ################################################################################################
 #WOTLK Instances - Base Level
 ################################################################################################
-
 # Naxxramas
 Solocraft.StratholmeRaid.Level = 78
 # Utgarde Keep

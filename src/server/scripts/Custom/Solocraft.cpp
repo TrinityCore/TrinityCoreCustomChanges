@@ -29,7 +29,6 @@ uint32 SolocraftDungeonLevel = 1;
 std::unordered_map<uint32, uint32> dungeons;
 std::unordered_map<uint32, float> diff_Multiplier;
 std::unordered_map<uint32, float> diff_Multiplier_Heroics;
-
 float D5 = 1.0;
 float D10 = 1.0;
 float D25 = 1.0;
@@ -37,30 +36,23 @@ float D40 = 1.0;
 float D649H10 = 1.0;
 float D649H25 = 1.0;
 
-
 class SolocraftConfig : public WorldScript
 {
 public:
     SolocraftConfig() : WorldScript("SolocraftConfig") {}
-
     // Load Configuration Settings
     void SetInitialWorldSettings()
     {
         SoloCraftEnable = sConfigMgr->GetBoolDefault("Solocraft.Enable", 1);
         SoloCraftAnnounceModule = sConfigMgr->GetBoolDefault("Solocraft.Announce", 1);
-
         //Balancing
         SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
         SoloCraftSpellMult = sConfigMgr->GetFloatDefault("SoloCraft.Spellpower.Mult", 2.5);
         SoloCraftStatsMult = sConfigMgr->GetFloatDefault("SoloCraft.Stats.Mult", 100.0);
-
         //Level Thresholds
         SolocraftLevelDiff = sConfigMgr->GetIntDefault("Solocraft.Max.Level.Diff", 10);
-
         //Catch All Dungeon Level Threshold
         SolocraftDungeonLevel = sConfigMgr->GetIntDefault("Solocraft.Dungeon.Level", 80);
-
-
         // Dungeon Base Level
         dungeons =
         {
@@ -90,7 +82,6 @@ public:
             {469, sConfigMgr->GetIntDefault("Solocraft.BlackwingLair.Level", 40) },
             {509, sConfigMgr->GetIntDefault("Solocraft.AhnQiraj.Level", 60) },                            // Ruins of Ahn'Qiraj
             {531, sConfigMgr->GetIntDefault("Solocraft.AhnQirajTemple.Level", 60) },
-
             // BC Instances
             {269, sConfigMgr->GetIntDefault("Solocraft.CavernsOfTime.Level", 68) },                       // The Black Morass
             {532, sConfigMgr->GetIntDefault("Solocraft.Karazahn.Level", 68) },
@@ -117,7 +108,6 @@ public:
             {568, sConfigMgr->GetIntDefault("Solocraft.ZulAman.Level", 68) },
             {580, sConfigMgr->GetIntDefault("Solocraft.SunwellPlateau.Level", 70) },
             {585, sConfigMgr->GetIntDefault("Solocraft.Sunwell5ManFix.Level", 68) },                      // Magister's Terrace
-
             // WOTLK Instances
             {533, sConfigMgr->GetIntDefault("Solocraft.StratholmeRaid.Level", 78) },                      // Naxxramas
             {574, sConfigMgr->GetIntDefault("Solocraft.Valgarde70.Level", 78) },                          // Utgarde Keep
@@ -143,14 +133,12 @@ public:
             {668, sConfigMgr->GetIntDefault("Solocraft.HallsOfReflection.Level", 78) },                   // Halls of Reflection
             {724, sConfigMgr->GetIntDefault("Solocraft.ChamberOfAspectsRed.Level", 80) },                 // The Ruby Sanctum
         };
-
         // Dungeon Difficulty
         // Catch alls
         D5 = sConfigMgr->GetFloatDefault("Solocraft.Dungeon", 5.0);
         D10 = sConfigMgr->GetFloatDefault("Solocraft.Heroic", 10.0);
         D25 = sConfigMgr->GetFloatDefault("Solocraft.Raid25", 25.0);
         D40 = sConfigMgr->GetFloatDefault("Solocraft.Raid40", 40.0);
-
         diff_Multiplier =
         {
             // WOW Classic Instances
@@ -179,7 +167,6 @@ public:
             {469, sConfigMgr->GetFloatDefault("Solocraft.BlackwingLair", 40.0) },
             {509, sConfigMgr->GetFloatDefault("Solocraft.AhnQiraj", 20.0) },
             {531, sConfigMgr->GetFloatDefault("Solocraft.AhnQirajTemple", 40.0) },
-
             // BC Instances
             {269, sConfigMgr->GetFloatDefault("Solocraft.CavernsOfTime", 5.0) },                          // Black Morass
             {532, sConfigMgr->GetFloatDefault("Solocraft.Karazahn", 10.0) },
@@ -206,7 +193,6 @@ public:
             {568, sConfigMgr->GetFloatDefault("Solocraft.ZulAman", 5.0) },
             {580, sConfigMgr->GetFloatDefault("Solocraft.SunwellPlateau", 25.0) },
             {585, sConfigMgr->GetFloatDefault("Solocraft.Sunwell5ManFix", 5.0) },                         // Magister's Terrace
-
             // WOTLK Instances
             {533, sConfigMgr->GetFloatDefault("Solocraft.StratholmeRaid", 10.0) },                        //  Nax 10
             {574, sConfigMgr->GetFloatDefault("Solocraft.Valgarde70", 5.0) },                             // Utgarde Keep
@@ -232,8 +218,6 @@ public:
             {668, sConfigMgr->GetFloatDefault("Solocraft.HallsOfReflection", 5.0) },                      // Halls of Reflection
             {724, sConfigMgr->GetFloatDefault("Solocraft.ChamberOfAspectsRed", 10.0) },                   // The Ruby Sanctum 10
         };
-
-
         // Heroics
         diff_Multiplier_Heroics =
         {
@@ -255,7 +239,6 @@ public:
             {560, sConfigMgr->GetFloatDefault("Solocraft.HillsbradPastH", 5.0) },                         // Old Hillsbrad Foothills H
             {568, sConfigMgr->GetFloatDefault("Solocraft.ZulAmanH", 5.0) },                               // Zul'Aman H
             {585, sConfigMgr->GetFloatDefault("Solocraft.Sunwell5ManFixH", 5.0) },                        // Magister's Terrace H
-
             // WOTLK Instances Heroics
             {533, sConfigMgr->GetFloatDefault("Solocraft.StratholmeRaidH", 25.0) },                       // Naxxramas 25
             {574, sConfigMgr->GetFloatDefault("Solocraft.Valgarde70H", 5.0) },                            // Utgarde Keep H
@@ -281,22 +264,15 @@ public:
             {668, sConfigMgr->GetFloatDefault("Solocraft.HallsOfReflectionH", 5.0) },                     // Halls of Reflection H
             {724, sConfigMgr->GetFloatDefault("Solocraft.ChamberOfAspectsRedH", 25.0) },                  // The Ruby Sanctum 25
         };
-
-
         //Unique Raids beyond the heroic and normal versions of themselves
         D649H10 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH10", 10.0);  //Trial of the Crusader 10 Heroic
         D649H25 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH25", 25.0);  //Trial of the Crusader 25 Heroic
-
     }
 };
-
 class SolocraftAnnounce : public PlayerScript
 {
-
 public:
-
     SolocraftAnnounce() : PlayerScript("SolocraftAnnounce") {}
-
     void OnLogin(Player* Player, bool /*firstLogin*/) override
     {
         // Announce Module
@@ -309,13 +285,9 @@ public:
         }
     }
 };
-
 class solocraft_player_instance_handler : public PlayerScript {
-
 public:
-
     solocraft_player_instance_handler() : PlayerScript("solocraft_player_instance_handler") {}
-
     void OnMapChanged(Player* player) override {
         if (sConfigMgr->GetBoolDefault("Solocraft.Enable", true))
         {
@@ -326,17 +298,12 @@ public:
             ApplyBuffs(player, map, difficulty, dunLevel, numInGroup);
         }
     }
-
 private:
-
     std::map<uint32, float> _unitDifficulty;
-
-
     // Set the instance difficulty
     int CalculateDifficulty(Map* map, Player* /*player*/)
     {
         //float difficulty = 0.0;//changed from 1.0
-
         if (map)
         {
             //WOTLK 25 Man raids
@@ -351,8 +318,6 @@ private:
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
             }
-
-
             if (map->IsHeroic())
             {
                 //WOTLK 10 Man Heroic
@@ -365,8 +330,6 @@ private:
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
             }
-
-
             if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end()) {
                 //Catch Alls  ----------------------5 Dungeons and 40 Raids
                 if (map->IsDungeon()) {
@@ -381,9 +344,6 @@ private:
         }
         return 0; //return 0
     }
-
-
-
     // Set the Dungeon Level
     int CalculateDungeonLevel(Map* map, Player* /*player*/) {
         if (dungeons.find(map->GetId()) == dungeons.end())
@@ -393,8 +353,6 @@ private:
         else
             return dungeons[map->GetId()]; //return the specific dungeon's level
     }
-
-
     // Get the group's size
     int GetNumInGroup(Player* player) {
         int numInGroup = 1;
@@ -405,23 +363,18 @@ private:
         }
         return numInGroup;
     }
-
     // Apply the player buffs
     void ApplyBuffs(Player* player, Map* map, float difficulty, int dunLevel, int numInGroup)
     {
         int SpellPowerBonus = 0;
-
         //Check whether to buff the player or check to debuff back to normal
         if (difficulty != 0)
         {
             std::ostringstream ss;
-
             if (player->GetLevel() <= dunLevel + SolocraftLevelDiff) //If a player is too high level for dungeon don't buff but if in a group will count towards the group offset balancing.
             {
-
                 //Get Current members total difficulty offset and if it exceeds the difficulty offset of the dungeon then debuff new group members coming in until all members leave and re-enter. This happens when a player already inside dungeon invite others to the group but the player already has the full difficulty offset.
                 float GroupDifficulty = GetGroupDifficulty(player);
-
                 //Check to either debuff or buff player entering dungeon.  Debuff must be enabled in Config
                 if (GroupDifficulty >= difficulty && SoloCraftDebuffEnable == 1)
                 {
@@ -430,7 +383,6 @@ private:
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck
 
                     //sLog->outError("%u: would have this difficulty: %f", player->GetGUID(), tempDiff);
-
                 }
                 else
                 {
@@ -438,20 +390,15 @@ private:
                     //Group difficulty adjustment
                     difficulty = difficulty / numInGroup;
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck - two decimal rounding
-
                 }
-
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
                 {
                     // Buff the player
                     player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, difficulty * SoloCraftStatsMult, true); //Unitmods enum UNIT_MOD_STAT_START defined in Unit.h line 391
-
                 }
-
                 // Set player health
                 player->SetFullHealth();//defined in Unit.h line 1524
-
                 //Spellcaster Stat modify
                 if (player->GetPowerType() == POWER_MANA)
                 {
@@ -465,7 +412,6 @@ private:
                         //sLog->outError("%u: spellpower Bonus applied: %i", player->GetGUID(), SpellPowerBonus);
                     }
                 }
-
                 //Announcements
                 if (difficulty > 0)
                 {
@@ -479,7 +425,6 @@ private:
                     ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
                     ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty);
                 }
-
                 // Save Player Dungeon Offsets to Database
                 CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES (%u, %f, %u, %i, %f)", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
             }
@@ -489,12 +434,10 @@ private:
                 ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level (%i) threshold for this dungeon.";
                 ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
             }
-
         }
         else
             ClearBuffs(player, map); //Check to revert player back to normal - Moving this here fixed logout and login while in instance buff and debuff issues
     }
-
     // Get the current group members GUIDS and return the total sum of the difficulty offset by all group members currently in the dungeon
     float GetGroupDifficulty(Player* player) {
         float GroupDifficulty = 0.0;
@@ -523,10 +466,8 @@ private:
         }
         return GroupDifficulty;
     }
-
     void ClearBuffs(Player* player, Map* map)
     {
-
         //Database query to get offset from the last instance player exited
         QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
         if (result)
@@ -534,14 +475,11 @@ private:
             float difficulty = (*result)[1].GetFloat();
             int SpellPowerBonus = (*result)[3].GetUInt32();
             float StatsMultPct = (*result)[4].GetFloat();
-
             //sLog->outError("Map difficulty: %f", difficulty);
-
             // Inform the player
             std::ostringstream ss;
             ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to %s - Reverting Difficulty Offset: %0.2f. Spellpower Bonus Removed: %i";
             ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
-
             // Clear the buffs
             for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
             {
@@ -552,7 +490,6 @@ private:
                 // remove spellpower bonus
                 player->ApplySpellPowerBonus(SpellPowerBonus, false);
             }
-
             //Remove database entry as the player is no longer in an instance
             CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
         }

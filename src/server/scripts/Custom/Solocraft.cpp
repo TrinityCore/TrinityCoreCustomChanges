@@ -333,10 +333,11 @@ private:
 
 
     // Set the instance difficulty
-    int CalculateDifficulty(Map* map, Player* /*player*/) {
+    int CalculateDifficulty(Map* map, Player* /*player*/)
+    {
         //float difficulty = 0.0;//changed from 1.0
 
-        if (map) 
+        if (map)
         {
             //WOTLK 25 Man raids
             if (map->Is25ManRaid())

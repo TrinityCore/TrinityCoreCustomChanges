@@ -4093,7 +4093,7 @@ Metric.OverallStatusInterval = 1
 ###################################################################################################
 # Dynamic Resurrection
 #
-# Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near the latest boss 
+# Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near the latest boss
 # killed in dungeon or raid. for faster Resurrection. If 5 players or more is in a instance it will
 # be turned off to prevent abuse of instance.
 #

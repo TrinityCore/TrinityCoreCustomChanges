@@ -4112,4 +4112,18 @@ Dynamic.Resurrections.Announce.enable = 0
 Dynamic.Resurrections.enable = 0
 
 #
+#	Dynamic.Ressurrection.Instance Health
+#         Description: Amount of Health Player Revives in % for either Dungeon or Raid Instance.
+#         Default:    0.7 - (70%) Float Values
+#                     1.0 - (100%) Float Values
+#
+#    Dungeon Health
+
+Dynamic.Ressurrection.Dungeon.Health = 0.7
+
+#    Raid Health
+
+Dynamic.Ressurrection.Raid.Health = 0.7
+
+#
 ###################################################################################################

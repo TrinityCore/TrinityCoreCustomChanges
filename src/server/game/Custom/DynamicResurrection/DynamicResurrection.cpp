@@ -20,6 +20,8 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "Player.h"
 
 uint8 combatcount = 0;
+float DRD = 1.0f;
+float DRR = 1.0f;
 
 bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 {
@@ -59,6 +61,9 @@ bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 
 void Dynamic_Resurrection::DynamicResurrection(Player* player)
 {
+    DRD = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Dungeon.Health", 0.7f);
+    DRR = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Raid.Health", 0.7f);
+
     if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
     {
         Map* map = player->GetMap();
@@ -76,7 +81,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
             {
                 player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                player->ResurrectPlayer(0.7f);
+                player->ResurrectPlayer(DRD);
                 player->SpawnCorpseBones();
             }
         }
@@ -87,7 +92,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             {
                 player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
                 // Revive Player with 70 %
-                player->ResurrectPlayer(0.7f);
+                player->ResurrectPlayer(DRR);
                 player->SpawnCorpseBones();
             }
         }

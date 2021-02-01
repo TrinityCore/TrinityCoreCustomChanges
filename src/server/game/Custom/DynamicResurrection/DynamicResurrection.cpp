@@ -14,7 +14,7 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 
 bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 {
-    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
     {
         Group* group = player->GetGroup();
 
@@ -24,25 +24,29 @@ bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
         }
 
         if (sMapStore.LookupEntry(player->GetMapId())->Instanceable())
+        {
             return true; // boolean need to return to a value
+        }
         return false;
     }
 }
 
 bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 {
-    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
     {
         // Find Nearest Creature And Teleport.
-        if (Creature* creature = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+        if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+        {
             return true;
+        }
         return false;
     }
 }
 
 void Dynamic_Resurrection::DynamicResurrection(Player* player)
 {
-    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
     {
         // Find Nearest Creature And Teleport.
         if (Creature* creature = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))

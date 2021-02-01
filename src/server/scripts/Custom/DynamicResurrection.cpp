@@ -21,7 +21,7 @@ public:
 
     void OnLogin(Player* Player, bool /*firstLogin*/) override
     {
-        if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.Announce.enable", true))
+        if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.Announce.enable", false))
         {
             ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Dynamic Resurrections Announce |rmodule.");
         }
@@ -30,7 +30,7 @@ public:
 
     void OnCreatureKill(Player* player, Creature* boss)
     {
-        if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+        if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
         {
             if (sDynRes->IsInDungeonOrRaid(player) && (boss->isWorldBoss() || boss->IsDungeonBoss()))
                 player->SummonCreature(C_Resurrection_ENTRY, boss->GetPositionX(), boss->GetPositionY(), boss->GetPositionZ(), boss->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120min);

@@ -35,7 +35,6 @@ bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
     }
 }
 
-
 bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 {
     if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))

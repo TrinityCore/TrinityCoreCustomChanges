@@ -57,8 +57,8 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
     if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
     {
         // Find Nearest Creature And Teleport.
-        if (Creature* creature = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-            player->TeleportTo(player->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), 1);
+        if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+            player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
         // Revive Player with 70 %
         player->ResurrectPlayer(0.7f);
         player->SpawnCorpseBones();

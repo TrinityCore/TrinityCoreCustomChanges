@@ -8,7 +8,7 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 
 #include "Chat.h"
 #include "Config.h"
-#include "CreatureAI.h"
+#include "Creature.h"
 #include "DynamicResurrection.h"
 #include "GameTime.h"
 #include "Object.h"

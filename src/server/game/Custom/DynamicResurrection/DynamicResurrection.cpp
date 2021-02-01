@@ -29,7 +29,12 @@ bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
         }
         return false;
     }
+    else
+    {
+        return false;
+    }
 }
+
 
 bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 {
@@ -40,6 +45,10 @@ bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
         {
             return true;
         }
+        return false;
+    }
+    else
+    {
         return false;
     }
 }
@@ -54,5 +63,9 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
         // Revive Player with 70 %
         player->ResurrectPlayer(0.7f);
         player->SpawnCorpseBones();
+    }
+    else
+    {
+        return;
     }
 }

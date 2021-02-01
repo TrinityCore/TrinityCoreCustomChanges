@@ -28,7 +28,7 @@ public:
 
     }
 
-    void OnCreatureKill(Player* player, Creature* boss)
+    void OnCreatureKill(Player* player, Creature* boss) override
     {
         if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
         {

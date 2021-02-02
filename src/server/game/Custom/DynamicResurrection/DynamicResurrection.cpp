@@ -8,7 +8,7 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 */
 
 #include "Config.h"
-#include "CreatureAI.h"
+#include "Creature.h"
 #include "DatabaseEnv.h"
 #include "DynamicResurrection.h"
 #include "Group.h"
@@ -16,7 +16,6 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "Map.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
-#include "PassiveAI.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 

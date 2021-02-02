@@ -42,6 +42,20 @@ public:
             }
         }
     }
+
+    void OnPlayerEnterMap(Map* map, Player* player)
+    {
+        if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
+        {
+            if (map->IsRaid())
+            {
+                if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+                {
+                    player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
+                }
+            }
+        }
+    }
 };
 
 void AddSC_Dynamic_Resurrections()

@@ -74,36 +74,34 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                     if (member->IsInCombat())
                         combatcount++;
         }
-        if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
+
+        if (combatcount > 0)
         {
-            if (combatcount > 0)
+            if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
             {
-                if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
-                {
-                    player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                    if (map->IsRaid())
+                player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
+                if (map->IsRaid())
                     {
                         player->ResurrectPlayer(DRR);
+                        player->SpawnCorpseBones();
+                        return;
                     }
-                    else
+                else
                     {
                         player->ResurrectPlayer(DRD);
+                        player->SpawnCorpseBones();
+                        return;
                     }
-                    player->SpawnCorpseBones();
-                }
             }
         }
-        else
+
+        if (map->IsRaid())
         {
-            if (map->IsRaid())
+            if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
             {
-                if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-                {
-                    player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
-                    // Revive Player with 70 %
-                    player->ResurrectPlayer(DRR);
-                    player->SpawnCorpseBones();
-                }
+                player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
+                player->ResurrectPlayer(DRR);
+                player->SpawnCorpseBones();
             }
         }
         // Find Nearest Creature And Teleport.

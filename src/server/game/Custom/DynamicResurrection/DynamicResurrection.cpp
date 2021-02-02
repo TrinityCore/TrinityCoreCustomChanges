@@ -18,6 +18,7 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "ObjectMgr.h"
 #include "PassiveAI.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 
 uint8 combatcount = 0;
 
@@ -75,12 +76,19 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
         }
         if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
         {
-            if (map->IsRaid() || combatcount > 0)
+            if (combatcount > 0)
             {
                 if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
                 {
                     player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                    player->ResurrectPlayer(DRR);
+                    if (map->IsRaid())
+                    {
+                        player->ResurrectPlayer(DRR);
+                    }
+                    else
+                    {
+                        player->ResurrectPlayer(DRD);
+                    }
                     player->SpawnCorpseBones();
                 }
             }

@@ -55,7 +55,7 @@ public:
                 Player->AddItem(6948, true);//Hearthstone
                 Player->AddItem(38707, true);//Runed Soulblade
                 Player->AddItem(40483, true);//Insignia of the Scourge
-                                
+
                 if (Player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
                 {
                     Player->AddQuest(sObjectMgr->GetQuestTemplate(12657), NULL);

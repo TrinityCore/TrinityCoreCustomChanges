@@ -4115,6 +4115,7 @@ AutoBalance.enable = 1
 #        InflectionPoint & InflectionPointHeroic are the fallback values for 5-man dungeons
 #        InflectionPointRaid10M & InflectionPointRaid10MHeroic are the fallback values for 10 man raids
 #        InflectionPointRaid25M & InflectionPointRaid25MHeroic are the fallback values for 25 man raids
+#        InflectionPointRaid30M & InflectionPointRaid30MHeroic are the fallback values for 30 man raids
 #        InflectionPointRaid & InflectionPointRaidHeroic are the fallback values for other raids (40-man, 20-man, 15-man, or custom size)
 #        The inflection points fallback to the most specific number
 #
@@ -4131,6 +4132,9 @@ AutoBalance.InflectionPointRaid10MHeroic = 0.5
 
 AutoBalance.InflectionPointRaid25M = 0.5
 AutoBalance.InflectionPointRaid25MHeroic = 0.5
+
+AutoBalance.InflectionPointRaid30M = 0.5
+AutoBalance.InflectionPointRaid30MHeroic = 0.5
 
 AutoBalance.InflectionPointRaid = 0.5
 AutoBalance.InflectionPointRaidHeroic = 0.5

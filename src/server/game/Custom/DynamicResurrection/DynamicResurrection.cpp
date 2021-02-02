@@ -81,7 +81,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
             {
                 player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                player->ResurrectPlayer(DRD);
+                player->ResurrectPlayer(DRR);
                 player->SpawnCorpseBones();
             }
         }
@@ -92,7 +92,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             {
                 player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
                 // Revive Player with 70 %
-                player->ResurrectPlayer(DRR);
+                player->ResurrectPlayer(DRD);
                 player->SpawnCorpseBones();
             }
         }

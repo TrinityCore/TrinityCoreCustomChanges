@@ -4112,6 +4112,16 @@ Dynamic.Resurrections.Announce.enable = 0
 Dynamic.Resurrections.enable = 0
 
 #
+#    Raid.Entrance.Resurrection
+#        Description: When in raids, Dynamic Reussrections resurrects players at entrance of Raids.
+#                     Then will auto teleport you back to the last boss killed when re-entering the
+#                     the Raid Map.
+#                     When Disable, it will work normally like dungeons.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Raid.Entrance.Resurrection = 0
+
 #    Dynamic.Ressurrection.Instance Health
 #         Description: Amount of Health Player Revives in % for either Dungeon or Raid Instance.
 #         Default:    0.7 - (70%) Float Values

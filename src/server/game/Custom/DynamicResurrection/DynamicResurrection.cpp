@@ -20,21 +20,19 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "Player.h"
 
 uint8 combatcount = 0;
-float DRD = 1.0f;
-float DRR = 1.0f;
 
 bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 {
-    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
+    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
     {
-       if (sMapStore.LookupEntry(player->GetMapId())->Instanceable())
-       {
-           return true; // boolean need to return to a value
-       }
-       else
-       {
-           return false;
-       }
+        if (sMapStore.LookupEntry(player->GetMapId())->Instanceable())
+        {
+            return true; // boolean need to return to a value
+        }
+        else
+        {
+            return false;
+        }
     }
     else
     {
@@ -44,7 +42,7 @@ bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 
 bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 {
-    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
+    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
     {
         // Find Nearest Creature And Teleport.
         if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
@@ -61,10 +59,10 @@ bool Dynamic_Resurrection::CheckForSpawnPoint(Player* player)
 
 void Dynamic_Resurrection::DynamicResurrection(Player* player)
 {
-    DRD = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Dungeon.Health", 0.7f);
-    DRR = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Raid.Health", 0.7f);
+    float DRD = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Dungeon.Health", 0.7f);
+    float DRR = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Raid.Health", 0.7f);
 
-    if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
+    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
     {
         Map* map = player->GetMap();
 
@@ -75,14 +73,29 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                     if (member->IsInCombat())
                         combatcount++;
         }
-
-        if (map->IsRaid() || combatcount > 0)
+        if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
         {
-            if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
+            if (map->IsRaid() || combatcount > 0)
             {
-                player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                player->ResurrectPlayer(DRR);
-                player->SpawnCorpseBones();
+                if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
+                {
+                    player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
+                    player->ResurrectPlayer(DRR);
+                    player->SpawnCorpseBones();
+                }
+            }
+        }
+        else
+        {
+            if (map->IsRaid())
+            {
+                if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+                {
+                    player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
+                    // Revive Player with 70 %
+                    player->ResurrectPlayer(DRR);
+                    player->SpawnCorpseBones();
+                }
             }
         }
         // Find Nearest Creature And Teleport.

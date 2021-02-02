@@ -24,7 +24,7 @@ public:
 
     void OnLogin(Player* Player, bool /*firstLogin*/) override
     {
-        if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.Announce.enable", false))
+        if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.Announce.enable", true))
         {
             ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Dynamic Resurrections |rmodule.");
         }
@@ -33,11 +33,25 @@ public:
 
     void OnCreatureKill(Player* player, Creature* boss) override
     {
-        if (!sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", false))
+        if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
         {
             if (sDynRes->IsInDungeonOrRaid(player) && (boss->isWorldBoss() || boss->IsDungeonBoss()))
             {
                 player->SummonCreature(C_Resurrection_ENTRY, boss->GetPositionX(), boss->GetPositionY(), boss->GetPositionZ(), boss->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120min);
+            }
+        }
+    }
+
+    void OnPlayerEnterMap(Map* map, Player* player)
+    {
+        if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
+        {
+            if (map->IsRaid())
+            {
+                if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+                {
+                    player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
+                }
             }
         }
     }

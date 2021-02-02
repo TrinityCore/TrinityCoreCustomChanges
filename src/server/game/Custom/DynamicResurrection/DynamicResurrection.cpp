@@ -97,9 +97,9 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
 
         if (map->IsRaid())
         {
-            if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
             {
-                player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
+                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
                 player->ResurrectPlayer(DRR);
                 player->SpawnCorpseBones();
             }
@@ -107,9 +107,9 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
         // Find Nearest Creature And Teleport.
         if (map->IsDungeon())
         {
-            if (player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
             {
-                player->TeleportTo(player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 1);
+                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
                 // Revive Player with 70 %
                 player->ResurrectPlayer(DRD);
                 player->SpawnCorpseBones();

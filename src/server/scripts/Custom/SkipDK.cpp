@@ -18,16 +18,13 @@ class Trinitycore_skip_deathknight : public PlayerScript
 public:
     Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
 
-    void OnLogin(Player* Player, bool /*firstLogin*/) override
+    void OnLogin(Player* Player, bool firstLogin) override
     {
         if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
         {
             ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
         }
-    }
 
-    void OnLogin(Player* Player, bool firstLogin) override
-    {
         if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true))
         {
             if (Player->GetAreaId() == 4342)

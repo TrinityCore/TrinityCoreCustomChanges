@@ -59,12 +59,12 @@ public:
                 if (Player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
                 {
                     Player->AddQuest(sObjectMgr->GetQuestTemplate(12657), nullptr);
-                    Player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), NULL, Player);
+                    Player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), false, Player);
                 }
                 if (Player->GetQuestStatus(12801) == QUEST_STATUS_NONE)//The Light of Dawn
                 {
                     Player->AddQuest(sObjectMgr->GetQuestTemplate(12801), nullptr);
-                    Player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), NULL, Player);
+                    Player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, Player);
                 }
                 if (Player->GetTeam() == ALLIANCE && Player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
                     Player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);

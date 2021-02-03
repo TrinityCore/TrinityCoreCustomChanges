@@ -19,8 +19,6 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
-void AddCustomScripts()
-{
 // 1
 // 2
 // 3

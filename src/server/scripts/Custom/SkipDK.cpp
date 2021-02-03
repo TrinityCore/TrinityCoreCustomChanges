@@ -58,18 +58,18 @@ public:
 
                 if (Player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
                 {
-                    Player->AddQuest(sObjectMgr->GetQuestTemplate(12657), NULL);
+                    Player->AddQuest(sObjectMgr->GetQuestTemplate(12657), nullptr);
                     Player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), NULL, Player);
                 }
                 if (Player->GetQuestStatus(12801) == QUEST_STATUS_NONE)//The Light of Dawn
                 {
-                    Player->AddQuest(sObjectMgr->GetQuestTemplate(12801), NULL);
+                    Player->AddQuest(sObjectMgr->GetQuestTemplate(12801), nullptr);
                     Player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), NULL, Player);
                 }
                 if (Player->GetTeam() == ALLIANCE && Player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
-                    Player->AddQuest(sObjectMgr->GetQuestTemplate(13188), NULL);
+                    Player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
                 else if (Player->GetTeam() == HORDE && Player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
-                    Player->AddQuest(sObjectMgr->GetQuestTemplate(13189), NULL);
+                    Player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
                 if (Player->GetTeam() == ALLIANCE)
                     Player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
                 else

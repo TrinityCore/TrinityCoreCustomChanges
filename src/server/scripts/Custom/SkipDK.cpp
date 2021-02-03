@@ -18,6 +18,14 @@ class Trinitycore_skip_deathknight : public PlayerScript
 public:
     Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
 
+    void OnLogin(Player* Player, bool /*firstLogin*/) override
+    {
+        if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
+        {
+            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
+        }
+    }
+
     void OnLogin(Player* Player, bool firstLogin) override
     {
         if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true))
@@ -50,7 +58,7 @@ public:
                 Player->EquipNewItem(EQUIPMENT_SLOT_FINGER2, 38672, true);// Keleseth's Signet Ring
                 Player->AddItem(39320, true);//Sky Darkener's Shroud of Blood
                 Player->AddItem(38664, true);//Sky Darkener's Shroud of the Unholy
-                Player->AddItem(39322, true);//Sky Darkener's Shroud of the Unholy
+                Player->AddItem(39322, true);//Shroud of the North Wind
                 Player->AddItem(38632, true);//Greatsword of the Ebon Blade
                 Player->AddItem(6948, true);//Hearthstone
                 Player->AddItem(38707, true);//Runed Soulblade

@@ -4096,7 +4096,7 @@ Metric.OverallStatusInterval = 1
 #
 #    Skip Death Knight Starting Area
 #        Enable this if you want to skip the Deathknight starting area
-#        Start with level 58 DK with Runeforging. With Portable Runeforge Skill
+#        Start with level 58 DK with Runeforging.
 #
 #    Skip.Deathknight.Starter.Announce.enable
 #         Description: Announces Module when player logs in.

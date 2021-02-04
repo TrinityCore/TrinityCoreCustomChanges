@@ -64,7 +64,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
         }
 
     Map* map = player->GetMap();
-    
+
     if (combatcount > 0)
     {
         if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))

@@ -23,16 +23,9 @@ uint8 combatcount = 0;
 
 bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 {
-    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+    if (sMapStore.LookupEntry(player->GetMapId())->Instanceable())
     {
-        if (sMapStore.LookupEntry(player->GetMapId())->Instanceable())
-        {
-            return true; // boolean need to return to a value
-        }
-        else
-        {
-            return false;
-        }
+        return true; // boolean need to return to a value
     }
     else
     {
@@ -62,11 +55,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
     float DRD = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Dungeon.Health", 0.7f);
     float DRR = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Raid.Health", 0.7f);
 
-    if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
-    {
-        Map* map = player->GetMap();
-
-        if (Group* group = player->GetGroup())
+    if (Group* group = player->GetGroup())
         {
             for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
                 if (Player* member = itr->GetSource())
@@ -74,11 +63,13 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                         combatcount++;
         }
 
-        if (combatcount > 0)
+    Map* map = player->GetMap();
+    
+    if (combatcount > 0)
+    {
+        if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
         {
-            if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
-            {
-                player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
+            player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
                 if (map->IsRaid())
                     {
                         player->ResurrectPlayer(DRR);
@@ -91,28 +82,27 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                         player->SpawnCorpseBones();
                         return;
                     }
-            }
         }
+    }
 
         if (map->IsRaid())
+    {
+        if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
         {
-            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-            {
-                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
-                player->ResurrectPlayer(DRR);
-                player->SpawnCorpseBones();
-            }
+            player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
+            player->ResurrectPlayer(DRR);
+            player->SpawnCorpseBones();
         }
+    }
         // Find Nearest Creature And Teleport.
-        if (map->IsDungeon())
+    if (map->IsDungeon())
+    {
+        if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
         {
-            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-            {
-                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
-                // Revive Player with 70 %
-                player->ResurrectPlayer(DRD);
-                player->SpawnCorpseBones();
-            }
+            player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
+            // Revive Player with 70 %
+            player->ResurrectPlayer(DRD);
+            player->SpawnCorpseBones();
         }
     }
     else

@@ -48,6 +48,7 @@
 #include "CombatPackets.h"
 #include "Common.h"
 #include "ConditionMgr.h"
+#include "Config.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
 #include "DisableMgr.h"
@@ -5034,9 +5035,12 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
     {
-        if (sDynRes->IsInDungeonOrRaid(this) && sDynRes->CheckForSpawnPoint(this))
+        if (sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
         {
-            sDynRes->DynamicResurrection(this);
+            if (sDynRes->IsInDungeonOrRaid(this) && sDynRes->CheckForSpawnPoint(this))
+            {
+                sDynRes->DynamicResurrection(this);
+            }
         }
         else
         {

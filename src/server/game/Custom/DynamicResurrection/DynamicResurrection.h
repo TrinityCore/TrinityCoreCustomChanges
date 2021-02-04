@@ -18,7 +18,7 @@ class Player;
 enum WAYPOINT_CREATURE
 {
     C_Resurrection_ENTRY = 1, // change this as you wishes
-    C_DISTANCE_CHECK_RANGE = 1000, // change this (in yards)
+    C_DISTANCE_CHECK_RANGE = 50000, // change this (in yards)
 };
 
 class TC_GAME_API Dynamic_Resurrection

@@ -5045,7 +5045,6 @@ void Player::RepopAtGraveyard()
             {
                 TeleportTo(ClosestGrave->Continent, ClosestGrave->Loc.X, ClosestGrave->Loc.Y, ClosestGrave->Loc.Z, GetOrientation(), shouldResurrect ? TELE_REVIVE_AT_TELEPORT : 0);
             }
-            
         }
         else
         {

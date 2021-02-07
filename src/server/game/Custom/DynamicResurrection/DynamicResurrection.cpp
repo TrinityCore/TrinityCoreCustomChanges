@@ -56,42 +56,36 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
     float DRR = sConfigMgr->GetFloatDefault("Dynamic.Ressurrection.Raid.Health", 0.7f);
 
     if (Group* group = player->GetGroup())
-        {
-            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
-                if (Player* member = itr->GetSource())
-                    if (member->IsInCombat())
-                        combatcount++;
-        }
+    {
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            if (Player* member = itr->GetSource())
+                if (member->IsInCombat())
+                    combatcount++;
+    }
 
     Map* map = player->GetMap();
 
-    if (combatcount > 0)
+    if (map->IsRaid() && sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
+    {
+        if (combatcount > 0)
+        {
+            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+            {
+                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
+                player->ResurrectPlayer(DRR);
+                player->SpawnCorpseBones();
+            }
+        }
+    }
+
+    if (map->IsRaid() && sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
     {
         if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
         {
             player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
-                if (map->IsRaid())
-                    {
-                        player->ResurrectPlayer(DRR);
-                        player->SpawnCorpseBones();
-                        return;
-                    }
-                else
-                    {
-                        player->ResurrectPlayer(DRD);
-                        player->SpawnCorpseBones();
-                        return;
-                    }
-        }
-    }
-
-        if (map->IsRaid())
-    {
-        if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-        {
-            player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
             player->ResurrectPlayer(DRR);
             player->SpawnCorpseBones();
+            return;           
         }
     }
         // Find Nearest Creature And Teleport.

@@ -85,7 +85,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             player->TeleportTo(exit->target_mapId, exit->target_X, exit->target_Y, exit->target_Z, exit->target_Orientation + M_PI);
             player->ResurrectPlayer(DRR);
             player->SpawnCorpseBones();
-            return;           
+            return;
         }
     }
         // Find Nearest Creature And Teleport.

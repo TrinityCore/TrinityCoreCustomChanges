@@ -12,8 +12,12 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "Creature.h"
 #include "DynamicResurrection.h"
 #include "GameTime.h"
+#include "Group.h"
+#include "GroupMgr.h"
+#include "InstanceScript.h"
 #include "Map.h"
 #include "Object.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
@@ -39,20 +43,6 @@ public:
             if (sDynRes->IsInDungeonOrRaid(player) && (boss->isWorldBoss() || boss->IsDungeonBoss()))
             {
                 player->SummonCreature(C_Resurrection_ENTRY, boss->GetPositionX(), boss->GetPositionY(), boss->GetPositionZ(), boss->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120min);
-            }
-        }
-    }
-
-    void OnPlayerEnterMap(Map* map, Player* player)
-    {
-        if (sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
-        {
-            if (map->IsRaid())
-            {
-                if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-                {
-                    player->TeleportTo(checkpoint->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
-                }
             }
         }
     }

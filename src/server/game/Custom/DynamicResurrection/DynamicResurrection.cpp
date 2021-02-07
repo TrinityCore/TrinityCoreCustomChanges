@@ -69,7 +69,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
 
     if (map->IsRaid() && sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
     {
-        if (!combatcount == 0)
+        if (combatcount >= 1)
         {
             if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
             {
@@ -78,7 +78,7 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             }
         }
 
-        if(combatcount == 0)
+        if(combatcount = 0)
         {
             if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
             {

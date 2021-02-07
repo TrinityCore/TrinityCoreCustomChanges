@@ -65,23 +65,11 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                     combatcount++;
     }
 
-
     Map* map = player->GetMap();
-    MapEntry const* entry = sMapStore.LookupEntry(mapid);
 
     if (map->IsRaid() && sConfigMgr->GetBoolDefault("Raid.Entrance.Resurrection", true))
     {
-        if (combatcount == 0)
-        {
-            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-            {
-                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
-                player->ResurrectPlayer(DRR);
-                player->SpawnCorpseBones();
-            }
-        }
-     
-        if (combatcount >= 1)
+        if (!combatcount == 0)
         {
             if (AreaTrigger const* exit = sObjectMgr->GetGoBackTrigger(map->GetId()))
             {
@@ -90,7 +78,17 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
             }
         }
 
-        if (entry->IsRaid())
+        if(combatcount == 0)
+        {
+            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
+            {
+                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
+                player->ResurrectPlayer(DRR);
+                player->SpawnCorpseBones();
+            }
+        }
+
+        if (player->GetInstanceScript() && player->GetInstanceScript()->IsEncounterInProgress())
         {
             if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
             {

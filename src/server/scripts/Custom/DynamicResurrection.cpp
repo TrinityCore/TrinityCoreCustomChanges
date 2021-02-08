@@ -46,7 +46,7 @@ public:
             }
         }
     }
-    void OnMapChanged(Player* player)
+    void OnMapChanged(Player* player) override
     {
         Map* map = player->GetMap();
 

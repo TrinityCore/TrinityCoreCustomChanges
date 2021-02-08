@@ -87,15 +87,6 @@ void Dynamic_Resurrection::DynamicResurrection(Player* player)
                 player->SpawnCorpseBones();
             }
         }
-
-        if (player->GetInstanceScript() && player->GetInstanceScript()->IsEncounterInProgress())
-        {
-            if (Creature* checkpoint = player->FindNearestCreature(C_Resurrection_ENTRY, C_DISTANCE_CHECK_RANGE))
-            {
-                player->TeleportTo(player->GetMapId(), checkpoint->GetPositionX(), checkpoint->GetPositionY(), checkpoint->GetPositionZ(), 1);
-                player->SpawnCorpseBones();
-            }
-        }
     }
         // Find Nearest Creature And Teleport.
     if (map->IsDungeon())

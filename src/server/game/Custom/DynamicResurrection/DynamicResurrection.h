@@ -30,6 +30,7 @@ public:
         return &instance;
     }
 
+    void OnMapChanged(Player* player);
     bool IsInDungeonOrRaid(Player* player);
     bool CheckForSpawnPoint(Player* player);
     void DynamicResurrection(Player* player);

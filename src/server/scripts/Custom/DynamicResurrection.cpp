@@ -19,6 +19,7 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "Object.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 
 class Dynamic_Resurrections : public PlayerScript

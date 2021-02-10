@@ -42,6 +42,15 @@ public:
         {
             if (sDynRes->IsInDungeonOrRaid(player) && (boss->isWorldBoss() || boss->IsDungeonBoss()))
             {
+                std::list<Creature*> REZlist;
+                GetCreatureListWithEntryInGrid(REZlist, player, C_Resurrection_ENTRY, 50000.00f);
+                for (std::list<Creature*>::iterator itr = REZlist.begin(); itr != REZlist.end(); ++itr)
+                {
+                    if(Creature * creature = *itr)
+                    {
+                        creature->DespawnOrUnsummon();
+                    }
+                }
                 player->SummonCreature(C_Resurrection_ENTRY, boss->GetPositionX(), boss->GetPositionY(), boss->GetPositionZ(), boss->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120min);
             }
         }

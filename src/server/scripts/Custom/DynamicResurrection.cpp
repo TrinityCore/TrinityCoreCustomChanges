@@ -22,6 +22,33 @@ Dynamic Resurrection is a simple script that add a "Resurrection Waypoint" near 
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 
+class CreatureFindInWholeMapWorker
+{
+public:
+    CreatureFindInWholeMapWorker(uint32 creatureEntry) : _creatureEntry(creatureEntry) { }
+
+    void Visit(std::unordered_map<ObjectGuid, Creature*>& creatureMap)
+    {
+        for (auto const& p : creatureMap)
+        {
+            if (p.second->GetEntry() == _creatureEntry)
+                _creatures.push_back(p.second);
+        }
+    }
+
+    template<class T>
+    void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+
+    std::vector<Creature*> GetResult()
+    {
+        return _creatures;
+    }
+
+private:
+    std::vector<Creature*> _creatures;
+    uint32 _creatureEntry;
+};
+
 class Dynamic_Resurrections : public PlayerScript
 {
 
@@ -68,6 +95,18 @@ public:
                 player->SpawnCorpseBones();
             }
         }
+    }
+    std::vector<Creature*> FindCreaturesByEntry(WorldObject* obj, uint32 entry)
+    {
+        Map* map = obj->GetMap();
+        if (!map)
+            return {};
+
+        CreatureFindInWholeMapWorker worker(entry);
+        TypeContainerVisitor<CreatureFindInWholeMapWorker, MapStoredObjectTypesContainer> visitor(worker);
+        visitor.Visit(map->GetObjectsStore());
+
+        return worker.GetResult();
     }
 };
 

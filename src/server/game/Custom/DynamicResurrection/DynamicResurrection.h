@@ -34,6 +34,7 @@ public:
     bool IsInDungeonOrRaid(Player* player);
     bool CheckForSpawnPoint(Player* player);
     void DynamicResurrection(Player* player);
+    std::vector<Creature*> FindCreaturesByEntry(WorldObject* obj, uint32 entry);
 };
 #define sDynRes Dynamic_Resurrection::instance()
 

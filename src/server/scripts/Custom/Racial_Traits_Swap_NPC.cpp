@@ -135,6 +135,32 @@ public:
             std::ostringstream messageUN;
             messageUN << "Undead Racial Trait Swap -" << RTS1 << " Gold.";
             ClearGossipMenuFor(player);
+            char const* localizedExit;
+            switch (player->GetSession()->GetSessionDbcLocale())
+            {
+            case LOCALE_koKR: localizedExit = LOCALE_EXIT_1; break;
+            case LOCALE_frFR: localizedExit = LOCALE_EXIT_2; break;
+            case LOCALE_deDE: localizedExit = LOCALE_EXIT_3; break;
+            case LOCALE_zhCN: localizedExit = LOCALE_EXIT_4; break;
+            case LOCALE_zhTW: localizedExit = LOCALE_EXIT_5; break;
+            case LOCALE_esES: localizedExit = LOCALE_EXIT_6; break;
+            case LOCALE_esMX: localizedExit = LOCALE_EXIT_7; break;
+            case LOCALE_ruRU: localizedExit = LOCALE_EXIT_8; break;
+            case LOCALE_enUS: default: localizedExit = LOCALE_EXIT_0;
+            }
+            char const* localizedBack;
+            switch (player->GetSession()->GetSessionDbcLocale())
+            {
+            case LOCALE_koKR: localizedBack = LOCALE_BACK_1; break;
+            case LOCALE_frFR: localizedBack = LOCALE_BACK_2; break;
+            case LOCALE_deDE: localizedBack = LOCALE_BACK_3; break;
+            case LOCALE_zhCN: localizedBack = LOCALE_BACK_4; break;
+            case LOCALE_zhTW: localizedBack = LOCALE_BACK_5; break;
+            case LOCALE_esES: localizedBack = LOCALE_BACK_6; break;
+            case LOCALE_esMX: localizedBack = LOCALE_BACK_7; break;
+            case LOCALE_ruRU: localizedBack = LOCALE_BACK_8; break;
+            case LOCALE_enUS: default: localizedBack = LOCALE_BACK_0;
+            }
 
             switch (uiAction)
             {
@@ -153,7 +179,7 @@ public:
                     AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, messageTA.str(), GOSSIP_SENDER_MAIN, 8);//Tauren Selection
                     AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, messageTR.str(), GOSSIP_SENDER_MAIN, 9);//Troll Selection
                     AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, messageUN.str(), GOSSIP_SENDER_MAIN, 10);//Undead
-                    AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                    AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                     SendGossipMenuFor(player, 98888, _creature->GetGUID());
                 }
                 break;
@@ -164,8 +190,8 @@ public:
 
             case 1://Blood Elf Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Pride of the Blood Elves", GOSSIP_SENDER_MAIN, 112);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988881, _creature->GetGUID());
                 break;
 
@@ -201,7 +227,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -279,8 +305,8 @@ public:
 
             case 2://Draenei Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Light of the Draenei", GOSSIP_SENDER_MAIN, 212);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988882, _creature->GetGUID());
                 break;
 
@@ -334,13 +360,13 @@ public:
                     player->LearnSpell(28880, false);//Gift of Naaru
                     player->LearnSpell(59221, false);//Shadow Resistance
                 }
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Dwarven:
@@ -406,8 +432,8 @@ public:
 
             case 3://Dwarves Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Iron Will of the Dwarves", GOSSIP_SENDER_MAIN, 31);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988883, _creature->GetGUID());
                 break;
 
@@ -422,13 +448,13 @@ public:
                 player->LearnSpell(20595, false);//Gun Specialization
                 player->LearnSpell(59224, false);//Mace Specialization
                 player->LearnSpell(20594, false);//Stoneform
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -443,7 +469,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -515,8 +541,8 @@ public:
 
             case 4://Gnome Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Technological Might of the Gnomes", GOSSIP_SENDER_MAIN, 41);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988884, _creature->GetGUID());
                 break;
 
@@ -530,13 +556,13 @@ public:
                 player->LearnSpell(20593, false);//Engineering Specialization
                 player->LearnSpell(20589, false);//Escape Artist
                 player->LearnSpell(20591, false);//Expansive Mind
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -551,7 +577,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -624,8 +650,8 @@ public:
            
             case 5://Human Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Human Spirit", GOSSIP_SENDER_MAIN, 51);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988885, _creature->GetGUID());
                 break;
 
@@ -641,13 +667,13 @@ public:
                 player->LearnSpell(58985, false);//Perception
                 player->LearnSpell(20597, false);//Sword Specialization
                 player->LearnSpell(20598, false);//The Human Spirit
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -662,7 +688,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -733,8 +759,8 @@ public:
 
             case 6://Night Elf Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Ancient Night Elves", GOSSIP_SENDER_MAIN, 61);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988886, _creature->GetGUID());
                 break;
 
@@ -752,13 +778,13 @@ public:
                 {
                     player->LearnSpell(21009, false);//Elusiveness
                 }
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -773,7 +799,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -844,8 +870,8 @@ public:
 
             case 7://Orc Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Strength of the Orc", GOSSIP_SENDER_MAIN, 71);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988887, _creature->GetGUID());
                 break;
 
@@ -883,13 +909,13 @@ public:
                     player->LearnSpell(33702, false);//Blood Fury
                     player->LearnSpell(20575, false);//Command
                 }
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -904,7 +930,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -965,8 +991,8 @@ public:
 
             case 8://Tauren Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Endurance of the Taurens", GOSSIP_SENDER_MAIN, 81);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988888, _creature->GetGUID());
                 break;
 
@@ -980,13 +1006,13 @@ public:
                 player->LearnSpell(20550, false);//Endurance
                 player->LearnSpell(20551, false);//Nature Resistance
                 player->LearnSpell(20549, false);//Warstomp
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -1001,7 +1027,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -1073,11 +1099,11 @@ public:
                 break;
 
            case 9://Troll Selection
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Vodoo of the Trolls", GOSSIP_SENDER_MAIN, 91);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
-                SendGossipMenuFor(player, 988889, _creature->GetGUID());
-                break;
+               AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Vodoo of the Trolls", GOSSIP_SENDER_MAIN, 91);
+               AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+               AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
+               SendGossipMenuFor(player, 988889, _creature->GetGUID());
+               break;
 
             case 91://Troll
                 CloseGossipMenuFor(player);
@@ -1091,13 +1117,13 @@ public:
                 player->LearnSpell(58943, false);//Da Voodoo Shuffle
                 player->LearnSpell(20555, false);//Regeneration
                 player->LearnSpell(20558, false);//Throwing Specialization
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -1112,7 +1138,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin
@@ -1183,8 +1209,8 @@ public:
 
             case 10://Undead Selection
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Will of the Forsaken", GOSSIP_SENDER_MAIN, 101);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Back]", GOSSIP_SENDER_MAIN, 11);
-                AddGossipItemFor(player, GOSSIP_ICON_TALK, "[Exit]", GOSSIP_SENDER_MAIN, 1111);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
                 SendGossipMenuFor(player, 988880, _creature->GetGUID());
                 break;
 
@@ -1198,13 +1224,13 @@ public:
                 player->LearnSpell(20579, false);//Shadow Resistance
                 player->LearnSpell(5227, false);//Underwater Breating
                 player->LearnSpell(7744, false);//Will of the Forsaken
-                //blood elf: 
+                //blood elf:
                 player->RemoveSpell(28877, false, false);// unlearn Arcane Affinity
                 player->RemoveSpell(822, false, false);// unlearn Magic Resistance
                 //~DK
                 player->RemoveSpell(50613, false, false);// unlearn Arcane Torrent
                 //~Hunter, mage, paladin, priest, warlock
-                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent 
+                player->RemoveSpell(28730, false, false);// unlearn Arcane Torrent
                 //~Rogue
                 player->RemoveSpell(25046, false, false);// unlearn Arcane Torrent
                 //Draenei:
@@ -1219,7 +1245,7 @@ public:
                 player->RemoveSpell(59536, false, false);// unlearn Shadow Resistance
                 //~Mage
                 player->RemoveSpell(59548, false, false);// unlearn Gift of Naaru
-                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance  
+                player->RemoveSpell(59541, false, false);// unlearn Shadow Resistance
                 //~Mage, Priest, Shaman
                 player->RemoveSpell(28878, false, false);// unlearn Heroic Presence
                 //~Paladin

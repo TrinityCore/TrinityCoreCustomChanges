@@ -59,7 +59,7 @@
 // 37
 // 38
 // 39
-// 40
+void AddSC_racial_traits_npc();
 
 void AddCustomScripts()
 {
@@ -102,5 +102,5 @@ void AddCustomScripts()
     // 37
     // 38
     // 39
-    // 40
+    AddSC_racial_traits_npc();
 }

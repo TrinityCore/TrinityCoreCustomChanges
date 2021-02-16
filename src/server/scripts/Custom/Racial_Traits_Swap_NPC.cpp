@@ -156,7 +156,6 @@ SPP DEV MDIC
 #define LOCALE_UND_7 "Intercambio de rasgos raciales no muertos -"
 #define LOCALE_UND_8 "Смена расовой особенности нежити -"
 
-
 class Trinitycore_Race_Trait_announce : public PlayerScript
 {
 public:
@@ -1583,7 +1582,6 @@ public:
     return new npc_race_trait_swapAI(creature);
     }
 };
-
 
 void AddSC_racial_traits_npc()
 {

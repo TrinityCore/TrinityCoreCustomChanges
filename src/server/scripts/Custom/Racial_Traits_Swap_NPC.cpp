@@ -460,7 +460,7 @@ public:
                 {
                     player->LearnSpell(50613, false);//Arcane Torrent
                 }
-                if (player->GetClass() == CLASS_HUNTER || CLASS_MAGE || CLASS_PALADIN || CLASS_WARLOCK)
+                if (player->GetClass() == CLASS_HUNTER || player->GetClass() == CLASS_MAGE || player->GetClass() == CLASS_PALADIN || player->GetClass() == CLASS_WARLOCK)
                 {
                     player->LearnSpell(28730, false);//Arcane Torrent
                 }
@@ -575,7 +575,7 @@ public:
                     player->LearnSpell(59545, false);//Gift of Naaru
                     player->LearnSpell(59539, false);//Shadow Resistance
                 }
-                if (player->GetClass() == CLASS_DEATH_KNIGHT ||CLASS_HUNTER || CLASS_PALADIN || CLASS_WARRIOR)
+                if (player->GetClass() == CLASS_DEATH_KNIGHT || player->GetClass() == CLASS_HUNTER || player->GetClass() == CLASS_PALADIN || player->GetClass() == CLASS_WARRIOR)
                 {
                     player->LearnSpell(6562, false);//Heroic Presence
                 }
@@ -589,7 +589,7 @@ public:
                     player->LearnSpell(59548, false);//Gift of Naaru
                     player->LearnSpell(59541, false);//Shadow Resistance
                 }
-                if (player->GetClass() == CLASS_MAGE || CLASS_PRIEST || CLASS_SHAMAN)
+                if (player->GetClass() == CLASS_MAGE || player->GetClass() == CLASS_PRIEST || player->GetClass() == CLASS_SHAMAN)
                 {
                     player->LearnSpell(28878, false);//Heroic Presence
                 }
@@ -1027,7 +1027,7 @@ public:
                 player->LearnSpell(20582, false);//Quickness
                 player->LearnSpell(58984, false);//Shadowmeld
                 player->LearnSpell(20585, false);//Wisp Spirit
-                if (player->GetClass() == CLASS_DEATH_KNIGHT || CLASS_DRUID || CLASS_HUNTER || CLASS_PRIEST || CLASS_ROGUE || CLASS_WARRIOR)
+                if (player->GetClass() == CLASS_DEATH_KNIGHT || player->GetClass() == CLASS_DRUID || player->GetClass() == CLASS_HUNTER || player->GetClass() == CLASS_PRIEST || player->GetClass() == CLASS_ROGUE || player->GetClass() == CLASS_WARRIOR)
                 {
                     player->LearnSpell(21009, false);//Elusiveness
                 }
@@ -1140,11 +1140,11 @@ public:
                 {
                     player->LearnSpell(54562, false);//Command
                 }
-                if (player->GetClass() == CLASS_DEATH_KNIGHT || CLASS_HUNTER || CLASS_ROGUE || CLASS_WARRIOR)
+                if (player->GetClass() == CLASS_DEATH_KNIGHT || player->GetClass() == CLASS_HUNTER || player->GetClass() == CLASS_ROGUE || player->GetClass() == CLASS_WARRIOR)
                 {
                     player->LearnSpell(20572, false);//Blood Fury
                 }
-                if (player->GetClass() == CLASS_DRUID || CLASS_PALADIN || CLASS_PRIEST || CLASS_ROGUE || CLASS_WARRIOR)
+                if (player->GetClass() == CLASS_DRUID || player->GetClass() == CLASS_PALADIN || player->GetClass() == CLASS_PRIEST || player->GetClass() == CLASS_ROGUE || player->GetClass() == CLASS_WARRIOR)
                 {
                     player->LearnSpell(21563, false);//Command
                 }

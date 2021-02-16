@@ -221,7 +221,7 @@ public:
             return OnGossipSelect(player, me, sender, action);
         }
 
-        bool OnGossipSelect(Player* player, Creature* _creature, uint32 sender, uint32 uiAction)
+        bool OnGossipSelect(Player* player, Creature* _creature, uint32 /*sender*/, uint32 uiAction)
         {
             const int32 RTS1 = sConfigMgr->GetIntDefault("Racial.Traits.Swap.Gold", 100);
             char const* localizedExit;

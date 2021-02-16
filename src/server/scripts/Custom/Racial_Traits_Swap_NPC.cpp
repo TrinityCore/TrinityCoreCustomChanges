@@ -1,4 +1,4 @@
-﻿/*
+/*
 Racial Traits Swap NPC
 SPP DEV MDIC
 */
@@ -692,7 +692,7 @@ public:
 
             case 31://Dwarves
                 CloseGossipMenuFor(player);
-                 if (!player->HasEnoughMoney(int32(RTS1 * GOLD)))//gold check
+                if (!player->HasEnoughMoney(int32(RTS1 * GOLD)))//gold check
                     return true;
                 player->ModifyMoney(int32(-RTS1 * GOLD));//Deducting the money if check passes
                 player->CastSpell(player, 47292);//Level up visual effect to let you know the transaction did occure and money is deducted
@@ -1351,12 +1351,12 @@ public:
                 player->RemoveSpell(7744, false, false);// unlearn Will of the Forsaken
                 break;
 
-           case 9://Troll Selection
-               AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Vodoo of the Trolls", GOSSIP_SENDER_MAIN, 91);
-               AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
-               AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
-               SendGossipMenuFor(player, 988889, _creature->GetGUID());
-               break;
+            case 9://Troll Selection
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Commit to the Vodoo of the Trolls", GOSSIP_SENDER_MAIN, 91);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedBack, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_TALK, localizedExit, GOSSIP_SENDER_MAIN, 1111);
+                SendGossipMenuFor(player, 988889, _creature->GetGUID());
+                break;
 
             case 91://Troll
                 CloseGossipMenuFor(player);
@@ -1579,7 +1579,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-    return new npc_race_trait_swapAI(creature);
+        return new npc_race_trait_swapAI(creature);
     }
 };
 

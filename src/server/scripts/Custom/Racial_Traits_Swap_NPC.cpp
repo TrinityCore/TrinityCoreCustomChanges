@@ -1,6 +1,7 @@
 /*
 Racial Traits Swap NPC
 SPP DEV MDIC
+SQL Assistance by Nemesis Dev Jinnai
 */
 
 #include "Chat.h"

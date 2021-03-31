@@ -4189,7 +4189,7 @@ AutoBalance.levelUseDbValuesWhenExists = 0
 AutoBalance.LevelEndGameBoost = 1
 
 #
-     AutoBalance.DungeonScaleDownXP
+#     AutoBalance.DungeonScaleDownXP
 #        Decrease individual player's amount of XP gained during a dungeon to match the
 #        amount of XP gained during a full group run. Example: In a 5-man group, you
 #        earn 1/5 of the total XP per kill, but if you solo the dungeon with

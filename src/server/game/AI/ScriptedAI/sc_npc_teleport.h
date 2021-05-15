@@ -82,7 +82,7 @@ namespace nsNpcTel
     };
 
     // Class representing the categories of destinations
-    class CatDest
+    class TC_GAME_API CatDest
     {
     public:
 
@@ -109,12 +109,12 @@ namespace nsNpcTel
     };
 
     // Class page for current player
-    class Page
+    class TC_GAME_API Page
     {
       protected:
 
         // Class instance for current player
-        class Instance
+        class TC_GAME_API Instance
         {
           public:
 
@@ -157,11 +157,11 @@ namespace nsNpcTel
     // Verification of data integrity
     bool IsValidData(const CatValue cat);
 
-    extern VCatDest TabCatDest;
+    extern TC_GAME_API VCatDest TabCatDest;
 }
 
 // Loading contents of database
-void LoadNpcTele(void);
+void TC_GAME_API LoadNpcTele(void);
 
 //extern WorldDatabaseWorkerPool WorldDatabase;
 

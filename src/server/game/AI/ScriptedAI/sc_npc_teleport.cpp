@@ -317,7 +317,6 @@ void LoadNpcTele(void)
         "custom_npc_tele_association",
     };
 
-
     QueryResult result = WorldDatabase.PQuery(
         "SELECT `flag`, `data0`, `data1`, `cat_id`, C.`icon` `iconcat`, C.`size` `iconsize`,  C.`colour` `colourcat`, C.`name` `namecat`, "
         //       0       1        2        3                  4                   5                       6                     7
@@ -429,6 +428,5 @@ void LoadNpcTele(void)
     else
         TC_LOG_ERROR("misc", "WARNING >> Loaded 0 npc_teleport.");
 }
-
 
 #undef TELE

@@ -604,6 +604,7 @@ class spell_summon_blood_elves_script : SpellScriptLoader
         }
 };
 
+// 45996 - Darkness
 class spell_muru_darkness : SpellScriptLoader
 {
     public:
@@ -636,6 +637,7 @@ class spell_muru_darkness : SpellScriptLoader
         }
 };
 
+// 45934 - Dark Fiend
 class spell_dark_fiend_skin : public SpellScriptLoader
 {
     public:

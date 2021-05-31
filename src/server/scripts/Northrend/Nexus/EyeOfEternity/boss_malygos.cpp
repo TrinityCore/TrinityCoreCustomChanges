@@ -1585,6 +1585,7 @@ class npc_static_field : public CreatureScript
         }
 };
 
+// 56046 - Portal Beam
 class spell_malygos_portal_beam : public SpellScriptLoader
 {
     public:
@@ -1629,6 +1630,7 @@ class spell_malygos_portal_beam : public SpellScriptLoader
         }
 };
 
+// 56047 - Random Portal
 class spell_malygos_random_portal : public SpellScriptLoader
 {
     public:
@@ -1685,6 +1687,7 @@ class IsCreatureVehicleCheck
         bool _isVehicle;
 };
 
+// 57459, 61693, 61694 - Arcane Storm
 class spell_malygos_arcane_storm : public SpellScriptLoader
 {
     public:
@@ -1742,6 +1745,7 @@ class spell_malygos_arcane_storm : public SpellScriptLoader
         }
 };
 
+// 56105 - Vortex
 class spell_malygos_vortex_dummy : public SpellScriptLoader
 {
 public:
@@ -1779,6 +1783,7 @@ public:
     }
 };
 
+// 55873 - Vortex
 class spell_malygos_vortex_visual : public SpellScriptLoader
 {
     public:
@@ -1853,6 +1858,7 @@ class ExactDistanceCheck
         float _dist;
 };
 
+// 56438 - Arcane Overload
 class spell_arcane_overload : public SpellScriptLoader
 {
     public:
@@ -1886,6 +1892,7 @@ class spell_arcane_overload : public SpellScriptLoader
         }
 };
 
+// 61210 - Align Disk Aggro
 class spell_nexus_lord_align_disk_aggro : public SpellScriptLoader
 {
     public:
@@ -1937,6 +1944,7 @@ class IsPlayerOnHoverDisk
         bool _isOnHoverDisk;
 };
 
+// 56397 - Arcane Barrage
 class spell_scion_of_eternity_arcane_barrage : public SpellScriptLoader
 {
     public:
@@ -2017,6 +2025,7 @@ class spell_scion_of_eternity_arcane_barrage : public SpellScriptLoader
         }
 };
 
+// 58842 - Destroy Platform Channel
 class spell_malygos_destroy_platform_channel : public SpellScriptLoader
 {
     public:
@@ -2056,6 +2065,7 @@ class spell_malygos_destroy_platform_channel : public SpellScriptLoader
         }
 };
 
+// 59084 - Destroy Platform Boom Visual
 class spell_alexstrasza_bunny_destroy_platform_boom_visual : public SpellScriptLoader
 {
     public:
@@ -2093,6 +2103,7 @@ class spell_alexstrasza_bunny_destroy_platform_boom_visual : public SpellScriptL
         }
 };
 
+// 59099 - Destroy Platform Event
 class spell_alexstrasza_bunny_destroy_platform_event : public SpellScriptLoader
 {
     public:
@@ -2199,6 +2210,7 @@ class spell_wyrmrest_skytalon_ride_red_dragon_buddy_trigger : public SpellScript
         }
 };
 
+// 60939 - Surge of Power
 class spell_malygos_surge_of_power_warning_selector_25 : public SpellScriptLoader
 {
     public:
@@ -2262,6 +2274,7 @@ class spell_malygos_surge_of_power_warning_selector_25 : public SpellScriptLoade
         }
 };
 
+// 60936 - Surge of Power
 class spell_malygos_surge_of_power_25 : public SpellScriptLoader
 {
     public:
@@ -2313,6 +2326,7 @@ class spell_malygos_surge_of_power_25 : public SpellScriptLoader
         }
 };
 
+// 61028 - Alexstrasza's Gift Beam
 class spell_alexstrasza_gift_beam : public SpellScriptLoader
 {
     public:
@@ -2357,6 +2371,7 @@ class spell_alexstrasza_gift_beam : public SpellScriptLoader
         }
 };
 
+// 61023 - Alexstrasza's Gift Visual
 class spell_alexstrasza_gift_beam_visual : public SpellScriptLoader
 {
     public:

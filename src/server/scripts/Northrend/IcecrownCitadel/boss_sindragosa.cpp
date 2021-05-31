@@ -1336,6 +1336,7 @@ class spell_sindragosa_mystic_buffet : public SpellScript
     }
 };
 
+// 71376 - Icy Blast
 class spell_rimefang_icy_blast : public SpellScript
 {
     PrepareSpellScript(spell_rimefang_icy_blast);
@@ -1375,6 +1376,7 @@ class OrderWhelpTargetSelector
         Creature* _owner;
 };
 
+// 71357 - Order Whelp
 class spell_frostwarden_handler_order_whelp : public SpellScript
 {
     PrepareSpellScript(spell_frostwarden_handler_order_whelp);
@@ -1417,6 +1419,7 @@ class spell_frostwarden_handler_order_whelp : public SpellScript
     }
 };
 
+// 71350 - Focus Fire
 class spell_frostwarden_handler_focus_fire : public SpellScript
 {
     PrepareSpellScript(spell_frostwarden_handler_focus_fire);

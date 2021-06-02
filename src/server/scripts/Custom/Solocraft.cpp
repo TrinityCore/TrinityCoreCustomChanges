@@ -410,7 +410,7 @@ private:
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
                 {
-                    if (result) 
+                    if (result)
                     {
                         player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
                     }
@@ -426,7 +426,7 @@ private:
                     player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
 
                     //Check for Dungeon to Dungeon Transfer and remove old Spellpower buff
-                    if (result) 
+                    if (result)
                     {
                         // remove spellpower bonus
                         player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);

@@ -411,7 +411,7 @@ private:
                 {
 					if (result) 
 					{	
-						player->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
+						player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
 					}
                     // Buff the player
                     player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, difficulty * SoloCraftStatsMult, true); //Unitmods enum UNIT_MOD_STAT_START defined in Unit.h line 391

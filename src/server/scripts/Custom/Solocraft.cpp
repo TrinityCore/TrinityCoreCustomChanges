@@ -288,7 +288,7 @@ public:
     void OnLogout(Player* player) override
     {
         //Remove database entry as the player has logged out
-        CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
+        CharacterDatabase.PQuery("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
     }
 };
 class solocraft_player_instance_handler : public PlayerScript {
@@ -449,7 +449,7 @@ private:
                     ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty);
                 }
                 // Save Player Dungeon Offsets to Database
-                CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES (%u, %f, %u, %i, %f)", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
+                CharacterDatabase.PQuery("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES (%u, %f, %u, %i, %f)", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
             }
             else
             {
@@ -520,7 +520,7 @@ private:
                 player->ApplySpellPowerBonus(SpellPowerBonus, false);
             }
             //Remove database entry as the player is no longer in an instance
-            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
+            CharacterDatabase.PQuery("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
         }
     }
 };

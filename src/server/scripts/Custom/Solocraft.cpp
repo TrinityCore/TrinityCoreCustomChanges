@@ -498,7 +498,7 @@ private:
     void ClearBuffs(Player* player, Map* map)
     {
         //Database query to get offset from the last instance player exited
-        QueryResult result = CharacterDatabase.PExecute("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
+        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
         if (result)
         {
             float difficulty = (*result)[1].GetFloat();

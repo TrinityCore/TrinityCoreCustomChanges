@@ -479,7 +479,7 @@ private:
                 if (itr->guid != player->GetGUID())
                 {
                     //Database query to find difficulty for each group member that is currently in an instance
-                    QueryResult result = CharacterDatabase.PExecute("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = %u", itr->guid);
+                    QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = %u", itr->guid);
                     if (result)
                     {
                         //Test for debuffs already give to other members - They cannot be used to determine the total offset because negative numbers will skew the total difficulty offset

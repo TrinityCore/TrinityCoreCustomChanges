@@ -1837,6 +1837,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (oldmap)
                 oldmap->RemovePlayerFromMap(this, false);
 
+            // players on mount will be dismounted. the speed and height change should not require an ACK and should be applied directly
+            PurgeAndApplyPendingMovementChanges(false);
+
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
             m_teleport_options = options;
             SetFallInformation(0, GetPositionZ());
@@ -22774,7 +22777,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     /// SMSG_RESYNC_RUNES
     ResyncRunes();
 
-    GetSession()->GetGameClient()->AddAllowedMover(this);
+    GetGameClient()->SetMovedUnit(this, true);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()

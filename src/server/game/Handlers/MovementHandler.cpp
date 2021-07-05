@@ -693,7 +693,8 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -702,6 +703,7 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                           // unk2
@@ -714,7 +716,8 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -723,6 +726,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                           // unk2
@@ -735,7 +739,8 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -744,6 +749,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 }
 
@@ -754,7 +760,8 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -763,6 +770,7 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                           // unk2
@@ -775,7 +783,8 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -784,6 +793,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 }
 
@@ -794,7 +804,8 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -803,6 +814,7 @@ void WorldSession::HandleMoveSetCanFlyAckOpcode(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                           // unk2
@@ -815,7 +827,8 @@ void WorldSession::HandleMoveSetCanTransitionBetweenSwinAndFlyAck(WorldPacket& r
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -824,6 +837,7 @@ void WorldSession::HandleMoveSetCanTransitionBetweenSwinAndFlyAck(WorldPacket& r
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData.read_skip<uint32>();                           // unk2
@@ -836,7 +850,8 @@ void WorldSession::HandleMoveGravityDisableAck(WorldPacket& recvData)
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -845,6 +860,7 @@ void WorldSession::HandleMoveGravityDisableAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 }
 
@@ -855,7 +871,8 @@ void WorldSession::HandleMoveGravityEnableAck(WorldPacket& recvData)
     ObjectGuid guid;
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -864,6 +881,7 @@ void WorldSession::HandleMoveGravityEnableAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // unk
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 }
 
@@ -875,7 +893,8 @@ void WorldSession::HandleMoveSetCollisionHgtAck(WorldPacket& recvData)
     float  newValue;
     recvData >> guid.ReadAsPacked();
 
-    if (!IsRightUnitBeingMoved(guid))
+    GameClient* client = GetGameClient();
+    if (!client->IsAllowedToMove(guid))
     {
         recvData.rfinish();                     // prevent warnings spam
         return;
@@ -884,6 +903,7 @@ void WorldSession::HandleMoveSetCollisionHgtAck(WorldPacket& recvData)
     recvData.read_skip<uint32>();                           // movement counter
 
     MovementInfo movementInfo;
+    movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
     recvData >> newValue;

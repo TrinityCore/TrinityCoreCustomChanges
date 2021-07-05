@@ -38,6 +38,7 @@
 #include "Map.h"
 #include "Metric.h"
 #include "MoveSpline.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "OutdoorPvPMgr.h"
@@ -926,7 +927,21 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo* mi)
             mi->RemoveMovementFlag((maskToRemove));
     #endif
 
-    Unit* mover = GetGameClient()->GetActivelyMovedUnit();
+    if (mi->guid.IsEmpty())
+    {
+        TC_LOG_ERROR("entities.unit", "WorldSession::ReadMovementInfo: mi->guid is empty, opcode %u", static_cast<uint32>(data.GetOpcode()));
+        return;
+    }
+
+    Unit* mover = GetPlayer()->GetGUID() == mi->guid ? GetPlayer() : ObjectAccessor::GetUnit(*GetPlayer(), mi->guid);
+    if (!mover)
+    {
+        TC_LOG_ERROR("entities.unit", "WorldSession::ReadMovementInfo: If the server allows the unit (GUID %s) to be moved by the client of player %s, the unit should still exist! Opcode %u",
+            mi->guid.ToString().c_str(),
+            GetPlayer()->GetGUID().ToString().c_str(),
+            static_cast<uint32>(data.GetOpcode()));
+        return;
+    }
 
     if (!GetPlayer()->GetVehicleBase() || !(GetPlayer()->GetVehicle()->GetVehicleInfo()->Flags & VEHICLE_FLAG_FIXED_POSITION))
         REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ROOT), MOVEMENTFLAG_ROOT);

@@ -4129,7 +4129,7 @@ Skip.Deathknight.Starter.Announce.enable = 1
 #         Default:    0 - (Disabled)
 #                     1 - (Enabled)
 
-Skip.Deathknight.Starter.Enable = 1
+Skip.Deathknight.Starter.Enable = 0
 
 #    GM.Skip.Deathknight.Starter.Enable
 #         Active Module for all new accounts of a GM account level ONLY.
@@ -4145,6 +4145,12 @@ GM.Skip.Deathknight.Starter.Enable = 0
 #
 
 Skip.Deathknight.Start.Level = 58
+
+#    Skip.Deathknight.Optional.Enable
+#    Enables optional to skip when talking to lich king on first creation of dk.
+#    Default: 1 - (Active)
+
+Skip.Deathknight.Optional.Enable = 1
 
 #
 ###################################################################################################

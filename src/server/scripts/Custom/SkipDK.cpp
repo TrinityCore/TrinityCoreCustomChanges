@@ -202,7 +202,7 @@ public:
                 case LOCALE_esMX: localizedEntry = LOCALE_LICHKING_7; break;
                 case LOCALE_ruRU: localizedEntry = LOCALE_LICHKING_8; break;
                 case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
-				default: localizedEntry = LOCALE_LICHKING_0;
+                default: localizedEntry = LOCALE_LICHKING_0;
                 }
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, 11);
             }

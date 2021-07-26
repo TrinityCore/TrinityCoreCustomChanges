@@ -305,7 +305,7 @@ public:
             break;
 
             }
-            
+
             OnGossipHello(player);
             return true;
         }
@@ -321,7 +321,7 @@ class npc_arena1v1_world : public WorldScript
 {
     public:
         npc_arena1v1_world() : WorldScript("npc_arena1v1_world") {}
-        
+
         void OnConfigLoad(bool reload) override
         {
             if (reload) // if gm is using .reload config command // or using .reload config on worldserver console

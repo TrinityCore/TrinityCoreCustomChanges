@@ -17,7 +17,7 @@
  *Original Script by Mindsear
  *Refactored by SPP Developer MDic
 */
-#include "DBCStores.h" 
+#include "DBCStores.h"
 #include "ScriptMgr.h"
 #include "ArenaTeamMgr.h"
 #include "Common.h"
@@ -63,11 +63,11 @@ const uint32 FORBIDDEN_TALENTS_IN_1V1_ARENA[] =
     382, // PaladinHoly
     262, // ShamanRestoration
     282, // DruidRestoration
-    
+
     // Tanks
     //383, // PaladinProtection
     //163, // WarriorProtection
-    
+
     0 // End
 };
 

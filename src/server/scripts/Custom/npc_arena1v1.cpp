@@ -216,7 +216,6 @@ public:
 
         bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId)
         {
-            uint32 const sender = player->PlayerTalkClass->GetGossipOptionSender(gossipListId);
             uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
 
             if (!player || !me)

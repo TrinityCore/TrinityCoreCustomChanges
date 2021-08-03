@@ -19,6 +19,9 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+void AddSC_npc_1v1arena();
+
 void AddCustomScripts()
 {
+    AddSC_npc_1v1arena();
 }

@@ -30,7 +30,6 @@ public:
     // Load Configuration Settings
     void SetInitialWorldSettings()
     {
-        bool SoloCraftEnable = sConfigMgr->GetBoolDefault("Solocraft.Enable", 1);
         bool SoloCraftAnnounceModule = sConfigMgr->GetBoolDefault("Solocraft.Announce", 1);
         //Balancing
         bool SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
@@ -121,12 +120,6 @@ public:
             {668, sConfigMgr->GetIntDefault("Solocraft.HallsOfReflection.Level", 78) },                   // Halls of Reflection
             {724, sConfigMgr->GetIntDefault("Solocraft.ChamberOfAspectsRed.Level", 80) },                 // The Ruby Sanctum
         };
-        // Dungeon Difficulty
-        // Catch alls
-        float D5 = sConfigMgr->GetFloatDefault("Solocraft.Dungeon", 5.0);
-        float D10 = sConfigMgr->GetFloatDefault("Solocraft.Heroic", 10.0);
-        float D25 = sConfigMgr->GetFloatDefault("Solocraft.Raid25", 25.0);
-        float D40 = sConfigMgr->GetFloatDefault("Solocraft.Raid40", 40.0);
 
         diff_Multiplier =
         {
@@ -253,9 +246,7 @@ public:
             {668, sConfigMgr->GetFloatDefault("Solocraft.HallsOfReflectionH", 5.0) },                     // Halls of Reflection H
             {724, sConfigMgr->GetFloatDefault("Solocraft.ChamberOfAspectsRedH", 25.0) },                  // The Ruby Sanctum 25
         };
-        //Unique Raids beyond the heroic and normal versions of themselves
-        float D649H10 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH10", 10.0);  //Trial of the Crusader 10 Heroic
-        float D649H25 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH25", 25.0);  //Trial of the Crusader 25 Heroic
+
     }
 };
 
@@ -277,14 +268,14 @@ public:
 
     void OnLogout(Player* player)
     {
-		//Database query to see if an entry is still there
-		QueryResult result = CharacterDatabase.PQuery("SELECT `GUID` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
-		if (result)
-		{
-			//Remove database entry as the player has logged out
-			CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
-		}
-    }	
+        //Database query to see if an entry is still there
+        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
+        if (result)
+        {
+            //Remove database entry as the player has logged out
+            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
+        }
+    }
 };
 
 class solocraft_player_instance_handler : public PlayerScript {
@@ -300,6 +291,7 @@ public:
             ApplyBuffs(player, map, difficulty, dunLevel, numInGroup);
         }
     }
+
 private:
     std::map<uint32, float> _unitDifficulty;
     // Set the instance difficulty
@@ -309,6 +301,7 @@ private:
         float D10 = sConfigMgr->GetFloatDefault("Solocraft.Heroic", 10.0);
         float D25 = sConfigMgr->GetFloatDefault("Solocraft.Raid25", 25.0);
         float D40 = sConfigMgr->GetFloatDefault("Solocraft.Raid40", 40.0);
+        //Unique Raids beyond the heroic and normal versions of themselves
         float D649H10 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH10", 10.0);  //Trial of the Crusader 10 Heroic
         float D649H25 = sConfigMgr->GetFloatDefault("Solocraft.ArgentTournamentRaidH25", 25.0);  //Trial of the Crusader 25 Heroic
 
@@ -406,17 +399,17 @@ private:
                     difficulty = difficulty / numInGroup;
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck - two decimal rounding
                 }
-				
-				//Check Database for a current dungeon entry
-				QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
+                
+                //Check Database for a current dungeon entry
+                QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
 
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
                 {
-					if (result) 
-					{	
-						player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
-					}
+                    if (result) 
+                    {    
+                        player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
+                    }
                     // Buff the player
                     player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, difficulty * SoloCraftStatsMult, true); //Unitmods enum UNIT_MOD_STAT_START defined in Unit.h line 391
                 }
@@ -427,14 +420,14 @@ private:
                 {
                     // Buff the player's mana
                     player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
-										
-					//Check for Dungeon to Dungeon Transfer and remove old Spellpower buff					
-					if (result) 
-					{					
-						// remove spellpower bonus
-						player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);	
-					}	
-					
+                                        
+                    //Check for Dungeon to Dungeon Transfer and remove old Spellpower buff                    
+                    if (result) 
+                    {                    
+                        // remove spellpower bonus
+                        player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);    
+                    }    
+                    
                     //Buff Spellpower
                     if (difficulty > 0) //Debuffed characters do not get spellpower
                     {
@@ -464,16 +457,16 @@ private:
                 // Announce to player - Over Max Level Threshold
                 ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level (%i) threshold for this dungeon.";
                 ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
-				ClearBuffs(player, map); //Check to revert player back to normal
-			}
-			
-		}
-		else
-		{
-			ClearBuffs(player, map); //Check to revert player back to normal - Moving this here fixed logout and login while in instance buff and debuff issues
-		}
-	}
-	
+                ClearBuffs(player, map); //Check to revert player back to normal
+            }
+            
+        }
+        else
+        {
+            ClearBuffs(player, map); //Check to revert player back to normal - Moving this here fixed logout and login while in instance buff and debuff issues
+        }
+    }
+
     // Get the current group members GUIDS and return the total sum of the difficulty offset by all group members currently in the dungeon
     float GetGroupDifficulty(Player* player) {
         float GroupDifficulty = 0.0;
@@ -502,6 +495,7 @@ private:
         }
         return GroupDifficulty;
     }
+
     void ClearBuffs(Player* player, Map* map)
     {
         //Database query to get offset from the last instance player exited

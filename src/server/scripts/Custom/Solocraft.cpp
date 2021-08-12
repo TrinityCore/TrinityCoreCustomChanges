@@ -277,7 +277,7 @@ std::unordered_map<uint32, float> diff_Multiplier_Heroics;
          }
      }
 
-     void OnLogout(Player* player)
+     void OnLogout(Player* player) override
      {
          //Database query to see if an entry is still there
          QueryResult result = CharacterDatabase.PQuery("SELECT `GUID` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());

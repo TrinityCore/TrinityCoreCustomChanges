@@ -1,11 +1,4 @@
 /*
-<<<<<<< Updated upstream
-Orignal Azeroth Module Pulled from https://github.com/azerothcore/mod-solocraft
-Which is a fork of https://github.com/conan513/mod-solocraft
-Refactored to Trinitycore Custom 335
-and improved upon by Single Player Project Developer MDic
-*/
-=======
  * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -25,7 +18,12 @@ and improved upon by Single Player Project Developer MDic
  * Which is a fork of https://github.com/conan513/mod-solocraft
  * Refactored to Trinitycore Custom 335
  * and improved upon by Single Player Project Developer MDic
-*/
+
+ * Orignal Azeroth Module Pulled from https://github.com/azerothcore/mod-solocraft
+ * Which is a fork of https://github.com/conan513/mod-solocraft
+ * Refactored to Trinitycore Custom 335
+ * and improved upon by Single Player Project Developer MDic
+ */
 
 #include <map>
 #include "Config.h"

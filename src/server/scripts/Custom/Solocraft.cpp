@@ -399,15 +399,15 @@ private:
                     difficulty = difficulty / numInGroup;
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck - two decimal rounding
                 }
-                
+
                 //Check Database for a current dungeon entry
                 QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
 
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
                 {
-                    if (result) 
-                    {    
+                    if (result)
+                    {
                         player->HandleStatFlatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, (*result)[1].GetFloat() * (*result)[4].GetFloat(), false);
                     }
                     // Buff the player
@@ -420,14 +420,14 @@ private:
                 {
                     // Buff the player's mana
                     player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
-                                        
-                    //Check for Dungeon to Dungeon Transfer and remove old Spellpower buff                    
-                    if (result) 
-                    {                    
+
+                    //Check for Dungeon to Dungeon Transfer and remove old Spellpower buff
+                    if (result)
+                    {
                         // remove spellpower bonus
-                        player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);    
-                    }    
-                    
+                        player->ApplySpellPowerBonus((*result)[3].GetUInt32() * (*result)[4].GetFloat(),false);
+                    }
+
                     //Buff Spellpower
                     if (difficulty > 0) //Debuffed characters do not get spellpower
                     {
@@ -459,7 +459,7 @@ private:
                 ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
                 ClearBuffs(player, map); //Check to revert player back to normal
             }
-            
+
         }
         else
         {

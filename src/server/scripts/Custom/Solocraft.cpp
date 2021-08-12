@@ -30,7 +30,6 @@ public:
     // Load Configuration Settings
     void SetInitialWorldSettings()
     {
-        bool SoloCraftAnnounceModule = sConfigMgr->GetBoolDefault("Solocraft.Announce", 1);
         //Balancing
         bool SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
         float SoloCraftSpellMult = sConfigMgr->GetFloatDefault("SoloCraft.Spellpower.Mult", 2.5);

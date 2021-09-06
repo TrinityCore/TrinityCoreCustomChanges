@@ -841,7 +841,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
     AreaGroupId = spellEntry->RequiredAreasID;
     SchoolMask = spellEntry->SchoolMask;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        Effects[i] = SpellEffectInfo(spellEntry, this, i);
+        _effects[i] = SpellEffectInfo(spellEntry, this, i);
 
     ChainEntry = nullptr;
     ExplicitTargetMask = 0;
@@ -2558,7 +2558,7 @@ int32 SpellInfo::GetDiminishingReturnsLimitDuration(bool triggered) const
 
 void SpellInfo::_LoadImmunityInfo()
 {
-    for (SpellEffectInfo& effect : Effects)
+    for (SpellEffectInfo& effect : _GetEffects())
     {
         uint32 schoolImmunityMask = 0;
         uint32 applyHarmfulAuraImmunityMask = 0;
@@ -3892,15 +3892,15 @@ void SpellInfo::_InitializeSpellPositivity()
 void SpellInfo::_UnloadImplicitTargetConditionLists()
 {
     // find the same instances of ConditionList and delete them.
-    for (SpellEffectInfo const& effect : Effects)
+    for (SpellEffectInfo const& effect : GetEffects())
     {
         ConditionContainer* cur = effect.ImplicitTargetConditions;
         if (!cur)
             continue;
 
-        for (size_t j = effect.EffectIndex; j < Effects.size(); ++j)
-            if (Effects[j].ImplicitTargetConditions == cur)
-                Effects[j].ImplicitTargetConditions = nullptr;
+        for (size_t j = effect.EffectIndex; j < GetEffects().size(); ++j)
+            if (GetEffect(SpellEffIndex(j)).ImplicitTargetConditions == cur)
+                _GetEffect(SpellEffIndex(j)).ImplicitTargetConditions = nullptr;
 
         delete cur;
     }

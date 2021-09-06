@@ -794,19 +794,17 @@ bool SmartAIMgr::CheckUnusedEventParams(SmartScriptHolder const& e)
     static size_t rawCount = sizeof(SmartEvent::raw) / sizeof(uint32);
     size_t paramsCount = paramsStructSize / sizeof(uint32);
 
-    bool valid = true;
     for (size_t index = paramsCount; index < rawCount; index++)
     {
         uint32 value = ((uint32*)&e.event.raw)[index];
         if (value != 0)
         {
-            TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused event_param%zu with value %u, it must be 0, skipped.",
+            TC_LOG_WARN("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused event_param%zu with value %u, it should be 0.",
                 e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), index + 1, value);
-            valid = false;
         }
     }
 
-    return valid;
+    return true;
 }
 
 bool SmartAIMgr::CheckUnusedActionParams(SmartScriptHolder const& e)
@@ -968,19 +966,17 @@ bool SmartAIMgr::CheckUnusedActionParams(SmartScriptHolder const& e)
     static size_t rawCount = sizeof(SmartAction::raw) / sizeof(uint32);
     size_t paramsCount = paramsStructSize / sizeof(uint32);
 
-    bool valid = true;
     for (size_t index = paramsCount; index < rawCount; index++)
     {
         uint32 value = ((uint32*)&e.action.raw)[index];
         if (value != 0)
         {
-            TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused action_param%zu with value %u, it must be 0, skipped.",
+            TC_LOG_WARN("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused action_param%zu with value %u, it should be 0.",
                 e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), index + 1, value);
-            valid = false;
         }
     }
 
-    return valid;
+    return true;
 }
 
 bool SmartAIMgr::CheckUnusedTargetParams(SmartScriptHolder const& e)
@@ -1031,19 +1027,17 @@ bool SmartAIMgr::CheckUnusedTargetParams(SmartScriptHolder const& e)
     static size_t rawCount = sizeof(SmartTarget::raw) / sizeof(uint32);
     size_t paramsCount = paramsStructSize / sizeof(uint32);
 
-    bool valid = true;
     for (size_t index = paramsCount; index < rawCount; index++)
     {
         uint32 value = ((uint32*)&e.target.raw)[index];
         if (value != 0)
         {
-            TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused target_param%zu with value %u, it must be 0, skipped.",
+            TC_LOG_WARN("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u has unused target_param%zu with value %u, it should be 0.",
                 e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), index + 1, value);
-            valid = false;
         }
     }
 
-    return valid;
+    return true;
 }
 
 bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
@@ -1460,6 +1454,19 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 TC_LOG_ERROR("sql.sql", "SmartAIMgr: Not handled event_type(%u), Entry %d SourceType %u Event %u Action %u, skipped.", e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
                 return false;
         }
+
+        // Additional check for deprecated
+        switch (e.GetEventType())
+        {
+            // Deprecated
+            case SMART_EVENT_FRIENDLY_HEALTH:
+            case SMART_EVENT_TARGET_HEALTH_PCT:
+            case SMART_EVENT_IS_BEHIND_TARGET:
+                TC_LOG_WARN("sql.sql.deprecation", "SmartAIMgr: Deprecated event_type(%u), Entry %d SourceType %u Event %u Action %u, it might be removed in the future, loaded for now.", e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                break;
+            default:
+                break;
+        }
     }
 
     if (!CheckUnusedEventParams(e))
@@ -1592,13 +1599,13 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             if (!IsSpellValid(e, e.action.cast.spell))
                 return false;
 
-            for (SpellEffectInfo const& Effect : sSpellMgr->AssertSpellInfo(e.action.cast.spell)->Effects)
+            for (SpellEffectInfo const& spellEffectInfo : sSpellMgr->AssertSpellInfo(e.action.cast.spell)->GetEffects())
             {
-                if (Effect.IsEffect(SPELL_EFFECT_KILL_CREDIT) || Effect.IsEffect(SPELL_EFFECT_KILL_CREDIT2))
+                if (spellEffectInfo.IsEffect(SPELL_EFFECT_KILL_CREDIT) || spellEffectInfo.IsEffect(SPELL_EFFECT_KILL_CREDIT2))
                 {
-                    if (Effect.TargetA.GetTarget() == TARGET_UNIT_CASTER)
+                    if (spellEffectInfo.TargetA.GetTarget() == TARGET_UNIT_CASTER)
                         TC_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: %u targetA: %u - targetB: %u) has invalid target for this Action",
-                            e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.cast.spell, Effect.TargetA.GetTarget(), Effect.TargetB.GetTarget());
+                            e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.cast.spell, spellEffectInfo.TargetA.GetTarget(), spellEffectInfo.TargetB.GetTarget());
                 }
             }
             break;
@@ -2182,6 +2189,11 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_DESPAWN_SPAWNGROUP:
         case SMART_ACTION_PLAY_CINEMATIC:
             break;
+        // No longer supported
+        case SMART_ACTION_INSTALL_AI_TEMPLATE:
+        case SMART_ACTION_SET_DYNAMIC_FLAG:
+            TC_LOG_ERROR("sql.sql.nolongersupported", "SmartAIMgr: No longer supported action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);
+            return false;
         default:
             TC_LOG_ERROR("sql.sql", "SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry %d SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);
             return false;
@@ -2251,19 +2263,19 @@ void SmartAIMgr::LoadHelperStores()
         if (!spellInfo)
             continue;
 
-        for (uint32 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+        for (SpellEffectInfo const& spellEffectInfo : spellInfo->GetEffects())
         {
-            if (spellInfo->Effects[j].IsEffect(SPELL_EFFECT_SUMMON))
-                SummonCreatureSpellStore.insert(std::make_pair(uint32(spellInfo->Effects[j].MiscValue), std::make_pair(i, SpellEffIndex(j))));
+            if (spellEffectInfo.IsEffect(SPELL_EFFECT_SUMMON))
+                SummonCreatureSpellStore.insert(std::make_pair(uint32(spellEffectInfo.MiscValue), std::make_pair(i, spellEffectInfo.EffectIndex)));
 
-            else if (spellInfo->Effects[j].IsEffect(SPELL_EFFECT_SUMMON_OBJECT_WILD))
-                SummonGameObjectSpellStore.insert(std::make_pair(uint32(spellInfo->Effects[j].MiscValue), std::make_pair(i, SpellEffIndex(j))));
+            else if (spellEffectInfo.IsEffect(SPELL_EFFECT_SUMMON_OBJECT_WILD))
+                SummonGameObjectSpellStore.insert(std::make_pair(uint32(spellEffectInfo.MiscValue), std::make_pair(i, spellEffectInfo.EffectIndex)));
 
-            else if (spellInfo->Effects[j].IsEffect(SPELL_EFFECT_KILL_CREDIT) || spellInfo->Effects[j].IsEffect(SPELL_EFFECT_KILL_CREDIT2))
-                KillCreditSpellStore.insert(std::make_pair(uint32(spellInfo->Effects[j].MiscValue), std::make_pair(i, SpellEffIndex(j))));
+            else if (spellEffectInfo.IsEffect(SPELL_EFFECT_KILL_CREDIT) || spellEffectInfo.IsEffect(SPELL_EFFECT_KILL_CREDIT2))
+                KillCreditSpellStore.insert(std::make_pair(uint32(spellEffectInfo.MiscValue), std::make_pair(i, spellEffectInfo.EffectIndex)));
 
-            else if (spellInfo->Effects[j].IsEffect(SPELL_EFFECT_CREATE_ITEM))
-                CreateItemSpellStore.insert(std::make_pair(uint32(spellInfo->Effects[j].ItemType), std::make_pair(i, SpellEffIndex(j))));
+            else if (spellEffectInfo.IsEffect(SPELL_EFFECT_CREATE_ITEM))
+                CreateItemSpellStore.insert(std::make_pair(uint32(spellEffectInfo.ItemType), std::make_pair(i, spellEffectInfo.EffectIndex)));
         }
     }
 

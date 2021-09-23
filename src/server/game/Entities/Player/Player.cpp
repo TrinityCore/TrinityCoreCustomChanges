@@ -24836,7 +24836,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
 
     if (!item || item->is_looted)
     {
-        SendEquipError(EQUIP_ERR_ALREADY_LOOTED, nullptr, nullptr);
+        //SendEquipError(EQUIP_ERR_ALREADY_LOOTED, nullptr, nullptr);
         return;
     }
 

@@ -82,7 +82,6 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         Creature* creature = GetPlayer()->GetMap()->GetCreature(lguid);
         if (!player->GetGroup())
         {
-            uint32 noSpaceForCount = 0;
 
             int i = 0;
             float range = 30.0f;

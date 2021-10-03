@@ -87,7 +87,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
             float range = 30.0f;
             Creature* c = nullptr;
             std::vector<Creature*> creaturedie;
-            player->GetCreatureListWithEntryInGrid(creaturedie, creature->GetEntry(), range);
+            player->GetDeadCreatureListInGrid(creaturedie, range);
             for (std::vector<Creature*>::iterator itr = creaturedie.begin(); itr != creaturedie.end(); ++itr)
             {
                 c = *itr;

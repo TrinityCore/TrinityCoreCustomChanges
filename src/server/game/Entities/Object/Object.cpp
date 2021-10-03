@@ -3150,7 +3150,7 @@ void WorldObject::GetCreatureListWithEntryInGrid(Container& creatureContainer, u
 template <typename Container>
 void WorldObject::GetDeadCreatureListInGrid(Container& creaturedeadContainer, float maxSearchRange, bool alive /*= false*/) const
 {
-    Trinity::AllDeadCreaturesInRange check(this, maxSearchRange);
+    Trinity::AllDeadCreaturesInRange check(this, maxSearchRange, alive);
     Trinity::CreatureListSearcher<Trinity::AllDeadCreaturesInRange> searcher(this, creaturedeadContainer, check);
     Cell::VisitGridObjects(this, searcher, maxSearchRange);
 }

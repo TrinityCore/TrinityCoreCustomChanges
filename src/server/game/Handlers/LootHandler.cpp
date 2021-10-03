@@ -130,7 +130,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 
             loot = &creature->loot;
         }
-        
+
     }
 
     player->StoreLootItem(lootSlot, loot);

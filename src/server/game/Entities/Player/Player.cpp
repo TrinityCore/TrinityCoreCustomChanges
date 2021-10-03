@@ -24839,7 +24839,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot)
     {
         if (sConfigMgr->GetBoolDefault("AOE.LOOT.enable", true))
         {
-            //SendEquipError(EQUIP_ERR_ALREADY_LOOTED, nullptr, nullptr);
+            //SendEquipError(EQUIP_ERR_ALREADY_LOOTED, nullptr, nullptr); prevents error already loot from spamming
             return;
         }
 

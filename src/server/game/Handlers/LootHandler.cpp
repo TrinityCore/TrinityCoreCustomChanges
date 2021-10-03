@@ -17,6 +17,7 @@
 
 #include "WorldSession.h"
 #include "Common.h"
+#include "Config.h"
 #include "Corpse.h"
 #include "Creature.h"
 #include "GameObject.h"
@@ -80,7 +81,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     else
     {
         Creature* creature = GetPlayer()->GetMap()->GetCreature(lguid);
-        if (!player->GetGroup())
+        if (!player->GetGroup() && sConfigMgr->GetBoolDefault("AOE.LOOT.enable", true))
         {
             uint32 noSpaceForCount = 0;
 
@@ -130,6 +131,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 
             loot = &creature->loot;
         }
+        
     }
 
     player->StoreLootItem(lootSlot, loot);
@@ -236,24 +238,26 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
         }
         else
         {
-            if (!player->GetGroup())
+            if (sConfigMgr->GetBoolDefault("AOE.LOOT.enable", true))
             {
-                float range = 30.0f;
-                uint32 gold = 0;
-                Creature* creature = GetPlayer()->GetMap()->GetCreature(guid);
-                Creature* c = nullptr;
-                std::vector<Creature*> creaturedie;
-                player->GetCreatureListWithEntryInGrid(creaturedie, creature->GetEntry(), range);
-                for (std::vector<Creature*>::iterator itr = creaturedie.begin(); itr != creaturedie.end(); ++itr)
+                if (!player->GetGroup())
                 {
-                    c = *itr;
-                    loot = &c->loot;
-                    gold += loot->gold;
-                    loot->gold = 0;
+                    float range = 30.0f;
+                    uint32 gold = 0;
+                    Creature* creature = GetPlayer()->GetMap()->GetCreature(guid);
+                    Creature* c = nullptr;
+                    std::vector<Creature*> creaturedie;
+                    player->GetCreatureListWithEntryInGrid(creaturedie, creature->GetEntry(), range);
+                    for (std::vector<Creature*>::iterator itr = creaturedie.begin(); itr != creaturedie.end(); ++itr)
+                    {
+                        c = *itr;
+                        loot = &c->loot;
+                        gold += loot->gold;
+                        loot->gold = 0;
+                    }
+                    loot->gold = gold;
                 }
-                loot->gold = gold;
             }
-
             player->ModifyMoney(loot->gold);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
 

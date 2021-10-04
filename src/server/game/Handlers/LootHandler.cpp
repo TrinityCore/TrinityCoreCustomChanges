@@ -245,7 +245,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                     Creature* creature = GetPlayer()->GetMap()->GetCreature(guid);
                     Creature* c = nullptr;
                     std::vector<Creature*> creaturedie;
-                    player->GetCreatureListWithEntryInGrid(creaturedie, creature->GetEntry(), range);
+                    player->GetDeadCreatureListInGrid(creaturedie, range);
                     for (std::vector<Creature*>::iterator itr = creaturedie.begin(); itr != creaturedie.end(); ++itr)
                     {
                         c = *itr;

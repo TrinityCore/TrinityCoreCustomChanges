@@ -242,7 +242,6 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                 {
                     float range = 30.0f;
                     uint32 gold = 0;
-                    Creature* creature = GetPlayer()->GetMap()->GetCreature(guid);
                     Creature* c = nullptr;
                     std::vector<Creature*> creaturedie;
                     player->GetDeadCreatureListInGrid(creaturedie, range);

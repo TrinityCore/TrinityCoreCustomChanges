@@ -109,6 +109,12 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
                     }
                 }
 
+                // This if covers a issue with skinning being infinite by Aokromes
+                if (!creature->IsAlive())
+                {
+                    creature->AllLootRemovedFromCorpse();
+                }
+
                 loot->clear();
 
                 if (loot->isLooted() && loot->empty())

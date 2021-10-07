@@ -4,6 +4,8 @@
 * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
 * Copyright (C) 1985-2010 {VAS} KalCorp  <http://vasserver.dyndns.org/>
 *
+* This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+*
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
 * Free Software Foundation; either version 2 of the License, or (at your
@@ -16,17 +18,13 @@
 *
 * You should have received a copy of the GNU General Public License along
 * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/*
 * Script Name: AutoBalance
 * Original Authors: KalCorp and Vaughner
 * Maintainer(s): CVMagic
 * Original Script Name: VAS.AutoBalance
 * Description: This script is intended to scale based on number of players, instance mobs & world bosses' health, mana, and damage.
-*/
-/*
-Touched up by SPP MDic for Trinitycore
+*
+* Touched up by SPP MDic for Trinitycore Custom Changes Branch
 */
 
 #include "Configuration/Config.h"

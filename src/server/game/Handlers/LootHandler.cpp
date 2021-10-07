@@ -96,16 +96,18 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
                 uint8 maxSlot = loot->GetMaxSlotInLootFor(player);
                 for (i = 0; i < maxSlot; ++i)
                 {
-                    LootItem* item = loot->LootItemInSlot(i, player);
-                    if (player->AddItem(item->itemid, item->count))
+                    if (LootItem* item = loot->LootItemInSlot(i, player))
                     {
-                        player->SendNotifyLootItemRemoved(lootSlot);
-                        player->SendLootRelease(player->GetLootGUID());
-                    }
-                    else
-                    {
-                        player->SendItemRetrievalMail(item->itemid, item->count);
-                        player->GetSession()->SendAreaTriggerMessage("Your items has been mailed to you.");
+                        if (player->AddItem(item->itemid, item->count))
+                        {
+                            player->SendNotifyLootItemRemoved(lootSlot);
+                            player->SendLootRelease(player->GetLootGUID());
+                        }
+                        else
+                        {
+                            player->SendItemRetrievalMail(item->itemid, item->count);
+                            player->GetSession()->SendAreaTriggerMessage("Your items has been mailed to you.");
+                        }
                     }
                 }
 

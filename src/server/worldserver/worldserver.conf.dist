@@ -4130,10 +4130,10 @@ Metric.OverallStatusInterval = 1
 #Trinitycore Racial Trait Swap NPC  #
 #####################################
 #
-#    Trinitycore Equipment Exchange NPC
+#    Trinitycore Racial Trait NPC
 #        For a cost, you can swap our you current racial traits for that of another.
 #
-#    Trinitycore.Equipment.Exchange.Announce.enable
+#    Trinitycore.Racial.Trait.Swap.Announce.enable
 #         Description: Announces Module when player logs in.
 #         Default:    0 - (Disabled)
 #                     1 - (Enabled)

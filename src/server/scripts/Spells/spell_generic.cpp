@@ -1119,6 +1119,32 @@ private:
     int32 _damagePct;
 };
 
+// 28865 - Consumption
+// 64208 - Consumption
+class spell_gen_consumption : public SpellScript
+{
+    PrepareSpellScript(spell_gen_consumption);
+
+    void HandleDamageCalc(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        if (!caster || caster->GetTypeId() != TYPEID_UNIT)
+            return;
+
+        uint32 damage = 0;
+        if (SpellInfo const* createdBySpell = sSpellMgr->GetSpellInfo(caster->GetUInt32Value(UNIT_CREATED_BY_SPELL)))
+            damage = createdBySpell->GetEffect(EFFECT_1).CalcValue();
+
+        if (damage)
+            SetEffectValue(damage);
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_gen_consumption::HandleDamageCalc, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 // 63845 - Create Lance
 enum CreateLanceSpells
 {
@@ -1415,6 +1441,22 @@ class spell_gen_defend : public AuraScript
             AfterEffectApply += AuraEffectApplyFn(spell_gen_defend::RefreshVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             OnEffectRemove += AuraEffectRemoveFn(spell_gen_defend::RemoveVisualShields, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
         }
+    }
+};
+
+class spell_gen_despawn_aura : public AuraScript
+{
+    PrepareAuraScript(spell_gen_despawn_aura);
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Creature* target = GetTarget()->ToCreature())
+            target->DespawnOrUnsummon();
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_gen_despawn_aura::OnRemove, EFFECT_FIRST_FOUND, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -4540,6 +4582,7 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_gen_clone);
     RegisterSpellScript(spell_gen_clone_weapon);
     RegisterSpellScript(spell_gen_clone_weapon_aura);
+    RegisterSpellScript(spell_gen_consumption);
     RegisterSpellScriptWithArgs(spell_gen_count_pct_from_max_hp, "spell_gen_default_count_pct_from_max_hp");
     RegisterSpellScriptWithArgs(spell_gen_count_pct_from_max_hp, "spell_gen_50pct_count_pct_from_max_hp", 50);
     RegisterSpellScript(spell_gen_create_lance);
@@ -4549,6 +4592,7 @@ void AddSC_generic_spell_scripts()
     RegisterSpellAndAuraScriptPair(spell_gen_decay_over_time_fungal_decay, spell_gen_decay_over_time_spell);
     RegisterSpellAndAuraScriptPair(spell_gen_decay_over_time_tail_sting, spell_gen_decay_over_time_spell);
     RegisterSpellScript(spell_gen_defend);
+    RegisterSpellScript(spell_gen_despawn_aura);
     RegisterSpellScript(spell_gen_despawn_self);
     RegisterSpellScript(spell_gen_divine_storm_cd_reset);
     RegisterSpellScript(spell_gen_ds_flush_knockback);

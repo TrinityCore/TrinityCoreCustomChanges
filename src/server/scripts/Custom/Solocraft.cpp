@@ -419,7 +419,7 @@ private:
         {
             return classBalance; //class not found returns the catch all value
         }
-        else if (classes[player->GetClass()] >= 0 && classes[player->GetClass()] <= 100)
+        else if (classes[player->GetClass()] <= 100)
         {
             return classes[player->GetClass()]; //return the specific class's Balance value
         }

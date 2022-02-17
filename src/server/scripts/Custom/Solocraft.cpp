@@ -351,7 +351,8 @@ private:
                 if (map->IsHeroic() && map->GetId() == 649) {
                     return D649H25;  //Heroic Grand Trial of the Crusader
                 }
-                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
+                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end())
+                {
                     return D25; //map not found returns the catch all value
                 }
                 else
@@ -360,21 +361,26 @@ private:
             if (map->IsHeroic())
             {
                 //WOTLK 10 Man Heroic
-                if (map->GetId() == 649) {
+                if (map->GetId() == 649)
+                {
                     return D649H10;
                 }
-                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
+                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end())
+                {
                     return D10; //map not found returns the catch all value
                 }
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
             }
-            if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end()) {
+            if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end())
+            {
                 //Catch Alls  ----------------------5 Dungeons and 40 Raids
-                if (map->IsDungeon()) {
+                if (map->IsDungeon())
+                {
                     return D5;
                 }
-                else if (map->IsRaid()) {
+                else if (map->IsRaid())
+                {
                     return D40;
                 }
             }
@@ -384,7 +390,8 @@ private:
         return 0; //return 0
     }
     // Set the Dungeon Level
-    int CalculateDungeonLevel(Map* map, Player* /*player*/) {
+    int CalculateDungeonLevel(Map* map, Player* /*player*/)
+    {
         if (dungeons.find(map->GetId()) == dungeons.end())
         {
             return SolocraftDungeonLevel; //map not found returns the catch all value
@@ -393,7 +400,8 @@ private:
             return dungeons[map->GetId()]; //return the specific dungeon's level
     }
     // Get the group's size
-    int GetNumInGroup(Player* player) {
+    int GetNumInGroup(Player* player)
+    {
         int numInGroup = 1;
         Group* group = player->GetGroup();
         if (group) {

@@ -4165,7 +4165,7 @@ SoloCraft.Stats.Mult = 100.0
 # balance modifier will receive a base Spellpower increase of 240.
 # Note: 0 will completely disable the class from receiving difficulty modifiers from any dungeon
 #Default: 100 (Full Dungeon Difficulty Modifer will be Applied)
-#    	  0 (Disable) - 100
+#         0 (Disable) - 100
 SoloCraft.DEATH_KNIGHT = 100
 SoloCraft.DRUID = 100
 SoloCraft.HUNTER = 100

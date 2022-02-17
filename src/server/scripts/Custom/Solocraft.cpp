@@ -332,7 +332,7 @@ public:
             float difficulty = CalculateDifficulty(map, player);
             int dunLevel = CalculateDungeonLevel(map, player);
             int numInGroup = GetNumInGroup(player);
-            int classBalance = GetClassBalance(player);
+            uint32 classBalance = GetClassBalance(player);
             ApplyBuffs(player, map, difficulty, dunLevel, numInGroup, classBalance);
         }
     }
@@ -403,9 +403,9 @@ private:
         return numInGroup;
     }
     // Get the Player's class balance debuff
-    int GetClassBalance(Player* player)
+    uint32 GetClassBalance(Player* player)
     {
-        int classBalance = 100;
+        uint32 classBalance = 100;
 
         if (classes.find(player->GetClass()) == classes.end())
         {

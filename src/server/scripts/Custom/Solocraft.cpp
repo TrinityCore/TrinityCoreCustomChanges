@@ -403,7 +403,8 @@ private:
         return numInGroup;
     }
     // Get the Player's class balance debuff
-    int GetClassBalance(Player* player) {
+    int GetClassBalance(Player* player)
+    {
         int classBalance = 100;
 
         if (classes.find(player->GetClass()) == classes.end())

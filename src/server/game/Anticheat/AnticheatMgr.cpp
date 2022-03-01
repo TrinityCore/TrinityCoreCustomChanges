@@ -90,7 +90,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %u (%s)", player->GetName(), player->GetGUID().ToString());
+            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %s", player->GetGUID().ToString());
         }
 
         player->GetSession()->KickPlayer("Water Walking");

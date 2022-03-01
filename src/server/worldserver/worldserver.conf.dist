@@ -3367,7 +3367,8 @@ Anticheat.KickPlayerWaterWalkHack = 0
 #     Anticheat.AnnounceKick
 #       Description: Send a message to all players when a user kicked.
 #       Default:    0 - (Disabled)
-#     
+#
+
 Anticheat.AnnounceKick = 0
 
 #

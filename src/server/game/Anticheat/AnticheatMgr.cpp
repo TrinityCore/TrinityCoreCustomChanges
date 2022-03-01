@@ -90,7 +90,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %s", player->GetGUID().ToString());
+            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
         }
 
         player->GetSession()->KickPlayer("Water Walking");
@@ -144,7 +144,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Fly-Hack detected and counteracted by kicking player %u (%s)", player->GetName(), player->GetGUID().ToString());
+            TC_LOG_INFO("module", "AnticheatMgr:: Fly-Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
         }
 
         player->GetSession()->KickPlayer("Fly Hack");
@@ -226,7 +226,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                 }
                 if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
                 {
-                    TC_LOG_INFO("module", "AnticheatMgr:: Ignore Control - Hack detected player %u (%s)", player->GetName(), player->GetGUID().ToString());
+                    TC_LOG_INFO("module", "AnticheatMgr:: Ignore Control - Hack detected player %s", player->GetGUID().ToString().c_str());
                 }
                 BuildReport(player, IGNORE_CONTROL_REPORT);
             }
@@ -271,7 +271,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         }
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Teleport-Hack detected player %u (%s)", player->GetName(), player->GetGUID().ToString());
+            TC_LOG_INFO("module", "AnticheatMgr:: Teleport-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }

@@ -21,6 +21,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "World.h"
+#include "WorldSession.h"
 #include "Configuration/Config.h"
 
 #define CLIMB_ANGLE 1.87f

@@ -21,11 +21,9 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "World.h"
-
 #include "Configuration/Config.h"
 
 #define CLIMB_ANGLE 1.87f
-
 #define LANG_ANTICHEAT_ALERT 30087
 #define LANG_ANTICHEAT_TELEPORT 30088
 #define LANG_ANTICHEAT_IGNORECONTROL 30089
@@ -120,7 +118,6 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 {
     if (!sConfigMgr->GetBoolDefault("Anticheat.DetectFlyHack", true))
         return;
-
 
     uint32 key = player->GetGUID().GetCounter();
     if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FLYING))
@@ -314,7 +311,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 // basic detection
 void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo, uint32 opcode)
 {
-    if (!sConfigMgr->GetOption<bool>("Anticheat.DetectClimbHack", false))
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectClimbHack", false))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
@@ -348,7 +345,7 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
 
 void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
 {
-    if (!sConfigMgr->GetOption<bool>("Anticheat.DetectSpeedHack", true))
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectSpeedHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();

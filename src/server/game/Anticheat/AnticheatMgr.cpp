@@ -22,7 +22,13 @@
 #include "Player.h"
 #include "World.h"
 
-#define CLIMB_ANGLE 1.9f
+#include "Configuration/Config.h"
+
+#define CLIMB_ANGLE 1.87f
+
+#define LANG_ANTICHEAT_ALERT 30087
+#define LANG_ANTICHEAT_TELEPORT 30088
+#define LANG_ANTICHEAT_IGNORECONTROL 30089
 
 AnticheatMgr::AnticheatMgr()
 {
@@ -35,21 +41,24 @@ AnticheatMgr::~AnticheatMgr()
 
 void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInfo */,uint32 opcode)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & JUMP_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectJumpHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
     {
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Jump-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+        }
         BuildReport(player,JUMP_HACK_REPORT);
-        TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Jump-Hack detected player GUID %s",player->GetGUID().ToString().c_str());
     }
 }
 
-void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* movementInfo */)
+void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movementInfo)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & WALK_WATER_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectWaterWalkHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
@@ -60,20 +69,58 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* move
     if (!player->IsAlive())
         return;
 
-    if (player->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
-        player->HasAuraType(SPELL_AURA_SAFE_FALL) ||
-        player->HasAuraType(SPELL_AURA_WATER_WALK))
+    // Prevents the False Positive for water walking when you ressurrect.
+    // Aura 15007 (Resurrection sickness) is given while dead before returning back to life.
+    if (player->HasAuraType(SPELL_AURA_GHOST) && player->HasAura(15007))
         return;
 
-    TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Walk on Water - Hack detected player GUID %s",player->GetGUID().ToString().c_str());
+    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
+    {
+        if (player->HasAuraType(SPELL_AURA_WATER_WALK) || player->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
+            player->HasAuraType(SPELL_AURA_SAFE_FALL))
+        {
+            return;
+        }
+
+    }
+    else if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
+    {
+        return;
+    }
+
+    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerWaterWalkHack", false))
+    {
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %u (%s)", player->GetName(), player->GetGUID().ToString());
+        }
+
+        player->GetSession()->KickPlayer("Water Walking");
+        if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceKick", true))
+        {
+            std::string plr = player->GetName();
+            std::string tag_colour = "7bbef7";
+            std::string plr_colour = "ff0000";
+            std::ostringstream stream;
+            stream << "|CFF" << plr_colour << "[AntiCheat]|r|CFF" << tag_colour <<
+                " Player |r|cff" << plr_colour << plr << "|r|cff" << tag_colour <<
+                " has been kicked.|r";
+            sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
+        }
+    }
+    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+    {
+        TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Walk on Water - Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+    }
     BuildReport(player,WALK_WATER_HACK_REPORT);
 
 }
 
-void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo /* movementInfo */)
+void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & FLY_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectFlyHack", true))
         return;
+
 
     uint32 key = player->GetGUID().GetCounter();
     if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FLYING))
@@ -84,13 +131,48 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo /* movementInfo
         player->HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED))
         return;
 
-    TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Fly-Hack detected player GUID %s",player->GetGUID().ToString().c_str());
+    /*Thanks to @LilleCarl for info to check extra flag*/
+    bool stricterChecks = true;
+    if (sConfigMgr->GetBoolDefault("Anticheat.StricterFlyHackCheck", false))
+    {
+        stricterChecks = !(movementInfo.HasMovementFlag(MOVEMENTFLAG_ASCENDING) && !player->IsInWater());
+    }
+
+    if (!movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING) && stricterChecks)
+    {
+        return;
+    }
+
+    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerFlyHack", false))
+    {
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("module", "AnticheatMgr:: Fly-Hack detected and counteracted by kicking player %u (%s)", player->GetName(), player->GetGUID().ToString());
+        }
+
+        player->GetSession()->KickPlayer("Fly Hack");
+        if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceKick", true))
+        {
+            std::string plr = player->GetName();
+            std::string tag_colour = "7bbef7";
+            std::string plr_colour = "ff0000";
+            std::ostringstream stream;
+            stream << "|CFF" << plr_colour << "[AntiCheat]|r|CFF" << tag_colour <<
+                " Player |r|cff" << plr_colour << plr << "|r|cff" << tag_colour <<
+                " has been kicked.|r";
+            sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
+        }
+    }
+    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+    {
+        TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Fly-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+    }
     BuildReport(player,FLY_HACK_REPORT);
 }
 
 void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & TELEPORT_PLANE_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectTelePlaneHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
@@ -110,9 +192,94 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     // we are not really walking there
     if (z_diff > 1.0f)
     {
-        TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Teleport To Plane - Hack detected player GUID %s",player->GetGUID().ToString().c_str());
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Teleport To Plane - Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+        }
         BuildReport(player,TELEPORT_PLANE_HACK_REPORT);
     }
+}
+
+void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movementInfo)
+{
+    float x, y;
+    player->GetPosition(x, y);
+    ObjectGuid key = player->GetGUID();
+
+    if (sConfigMgr->GetBoolDefault("Anticheat.IgnoreControlHack", true))
+    {
+        if (player->HasUnitState(UNIT_STATE_ROOT) && !player->GetVehicle())
+        {
+            bool unrestricted = movementInfo.pos.GetPositionX() != x || movementInfo.pos.GetPositionY() != y;
+            if (unrestricted)
+            {
+                if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
+                {
+                    // display warning at the center of the screen, hacky way?
+                    std::string str = "";
+                    str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
+                    WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                    data << str;
+                    sWorld->SendGlobalGMMessage(&data);
+                    // need better way to limit chat spam
+                    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                    {
+                        sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str());
+                    }
+                }
+                if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+                {
+                    TC_LOG_INFO("module", "AnticheatMgr:: Ignore Control - Hack detected player %u (%s)", player->GetName(), player->GetGUID().ToString());
+                }
+                BuildReport(player, IGNORE_CONTROL_REPORT);
+            }
+        }
+    }
+}
+
+void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementInfo)
+{
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectTelePortHack", true))
+        return;
+
+    ObjectGuid key = player->GetGUID();
+
+    if (m_Players[key].GetLastMovementInfo().pos.GetPositionX() == movementInfo.pos.GetPositionX())
+        return;
+
+    float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
+    float newX = movementInfo.pos.GetPositionX();
+
+    float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
+    float newY = movementInfo.pos.GetPositionY();
+
+    float xDiff = fabs(lastX - newX);
+    float yDiff = fabs(lastY - newY);
+
+    if ((xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())
+    {
+        if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
+        {
+            // display warning at the center of the screen, hacky way?
+            std::string str = "";
+            str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
+            // need better way to limit chat spam
+            if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+            {
+                sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str());
+            }
+        }
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("module", "AnticheatMgr:: Teleport-Hack detected player %u (%s)", player->GetName(), player->GetGUID().ToString());
+        }
+        BuildReport(player, TELEPORT_HACK_REPORT);
+    }
+    else if (player->CanTeleport())
+        player->SetCanTeleport(false);
 }
 
 void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
@@ -138,7 +305,8 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     JumpHackDetection(player,movementInfo,opcode);
     TeleportPlaneHackDetection(player, movementInfo);
     ClimbHackDetection(player,movementInfo,opcode);
-
+    TeleportHackDetection(player, movementInfo);
+    IgnoreControlHackDetection(player, movementInfo);
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
 }
@@ -146,7 +314,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 // basic detection
 void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo, uint32 opcode)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & CLIMB_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetOption<bool>("Anticheat.DetectClimbHack", false))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
@@ -170,23 +338,60 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
 
     if (angle > CLIMB_ANGLE)
     {
-        TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Climb-Hack detected player GUID %s",player->GetGUID().ToString().c_str());
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Climb-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+        }
         BuildReport(player,CLIMB_HACK_REPORT);
     }
 }
 
 void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
 {
-    if ((sWorld->getIntConfig(CONFIG_ANTICHEAT_DETECTIONS_ENABLED) & SPEED_HACK_DETECTION) == 0)
+    if (!sConfigMgr->GetOption<bool>("Anticheat.DetectSpeedHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
 
     // We also must check the map because the movementFlag can be modified by the client.
     // If we just check the flag, they could always add that flag and always skip the speed hacking detection.
-    // 369 == DEEPRUN TRAM
-    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId() == 369)
-        return;
+
+    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId())
+        switch (player->GetMapId())
+        {
+            case 369: //Transport: DEEPRUN TRAM
+            case 607: //Transport: Strands of the Ancients
+            case 582: //Transport: Rut'theran to Auberdine
+            case 584: //Transport: Menethil to Theramore
+            case 586: //Transport: Exodar to Auberdine
+            case 587: //Transport: Feathermoon Ferry
+            case 588: //Transport: Menethil to Auberdine
+            case 589: //Transport: Orgrimmar to Grom'Gol
+            case 590: //Transport: Grom'Gol to Undercity
+            case 591: //Transport: Undercity to Orgrimmar
+            case 592: //Transport: Borean Tundra Test
+            case 593: //Transport: Booty Bay to Ratchet
+            case 594: //Transport: Howling Fjord Sister Mercy (Quest)
+            case 596: //Transport: Naglfar
+            case 610: //Transport: Tirisfal to Vengeance Landing
+            case 612: //Transport: Menethil to Valgarde
+            case 613: //Transport: Orgrimmar to Warsong Hold
+            case 614: //Transport: Stormwind to Valiance Keep
+            case 620: //Transport: Moa'ki to Unu'pe
+            case 621: //Transport: Moa'ki to Kamagua
+            case 622: //Transport: Orgrim's Hammer
+            case 623: //Transport: The Skybreaker
+            case 641: //Transport: Alliance Airship BG
+            case 642: //Transport: Horde Airship BG
+            case 647: //Transport: Orgrimmar to Thunder Bluff
+            case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
+            case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+            case 712: //Transport: The Skybreaker (IC Dungeon)
+            case 713: //Transport: Orgrim's Hammer (IC Dungeon)
+            case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
+                return;
+            break;
+        }
 
     uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
     uint8 moveType = 0;
@@ -208,17 +413,26 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
     // how long the player took to move to here.
     uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time,movementInfo.time);
 
+    if (int32(timeDiff) < 0)
+    {
+        BuildReport(player, SPEED_HACK_REPORT);
+        timeDiff = 1;
+    }
+
     if (!timeDiff)
         timeDiff = 1;
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 
-    // we did the (uint32) cast to accept a margin of tolerance
-    if (clientSpeedRate > speedRate)
+    // we did the (uint32) cast to accept a margin of tolerance and drift for falling compensation
+    if (clientSpeedRate > speedRate * 1.25f)
     {
-        BuildReport(player,SPEED_HACK_REPORT);
-        TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Speed-Hack detected player GUID %s",player->GetGUID().ToString().c_str());
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        {
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Speed-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+        }
+        BuildReport(player, SPEED_HACK_REPORT);
     }
 }
 
@@ -272,6 +486,12 @@ uint32 AnticheatMgr::GetTypeReports(uint32 lowGUID, uint8 type)
 bool AnticheatMgr::MustCheckTempReports(uint8 type)
 {
     if (type == JUMP_HACK_REPORT)
+        return false;
+
+    if (type == TELEPORT_HACK_REPORT)
+        return false;
+
+    if (type == IGNORE_CONTROL_REPORT)
         return false;
 
     return true;
@@ -341,6 +561,11 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         WorldPacket data2(SMSG_CHAT_SERVER_MESSAGE, (str.size()+1));
         data2 << str;
         sWorld->SendGlobalGMMessage(&data2);
+    }
+    // need better way to limit chat spam
+    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+    {
+        sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
     }
 }
 

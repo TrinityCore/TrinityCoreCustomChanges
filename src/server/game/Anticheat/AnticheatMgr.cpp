@@ -47,9 +47,9 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_DEBUG("entities.player.character", "AnticheatMgr:: Jump-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Jump-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player,JUMP_HACK_REPORT);
     }
@@ -89,9 +89,9 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerWaterWalkHack", false))
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO(entities.player.character, "AnticheatMgr:: Walk on Water - Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
         }
 
         player->GetSession()->KickPlayer("Water Walking");
@@ -107,7 +107,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
             sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
         }
     }
-    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
         TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Walk on Water - Hack detected player GUID %s", player->GetGUID().ToString().c_str());
     }
@@ -143,9 +143,9 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerFlyHack", false))
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Fly-Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO(entities.player.character, "AnticheatMgr:: Fly-Hack detected and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
         }
 
         player->GetSession()->KickPlayer("Fly Hack");
@@ -161,7 +161,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
             sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
         }
     }
-    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+    else if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
         TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Fly-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
     }
@@ -190,7 +190,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     // we are not really walking there
     if (z_diff > 1.0f)
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
             TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Teleport To Plane - Hack detected player GUID %s", player->GetGUID().ToString().c_str());
         }
@@ -225,9 +225,9 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                         sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str());
                     }
                 }
-                if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+                if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
                 {
-                    TC_LOG_INFO("module", "AnticheatMgr:: Ignore Control - Hack detected player %s", player->GetGUID().ToString().c_str());
+                    TC_LOG_INFO(entities.player.character, "AnticheatMgr:: Ignore Control - Hack detected player %s", player->GetGUID().ToString().c_str());
                 }
                 BuildReport(player, IGNORE_CONTROL_REPORT);
             }
@@ -270,9 +270,9 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
                 sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str());
             }
         }
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Teleport-Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO(entities.player.character, "AnticheatMgr:: Teleport-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }
@@ -336,7 +336,7 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
 
     if (angle > CLIMB_ANGLE)
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
             TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Climb-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
         }
@@ -426,7 +426,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
     // we did the (uint32) cast to accept a margin of tolerance and drift for falling compensation
     if (clientSpeedRate > speedRate * 1.25f)
     {
-        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false))
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
             TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Speed-Hack detected player GUID %s", player->GetGUID().ToString().c_str());
         }

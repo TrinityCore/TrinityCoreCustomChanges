@@ -141,7 +141,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
         return;
     }
 
-    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerFlyHack", false))
+    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayerFlyHack", true))
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {

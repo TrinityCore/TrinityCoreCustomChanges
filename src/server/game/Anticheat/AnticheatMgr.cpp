@@ -426,6 +426,12 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
         return;
     }
 
+    // Mage Class Blink causes false flags so we add the exception here
+    if (player->GetClass() == CLASS_MAGE && player->GetAura(1953))
+    {
+        return;
+    }
+
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 

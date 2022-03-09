@@ -420,6 +420,12 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
     if (!timeDiff)
         timeDiff = 1;
 
+    // Rouge Class Killing Spree causes false flags so we add the exception here
+    if (player->GetClass() == CLASS_ROGUE && player->GetAura(51690))
+    {
+        return;
+    }
+
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 

@@ -547,7 +547,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player {} ({})", player->GetName(), player->GetGUID().ToString());
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player {} ({})", player->GetName(), player->GetGUID().ToString());
         }
         // display warning at the center of the screen, hacky way?
         std::string str = "";
@@ -574,7 +574,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player {} ({})", player->GetName(), player->GetGUID().ToString());
+            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player {} ({})", player->GetName(), player->GetGUID().ToString());
         }
         // display warning at the center of the screen, hacky way?
         std::string str = "";

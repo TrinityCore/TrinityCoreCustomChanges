@@ -61,7 +61,7 @@ class TC_GAME_API AnticheatMgr
     ~AnticheatMgr();
 
     public:
-    static AnticheatMgr* instance()
+        static AnticheatMgr* instance()
         {
            static AnticheatMgr* instance = new AnticheatMgr();
            return instance;
@@ -95,7 +95,7 @@ class TC_GAME_API AnticheatMgr
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);
-
+        WorldSession* _session;
         AnticheatPlayersDataMap m_Players;                        ///< Player data
 };
 

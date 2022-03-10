@@ -3350,26 +3350,42 @@ Anticheat.IgnoreControlHack = 1
 
 Anticheat.StricterFlyHackCheck = 0
 
-#     Anticheat.KickPlayerFlyHack
-#       Description: Kick option for first detect on flyhack (may give false positives)
+# Automatic Moderation Features
+#
+#     Anticheat.KickPlayer
+#     Anticheat.ReportsForKick
+#
+#       Description: Enables and Auto kick when reports reach threshhold
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
+#       Default:    70 - (Kick at 70 auto reports)
+#
 
-Anticheat.KickPlayerFlyHack = 0
+Anticheat.KickPlayer = 0
+Anticheat.ReportsForKick = 70
 
-#     Anticheat.KickPlayerWaterWalkHack
+#     Anticheat.BanPlayer
+#     Anticheat.ReportsForBan
+#
+#       Description: Enables and Auto kick when reports reach threshhold
 #       Description: Kick option for first detect on waterwalkhack (may give false positives)
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
-
-Anticheat.KickPlayerWaterWalkHack = 0
-
-#     Anticheat.AnnounceKick
-#       Description: Send a message to all players when a user kicked.
-#       Default:    0 - (Disabled)
+#       Default:    70 - (Kick at 70 auto reports)
 #
 
+Anticheat.BanPlayer = 0
+Anticheat.ReportsForBan = 70
+
+#     Anticheat.AnnounceKick
+#     Anticheat.AnnounceBan
+#       Description: Send a message to all players when a user kicked or banned.
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
 Anticheat.AnnounceKick = 0
+Anticheat.AnnounceBan = 0
+
 
 #
 #     PlayerDump.DisallowPaths

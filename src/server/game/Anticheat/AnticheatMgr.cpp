@@ -420,16 +420,21 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
     if (!timeDiff)
         timeDiff = 1;
 
-    // Rouge Class Killing Spree causes false flags so we add the exception here
-    if (player->GetClass() == CLASS_ROGUE && player->GetAura(51690))
+    // Exceptions
+    switch (player->GetClass())
     {
-        return;
-    }
-
-    // Mage Class Blink causes false flags so we add the exception here
-    if (player->GetClass() == CLASS_MAGE && player->GetAura(1953))
-    {
-        return;
+        case CLASS_ROGUE:
+            // Killing Spree
+            if (player->GetAura(51690))
+                return;
+            break;
+        case CLASS_MAGE:
+            // Blink
+            if (player->GetAura(1953))
+                return;
+            break;
+        default:
+            break;
     }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.

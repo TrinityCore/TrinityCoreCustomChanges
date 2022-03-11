@@ -545,7 +545,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     }
     if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", true))
     {
-        if (m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70))
+        if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_MAX_REPORTS_FOR_KICKS))
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
@@ -575,7 +575,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
 
     if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true))
     {
-        if (m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70))
+        if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_MAX_REPORTS_FOR_BANS))
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {

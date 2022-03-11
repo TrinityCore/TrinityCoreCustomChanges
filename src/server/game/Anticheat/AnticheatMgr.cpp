@@ -543,7 +543,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
     }
-    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", true) && m_Players[key].GetTotalReports() > sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70))
+    if (sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", true) && m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70))
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
@@ -570,7 +570,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         }
     }
 
-    if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true) && m_Players[key].GetTotalReports() > sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70))
+    if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true) && m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70))
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {

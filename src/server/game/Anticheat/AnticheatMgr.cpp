@@ -539,7 +539,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         sWorld->SendGlobalGMMessage(&data2);
     }
     // need better way to limit chat spam
-    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && (m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX)))
     {
         sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
     }
@@ -570,7 +570,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         }
     }
 
-    if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true) && m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70))
+    if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true) && (m_Players[key].GetTotalReports() >= sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70)))
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {

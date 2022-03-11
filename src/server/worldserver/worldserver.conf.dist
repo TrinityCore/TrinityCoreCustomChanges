@@ -3386,7 +3386,6 @@ Anticheat.ReportsForBan = 70
 Anticheat.AnnounceKick = 0
 Anticheat.AnnounceBan = 0
 
-
 #
 #     PlayerDump.DisallowPaths
 #        Description: Disallow using paths in PlayerDump output files

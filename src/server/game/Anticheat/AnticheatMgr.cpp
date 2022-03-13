@@ -617,6 +617,38 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
             }
         }
     }
+
+    if (sConfigMgr->GetBoolDefault("Anticheat.JailPlayer", true) && m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS))
+    {
+        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
+        {
+            TC_LOG_INFO("module", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player {} ({})", player->GetName(), player->GetGUID().ToString());
+        }
+        // display warning at the center of the screen, hacky way?
+        std::string str = "";
+        str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Jailed Account for Reaching Cheat Threshhold!";
+        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+        data << str;
+        sWorld->SendGlobalGMMessage(&data);
+
+        WorldLocation loc;
+        loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+        player->TeleportTo(loc);
+        player->SetHomebind(loc, 876);// GM Jail Homebind location
+        player->CastSpell(player, 9454);// freeze him in place to ensure no exploit happens for jail break attempt
+
+        if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceJail", true))
+        {
+            std::string plr = player->GetName();
+            std::string tag_colour = "7bbef7";
+            std::string plr_colour = "ff0000";
+            std::ostringstream stream;
+            stream << "|CFF" << plr_colour << "[AntiCheat]|r|CFF" << tag_colour <<
+                " Player |r|cff" << plr_colour << plr << "|r|cff" << tag_colour <<
+                " has been Jailed by the Anticheat Module.|r";
+            sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
+        }
+    }
 }
 
 void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)

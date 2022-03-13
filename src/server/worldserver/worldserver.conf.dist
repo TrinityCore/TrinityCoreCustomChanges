@@ -3340,7 +3340,7 @@ Anticheat.DetectJumpHack = 1
 Anticheat.DetectTelePlaneHack = 1
 Anticheat.DetectSpeedHack = 1
 Anticheat.DetectClimbHack = 1
-Anticheat.DetectTelePortHack =1
+Anticheat.DetectTelePortHack = 1
 Anticheat.IgnoreControlHack = 1
 
 #     Anticheat.StricterFlyHackCheck
@@ -3350,7 +3350,7 @@ Anticheat.IgnoreControlHack = 1
 
 Anticheat.StricterFlyHackCheck = 0
 
-# Automatic Moderation Features
+#     Automatic Moderation Features
 #
 #     Anticheat.KickPlayer
 #     Anticheat.ReportsForKick
@@ -3362,13 +3362,13 @@ Anticheat.StricterFlyHackCheck = 0
 #
 
 Anticheat.KickPlayer = 0
-Anticheat.ReportsForKick = 70
+Anticheat.ReportsForKick = 75
 
 #     Anticheat.BanPlayer
 #     Anticheat.ReportsForBan
 #
 #       Description: Enables and Auto kick when reports reach threshhold
-#       Description: Kick option for first detect on waterwalkhack (may give false positives)
+#       Description: Enables and Auto ban when reports reach threshhold
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
 #       Default:    70 - (Kick at 70 auto reports)
@@ -3377,14 +3377,29 @@ Anticheat.ReportsForKick = 70
 Anticheat.BanPlayer = 0
 Anticheat.ReportsForBan = 70
 
+#     Anticheat.JailPlayer
+#     Anticheat.ReportsForJail
+#
+#       Description: Enables and Auto Jail when reports reach threshhold
+#       Description: Enables and Auto Jail when reports reach threshhold
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#       Default:    70 - (Kick at 70 auto reports)
+#
+
+Anticheat.JailPlayer = 0
+Anticheat.ReportsForJail = 70
+
 #     Anticheat.AnnounceKick
 #     Anticheat.AnnounceBan
-#       Description: Send a message to all players when a user kicked or banned.
+#     Anticheat.AnnounceJail
+#       Description: Send a message to all players when a user kicked, banned, jailed.
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
 
 Anticheat.AnnounceKick = 0
 Anticheat.AnnounceBan = 0
+Anticheat.AnnounceJail = 0
 
 #
 #     PlayerDump.DisallowPaths

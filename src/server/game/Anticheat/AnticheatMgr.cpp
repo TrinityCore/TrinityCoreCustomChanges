@@ -349,8 +349,18 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
             case 713: //Transport: Orgrim's Hammer (IC Dungeon)
             case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
                 return;
-            break;
+            break;// Should never happen
         }
+
+    switch (player->GetAreaId())
+    {
+        case 4281: //Acherus: The Ebon Hold
+        case 4342: //Acherus: The Ebon Hold
+            return;
+        break;
+            default:
+        break;// Should never happen
+    }
 
     uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
     uint8 moveType = 0;
@@ -395,7 +405,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player,MovementInfo movementInfo)
                 return;
             break;
         default:
-            break;
+            break;// Should never happen
     }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.

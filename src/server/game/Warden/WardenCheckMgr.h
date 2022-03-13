@@ -63,7 +63,7 @@ constexpr WardenCheckCategory GetWardenCheckCategory(WardenCheckType type)
     {
         case TIMING_CHECK:   return NUM_CHECK_CATEGORIES;
         case DRIVER_CHECK:   return INJECT_CHECK_CATEGORY;
-        case PROC_CHECK:     return NUM_CHECK_CATEGORIES;
+        case PROC_CHECK:     return INJECT_CHECK_CATEGORY;
         case LUA_EVAL_CHECK: return LUA_CHECK_CATEGORY;
         case MPQ_CHECK:      return MODDED_CHECK_CATEGORY;
         case PAGE_CHECK_A:   return INJECT_CHECK_CATEGORY;

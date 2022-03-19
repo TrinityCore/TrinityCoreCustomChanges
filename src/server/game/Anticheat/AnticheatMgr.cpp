@@ -23,6 +23,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "SharedDefines.h"
 #include "World.h"
 #include "WorldSession.h"
 #include "Configuration/Config.h"
@@ -581,8 +582,8 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
             }
         }
     }
-
-    if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true))
+// commit out until we can figure out why automatic moderation banning crashes the server.
+ /*   if (sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", true))
     {
         if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_MAX_REPORTS_FOR_BANS))
         {
@@ -599,9 +600,8 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
 
             std::string accountName;
             AccountMgr::GetName(_session->GetAccountId(), accountName);
-            std::stringstream banReason;
-            banReason << "Warden Anticheat Violation";
-            sWorld->BanAccount(BAN_ACCOUNT, accountName, "0s", "Anticheat module Auto Banned Account for Reach Cheat Threshhold", "Server");
+
+            sWorld->BanAccount(BAN_ACCOUNT, accountName, "0", "Anticheat Module Auto Banned", "Server");
 
             if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceBan", true))
             {
@@ -615,7 +615,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
                 sWorld->SendServerMessage(SERVER_MSG_STRING, stream.str().c_str());
             }
         }
-    }
+    }*/
 
     if (sConfigMgr->GetBoolDefault("Anticheat.JailPlayer", true) && m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS))
     {

@@ -546,9 +546,6 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
         WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
-        WorldPacket data2(SMSG_CHAT_SERVER_MESSAGE, (str.size()+1));
-        data2 << str;
-        sWorld->SendGlobalGMMessage(&data2);
     }
     // need better way to limit chat spam
     if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && (m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX)))

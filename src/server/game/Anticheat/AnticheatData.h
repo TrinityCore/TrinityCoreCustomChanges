@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -60,8 +60,6 @@ public:
 private:
     uint32 lastOpcode;
     MovementInfo lastMovementInfo;
-    //bool disableACCheck;
-    //uint32 disableACCheckTimer;
     uint32 totalReports;
     uint32 typeReports[MAX_REPORT_TYPES];
     float average;

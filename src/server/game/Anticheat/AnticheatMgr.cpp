@@ -276,7 +276,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 // basic detection
 void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
-    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectClimbHack", false))
+    if (!sConfigMgr->GetBoolDefault("Anticheat.DetectClimbHack", true))
         return;
 
     uint32 key = player->GetGUID().GetCounter();

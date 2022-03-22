@@ -3399,6 +3399,13 @@ Anticheat.AnnounceKick = 0
 Anticheat.AnnounceBan = 0
 Anticheat.AnnounceJail = 0
 
+# Anticheat Logging\Appenders
+# Currently spams into its own file
+# If you want world console spam just use Logger.anticheat=3,Console Server Anticheat
+
+Appender.Anticheat=2,3,15,anticheat.log,a
+Logger.anticheat=3,Server Anticheat
+
 #
 #     PlayerDump.DisallowPaths
 #        Description: Disallow using paths in PlayerDump output files

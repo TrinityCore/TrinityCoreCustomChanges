@@ -53,7 +53,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Jump-Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jump-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, JUMP_HACK_REPORT);
     }
@@ -93,7 +93,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
-        TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Walk on Water - Hack detected player %s", player->GetGUID().ToString().c_str());
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s", player->GetGUID().ToString().c_str());
     }
     BuildReport(player, WALK_WATER_HACK_REPORT);
 
@@ -127,7 +127,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
-        TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Fly-Hack detected player %s", player->GetGUID().ToString().c_str());
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s", player->GetGUID().ToString().c_str());
     }
     BuildReport(player, FLY_HACK_REPORT);
 }
@@ -156,7 +156,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Teleport To Plane - Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport To Plane - Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_PLANE_HACK_REPORT);
     }
@@ -191,7 +191,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                 }
                 if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
                 {
-                    TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Ignore Control - Hack detected player %s", player->GetGUID().ToString().c_str());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Control - Hack detected player %s", player->GetGUID().ToString().c_str());
                 }
                 BuildReport(player, IGNORE_CONTROL_REPORT);
             }
@@ -236,7 +236,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         }
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Teleport-Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }
@@ -302,7 +302,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Climb-Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, CLIMB_HACK_REPORT);
     }
@@ -321,49 +321,49 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId())
         switch (player->GetMapId())
         {
-            case 369: //Transport: DEEPRUN TRAM
-            case 607: //Transport: Strands of the Ancients
-            case 582: //Transport: Rut'theran to Auberdine
-            case 584: //Transport: Menethil to Theramore
-            case 586: //Transport: Exodar to Auberdine
-            case 587: //Transport: Feathermoon Ferry
-            case 588: //Transport: Menethil to Auberdine
-            case 589: //Transport: Orgrimmar to Grom'Gol
-            case 590: //Transport: Grom'Gol to Undercity
-            case 591: //Transport: Undercity to Orgrimmar
-            case 592: //Transport: Borean Tundra Test
-            case 593: //Transport: Booty Bay to Ratchet
-            case 594: //Transport: Howling Fjord Sister Mercy (Quest)
-            case 596: //Transport: Naglfar
-            case 610: //Transport: Tirisfal to Vengeance Landing
-            case 612: //Transport: Menethil to Valgarde
-            case 613: //Transport: Orgrimmar to Warsong Hold
-            case 614: //Transport: Stormwind to Valiance Keep
-            case 620: //Transport: Moa'ki to Unu'pe
-            case 621: //Transport: Moa'ki to Kamagua
-            case 622: //Transport: Orgrim's Hammer
-            case 623: //Transport: The Skybreaker
-            case 641: //Transport: Alliance Airship BG
-            case 642: //Transport: Horde Airship BG
-            case 647: //Transport: Orgrimmar to Thunder Bluff
-            case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
-            case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
-            case 712: //Transport: The Skybreaker (IC Dungeon)
-            case 713: //Transport: Orgrim's Hammer (IC Dungeon)
-            case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
-                return;
+        case 369: //Transport: DEEPRUN TRAM
+        case 607: //Transport: Strands of the Ancients
+        case 582: //Transport: Rut'theran to Auberdine
+        case 584: //Transport: Menethil to Theramore
+        case 586: //Transport: Exodar to Auberdine
+        case 587: //Transport: Feathermoon Ferry
+        case 588: //Transport: Menethil to Auberdine
+        case 589: //Transport: Orgrimmar to Grom'Gol
+        case 590: //Transport: Grom'Gol to Undercity
+        case 591: //Transport: Undercity to Orgrimmar
+        case 592: //Transport: Borean Tundra Test
+        case 593: //Transport: Booty Bay to Ratchet
+        case 594: //Transport: Howling Fjord Sister Mercy (Quest)
+        case 596: //Transport: Naglfar
+        case 610: //Transport: Tirisfal to Vengeance Landing
+        case 612: //Transport: Menethil to Valgarde
+        case 613: //Transport: Orgrimmar to Warsong Hold
+        case 614: //Transport: Stormwind to Valiance Keep
+        case 620: //Transport: Moa'ki to Unu'pe
+        case 621: //Transport: Moa'ki to Kamagua
+        case 622: //Transport: Orgrim's Hammer
+        case 623: //Transport: The Skybreaker
+        case 641: //Transport: Alliance Airship BG
+        case 642: //Transport: Horde Airship BG
+        case 647: //Transport: Orgrimmar to Thunder Bluff
+        case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
+        case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+        case 712: //Transport: The Skybreaker (IC Dungeon)
+        case 713: //Transport: Orgrim's Hammer (IC Dungeon)
+        case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
+            return;
             break;
-                default:
+        default:
             break;// Should never happen
         }
 
     switch (player->GetAreaId())
     {
-        case 4281: //Acherus: The Ebon Hold
-        case 4342: //Acherus: The Ebon Hold
-            return;
+    case 4281: //Acherus: The Ebon Hold
+    case 4342: //Acherus: The Ebon Hold
+        return;
         break;
-            default:
+    default:
         break;// Should never happen
     }
 
@@ -399,18 +399,18 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // Exceptions
     switch (player->GetClass())
     {
-        case CLASS_ROGUE:
-            // Killing Spree
-            if (player->GetAura(51690))
-                return;
-            break;
-        case CLASS_MAGE:
-            // Blink
-            if (player->GetAura(1953))
-                return;
-            break;
-        default:
-            break;// Should never happen
+    case CLASS_ROGUE:
+        // Killing Spree
+        if (player->GetAura(51690))
+            return;
+        break;
+    case CLASS_MAGE:
+        // Blink
+        if (player->GetAura(1953))
+            return;
+        break;
+    default:
+        break;// Should never happen
     }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
@@ -421,7 +421,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Speed-Hack detected player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s", player->GetGUID().ToString().c_str());
         }
         BuildReport(player, SPEED_HACK_REPORT);
     }
@@ -562,7 +562,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
-                TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s", player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
             std::string str = "";
@@ -592,7 +592,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
-                TC_LOG_INFO("entities.player.character", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s", player->GetGUID().ToString().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s", player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
             std::string str = "";

@@ -87,10 +87,14 @@ public:
         Player* pTarget = player->GetConnectedPlayer();
 
         // teleport both to jail.
-        WorldLocation jail {1, 16226.5f, 16403.6f, -64.5f, 3.2f};
-        pTarget->TeleportTo(jail);
-        handler->GetPlayer()->TeleportTo(jail);
-        pTarget->SetHomebind(jail, 876);
+        handler->GetSession()->GetPlayer()->TeleportTo(1, 16226.5f, 16403.6f, -64.5f, 3.2f);
+
+        WorldLocation loc;
+        loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+        pTarget->TeleportTo(loc);
+        pTarget->SetHomebind(loc, 876);// GM Jail Homebind location
+        pTarget->CastSpell(pTarget, 38505);// shackle him in place to ensure no exploit happens for jail break attempt
+
 
         return true;
     }

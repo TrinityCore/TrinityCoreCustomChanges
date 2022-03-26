@@ -636,7 +636,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
         player->TeleportTo(loc);
         player->SetHomebind(loc, 876);// GM Jail Homebind location
-        player->CastSpell(player, 9454);// freeze him in place to ensure no exploit happens for jail break attempt
+        player->CastSpell(player, 38505);// shackle him in place to ensure no exploit happens for jail break attempt
 
         if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceJail", true))
         {

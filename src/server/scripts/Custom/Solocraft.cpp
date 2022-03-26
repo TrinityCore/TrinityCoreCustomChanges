@@ -32,6 +32,7 @@
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Chat.h"
+#include "Log.h"
 #include <math.h>
 #include <unordered_map>
 
@@ -45,6 +46,7 @@ uint32 SolocraftDungeonLevel = 1;
 std::unordered_map<uint32, uint32> dungeons;
 std::unordered_map<uint32, float> diff_Multiplier;
 std::unordered_map<uint32, float> diff_Multiplier_Heroics;
+std::unordered_map<uint8, uint32> classes;
 float D5 = 1.0;
 float D10 = 1.0;
 float D25 = 1.0;
@@ -65,6 +67,19 @@ public:
         SoloCraftDebuffEnable = sConfigMgr->GetBoolDefault("SoloCraft.Debuff.Enable", 1);
         SoloCraftSpellMult = sConfigMgr->GetFloatDefault("SoloCraft.Spellpower.Mult", 2.5);
         SoloCraftStatsMult = sConfigMgr->GetFloatDefault("SoloCraft.Stats.Mult", 100.0);
+        classes =
+        {
+          {1, sConfigMgr->GetIntDefault("SoloCraft.WARRIOR", 100) },
+          {2, sConfigMgr->GetIntDefault("SoloCraft.PALADIN", 100) },
+          {3, sConfigMgr->GetIntDefault("SoloCraft.HUNTER", 100) },
+          {4, sConfigMgr->GetIntDefault("SoloCraft.ROGUE", 100) },
+          {5, sConfigMgr->GetIntDefault("SoloCraft.PRIEST", 100) },
+          {6, sConfigMgr->GetIntDefault("SoloCraft.DEATH_KNIGHT", 100) },
+          {7, sConfigMgr->GetIntDefault("SoloCraft.SHAMAN", 100) },
+          {8, sConfigMgr->GetIntDefault("SoloCraft.MAGE", 100) },
+          {9, sConfigMgr->GetIntDefault("SoloCraft.WARLOCK", 100) },
+          {11, sConfigMgr->GetIntDefault("SoloCraft.DRUID", 100) },
+        };
         //Level Thresholds
         SolocraftLevelDiff = sConfigMgr->GetIntDefault("Solocraft.Max.Level.Diff", 10);
         //Catch All Dungeon Level Threshold
@@ -317,7 +332,8 @@ public:
             float difficulty = CalculateDifficulty(map, player);
             int dunLevel = CalculateDungeonLevel(map, player);
             int numInGroup = GetNumInGroup(player);
-            ApplyBuffs(player, map, difficulty, dunLevel, numInGroup);
+            uint32 classBalance = GetClassBalance(player);
+            ApplyBuffs(player, map, difficulty, dunLevel, numInGroup, classBalance);
         }
     }
 
@@ -335,7 +351,8 @@ private:
                 if (map->IsHeroic() && map->GetId() == 649) {
                     return D649H25;  //Heroic Grand Trial of the Crusader
                 }
-                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
+                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end())
+                {
                     return D25; //map not found returns the catch all value
                 }
                 else
@@ -344,21 +361,26 @@ private:
             if (map->IsHeroic())
             {
                 //WOTLK 10 Man Heroic
-                if (map->GetId() == 649) {
+                if (map->GetId() == 649)
+                {
                     return D649H10;
                 }
-                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end()) {
+                else if (diff_Multiplier_Heroics.find(map->GetId()) == diff_Multiplier_Heroics.end())
+                {
                     return D10; //map not found returns the catch all value
                 }
                 else
                     return diff_Multiplier_Heroics[map->GetId()]; //return the specific dungeon's level
             }
-            if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end()) {
+            if (diff_Multiplier.find(map->GetId()) == diff_Multiplier.end())
+            {
                 //Catch Alls  ----------------------5 Dungeons and 40 Raids
-                if (map->IsDungeon()) {
+                if (map->IsDungeon())
+                {
                     return D5;
                 }
-                else if (map->IsRaid()) {
+                else if (map->IsRaid())
+                {
                     return D40;
                 }
             }
@@ -368,7 +390,8 @@ private:
         return 0; //return 0
     }
     // Set the Dungeon Level
-    int CalculateDungeonLevel(Map* map, Player* /*player*/) {
+    int CalculateDungeonLevel(Map* map, Player* /*player*/)
+    {
         if (dungeons.find(map->GetId()) == dungeons.end())
         {
             return SolocraftDungeonLevel; //map not found returns the catch all value
@@ -377,7 +400,8 @@ private:
             return dungeons[map->GetId()]; //return the specific dungeon's level
     }
     // Get the group's size
-    int GetNumInGroup(Player* player) {
+    int GetNumInGroup(Player* player)
+    {
         int numInGroup = 1;
         Group* group = player->GetGroup();
         if (group) {
@@ -386,8 +410,24 @@ private:
         }
         return numInGroup;
     }
+    // Get the Player's class balance debuff
+    uint32 GetClassBalance(Player* player)
+    {
+        uint32 classBalance = 100;
+
+        if (classes.find(player->GetClass()) == classes.end())
+        {
+            return classBalance; //class not found returns the catch all value
+        }
+        else if (classes[player->GetClass()] <= 100)
+        {
+            return classes[player->GetClass()]; //return the specific class's Balance value
+        }
+        else
+            return classBalance; //class balance value invalid returns the catch all value
+    }
     // Apply the player buffs
-    void ApplyBuffs(Player* player, Map* map, float difficulty, int dunLevel, int numInGroup)
+    void ApplyBuffs(Player* player, Map* map, float difficulty, int dunLevel, int numInGroup, int classBalance)
     {
         int SpellPowerBonus = 0;
         //Check whether to buff the player or check to debuff back to normal
@@ -401,8 +441,8 @@ private:
                 //Check to either debuff or buff player entering dungeon.  Debuff must be enabled in Config
                 if (GroupDifficulty >= difficulty && SoloCraftDebuffEnable == 1)
                 {
-                    //Current dungeon offset exceeded - Debuff player
-                    difficulty = (-abs(difficulty)) + (difficulty / numInGroup);
+                    //Current dungeon offset exceeded - Debuff player modified by ClassBalance Adjustment
+                    difficulty = (-abs(difficulty)) + ((((float)classBalance / 100) * difficulty) / numInGroup);
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck
 
                     //sLog->outError("%u: would have this difficulty: %f", player->GetGUID(), tempDiff);
@@ -410,8 +450,8 @@ private:
                 else
                 {
                     //Current Dungeon offset not exceeded - Buff player
-                    //Group difficulty adjustment
-                    difficulty = difficulty / numInGroup;
+                    //Group difficulty and ClassBalance Adjustment
+                    difficulty = (((float)classBalance / 100) * difficulty) / numInGroup;;
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck - two decimal rounding
                 }
 
@@ -455,14 +495,14 @@ private:
                 if (difficulty > 0)
                 {
                     // Announce to player - Buff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - Difficulty Offset: %0.2f. Spellpower Bonus: %i";
-                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
+                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - Difficulty Offset: %0.2f. Spellpower Bonus: %i. Class Balance Weight: %i";
+                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus, classBalance);
                 }
                 else
                 {
                     // Announce to player - Debuff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
-                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty);
+                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f with a Class Balance Weight: %i. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
+                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, classBalance);
                 }
                 // Save Player Dungeon Offsets to Database
                 CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES (%u, %f, %u, %i, %f)", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);

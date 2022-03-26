@@ -4134,7 +4134,7 @@ Solocraft.Enable = 1
 # Announce the module when the player logs in?
 Solocraft.Announce = 1
 ###################################################################################################
-#  Balancing - Groups (Overloading), Spellpower, and Stats
+#  Balancing - Groups (Overloading), Global Spellpower and Stats modifier, Global Class Balancing
 ###################################################################################################
 # Enable Debuff of new party members who enter the dungeon to avoid overloading the dungeon?
 # Overloading is when a group member already in the dungeon has the full offset/buff of the
@@ -4147,17 +4147,35 @@ Solocraft.Announce = 1
 SoloCraft.Debuff.Enable = 1
 # Spellpower Bonus Multiplier
 # Spellcasters spellpower bonus multiplier to offset no spellpower received from stats
-# Formula: (player->level * multiplier) * difficulty
+# Formula: (player->level * multiplier) * ((classBalance / 100) * difficulty)
 # Example Level 24 Mage with default modifier and  a dungeon difficulty of 5 will receive a base
 # Spellpower increase of 300.
 # Default:  2.5
 #           0.0 (Disable)
 SoloCraft.Spellpower.Mult = 2.5
 # Stats Percentage Bonus Multiplier
-# Forumla: player->Stats * (difficulty * multiplier)
+# Forumla: player->Stats * (((classBalance / 100) * difficulty) * multiplier)
 # Default:  100.0
 #           0.0 (Disable)
 SoloCraft.Stats.Mult = 100.0
+#
+# Class Balancing Modifier
+# This settings will only allow the percentage specified of the difficulty for the specified class
+# Example Level 24 Mage with default modifier (2.5), a dungeon difficulty of 5, and a 80 percent class
+# balance modifier will receive a base Spellpower increase of 240.
+# Note: 0 will completely disable the class from receiving difficulty modifiers from any dungeon
+#Default: 100 (Full Dungeon Difficulty Modifer will be Applied)
+#         0 (Disable) - 100
+SoloCraft.DEATH_KNIGHT = 100
+SoloCraft.DRUID = 100
+SoloCraft.HUNTER = 100
+SoloCraft.MAGE = 100
+SoloCraft.PALADIN = 100
+SoloCraft.PRIEST = 100
+SoloCraft.ROGUE = 100
+SoloCraft.SHAMAN = 100
+SoloCraft.WARLOCK = 100
+SoloCraft.WARRIOR = 100
 #
 ################################################################################################
 #Catch all Bucket - Difficulty Offset Defaults

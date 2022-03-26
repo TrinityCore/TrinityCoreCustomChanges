@@ -623,7 +623,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("module", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s", player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s", player->GetGUID().ToString().c_str());
         }
         // display warning at the center of the screen, hacky way?
         std::string str = "";

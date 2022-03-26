@@ -62,7 +62,7 @@ public:
 
         if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true))
         {
-            if (player->GetAreaId() == 4342)
+            if (player->GetSession()->GetSecurity() == SEC_PLAYER && player->GetAreaId() == 4342)
             {
                 if (!firstLogin)
                     return;

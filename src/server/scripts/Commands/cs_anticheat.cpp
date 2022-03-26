@@ -95,7 +95,6 @@ public:
         pTarget->SetHomebind(loc, 876);// GM Jail Homebind location
         pTarget->CastSpell(pTarget, 38505);// shackle him in place to ensure no exploit happens for jail break attempt
 
-
         return true;
     }
 

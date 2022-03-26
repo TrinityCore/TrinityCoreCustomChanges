@@ -41,7 +41,8 @@ public:
             { "delete",      HandleAntiCheatDeleteCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "handle",      HandleAntiCheatHandleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
-            { "warn",        HandleAnticheatWarnCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "parole",      HandleAnticheatParoleCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "warn",        HandleAnticheatWarnCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes }
         };
 
         static ChatCommandTable commandTable =
@@ -95,6 +96,42 @@ public:
         pTarget->SetHomebind(loc, 876);// GM Jail Homebind location
         pTarget->CastSpell(pTarget, 38505);// shackle him in place to ensure no exploit happens for jail break attempt
 
+        return true;
+    }
+
+    static bool HandleAnticheatParoleCommand(ChatHandler* handler, Optional<PlayerIdentifier> player)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
+            return false;
+
+        if (!player)
+            player = PlayerIdentifier::FromTarget(handler);
+        if (!player || !player->IsConnected())
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Player* pTarget = player->GetConnectedPlayer();
+
+        WorldLocation Aloc;
+        WorldLocation Hloc;
+        Aloc = WorldLocation(0, -8833.37f, 628.62f, 94.00f, 1.06f);// Stormwind
+        Hloc = WorldLocation(1, 1569.59f, -4397.63f, 16.06f, 0.54f);// Orgrimmar
+
+        if (pTarget->GetTeamId() == TEAM_ALLIANCE)
+        {
+            pTarget->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
+            pTarget->SetHomebind(Aloc, 1519);// Stormwind Homebind location
+        }
+        else
+        {
+            pTarget->TeleportTo(1, 1569.59f, -4397.63f, 7.7f, 0.54f);//Orgrimmar
+            pTarget->SetHomebind(Hloc, 1653);// Orgrimmar Homebind location
+        }
+        pTarget->RemoveAura(38505);// remove shackles
+        sAnticheatMgr->AnticheatDeleteCommand(pTarget->GetGUID());// deletes auto reports on player
         return true;
     }
 

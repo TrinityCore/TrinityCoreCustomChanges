@@ -381,10 +381,11 @@ enum Thassarian
     SAY_LERYSSA_1           = 0,
     SAY_LERYSSA_2           = 1,
     SAY_LERYSSA_3           = 2,
-    SAY_LERYSSA_4           = 3
-};
+    SAY_LERYSSA_4           = 3,
 
-#define GOSSIP_ITEM_T   "Let's do this, Thassarian. It's now or never."
+    GOSSIP_THASSARIAN_MENU  = 9418, //Let's do this, Thassarian.  It's now or never.
+    GOSSIP_THASSARIAN_OP    = 0
+};
 
 class npc_thassarian : public CreatureScript
 {
@@ -667,7 +668,7 @@ public:
                 player->PrepareQuestMenu(me->GetGUID());
 
             if (player->GetQuestStatus(QUEST_LAST_RITES) == QUEST_STATUS_INCOMPLETE && me->GetAreaId() == 4128)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_ITEM_T, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, GOSSIP_THASSARIAN_MENU, GOSSIP_THASSARIAN_OP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
             SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
             return true;
@@ -1111,106 +1112,6 @@ public:
 };
 
 /*######
-## npc_imprisoned_beryl_sorcerer
-######*/
-enum ImprisionedBerylSorcerer
-{
-    SPELL_NEURAL_NEEDLE                  = 45634,
-    SPELL_PROTOTYPE_NEURAL_NEEDLE        = 48252,
-    SPELL_NEURAL_NEEDLE_IMPACT           = 45702,
-    SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT = 48254,
-
-    NPC_IMPRISONED_BERYL_SORCERER = 25478,
-
-    QUEST_THE_ART_OF_PERSUASION   = 11648
-};
-
-class npc_imprisoned_beryl_sorcerer : public CreatureScript
-{
-public:
-    npc_imprisoned_beryl_sorcerer() : CreatureScript("npc_imprisoned_beryl_sorcerer") { }
-
-    struct npc_imprisoned_beryl_sorcererAI : public ScriptedAI
-    {
-        npc_imprisoned_beryl_sorcererAI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            rebuff = 0;
-        }
-
-        uint32 rebuff;
-
-        void Reset() override
-        {
-            if (me->GetReactState() != REACT_PASSIVE)
-                me->SetReactState(REACT_PASSIVE);
-
-            Initialize();
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            UpdateVictim();
-
-            if (rebuff <= diff)
-            {
-                if (!me->HasAura(SPELL_COSMETIC_ENSLAVE_CHAINS_SELF))
-                    DoCast(me, SPELL_COSMETIC_ENSLAVE_CHAINS_SELF);
-                rebuff = 180000;
-            }
-            else
-                rebuff -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-
-        void JustEngagedWith(Unit* /*who*/) override
-        {
-        }
-
-        void SpellHit(WorldObject* caster, SpellInfo const* spellInfo) override
-        {
-            Player* playerCaster = caster->ToPlayer();
-            if (!playerCaster)
-                return;
-
-            if (spellInfo->Id == SPELL_NEURAL_NEEDLE || spellInfo->Id == SPELL_PROTOTYPE_NEURAL_NEEDLE)
-                GotStinged(playerCaster, spellInfo->Id);
-        }
-
-        void GotStinged(Player* caster, uint32 spellId)
-        {
-            DoCastSelf(spellId == SPELL_NEURAL_NEEDLE ? SPELL_NEURAL_NEEDLE_IMPACT : SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT);
-
-            // Event cannot happen if quest is not accepted/completed/rewarded
-            if (caster->GetQuestStatus(QUEST_THE_ART_OF_PERSUASION) == QUEST_STATUS_NONE)
-                return;
-
-            uint32 step = 0;
-
-            if (spellId == SPELL_NEURAL_NEEDLE)
-                step = caster->GetAuraCount(SPELL_NEURAL_NEEDLE); // Text IDs 0-6
-            else
-                step = caster->GetAuraCount(SPELL_PROTOTYPE_NEURAL_NEEDLE) + 7; // Text IDs 7-18
-
-            if (spellId == SPELL_NEURAL_NEEDLE && step == 4)
-                caster->KilledMonsterCredit(NPC_IMPRISONED_BERYL_SORCERER);
-
-            Talk(step, caster);
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_imprisoned_beryl_sorcererAI(creature);
-    }
-};
-
-/*######
 ## Help Those That Cannot Help Themselves, Quest 11876
 ######*/
 
@@ -1415,12 +1316,13 @@ enum HiddenCultist
     SAY_HIDDEN_CULTIST_1                        = 0,
     SAY_HIDDEN_CULTIST_2                        = 1,
     SAY_HIDDEN_CULTIST_3                        = 2,
-    SAY_HIDDEN_CULTIST_4                        = 3
-};
+    SAY_HIDDEN_CULTIST_4                        = 3,
 
-char const* GOSSIP_ITEM_TOM_HEGGER = "What do you know about the Cult of the Damned?";
-char const* GOSSIP_ITEM_GUARD_MITCHELLS = "How long have you worked for the Cult of the Damned?";
-char const* GOSSIP_ITEM_SALTY_JOHN_THORPE = "I have a reason to believe you're involved in the cultist activity";
+    GOSSIP_ITEM_TOM_HEGGER_MENUID               = 9217, //What do you know about the Cult of the Damned?
+    GOSSIP_ITEM_GUARD_MITCHELLS_MENUID          = 9219, //How long have you worked for the Cult of the Damned?
+    GOSSIP_ITEM_SALTY_JOHN_THORPE_MENUID        = 9218, //I have a reason to believe you're involved in the cultist activity
+    GOSSIP_ITEM_HIDDEN_CULTIST_OPTIONID         = 0
+};
 
 class npc_hidden_cultist : public CreatureScript
 {
@@ -1548,28 +1450,28 @@ public:
         bool OnGossipHello(Player* player) override
         {
             uint32 uiGossipText = 0;
-            char const* charGossipItem;
+            uint32 charGossipItem = 0;
 
             switch (me->GetEntry())
             {
                 case NPC_TOM_HEGGER:
                     uiGossipText = GOSSIP_TEXT_TOM_HEGGER;
-                    charGossipItem = GOSSIP_ITEM_TOM_HEGGER;
+                    charGossipItem = GOSSIP_ITEM_TOM_HEGGER_MENUID;
                     break;
                 case NPC_SALTY_JOHN_THORPE:
                     uiGossipText = GOSSIP_TEXT_SALTY_JOHN_THORPE;
-                    charGossipItem = GOSSIP_ITEM_SALTY_JOHN_THORPE;
+                    charGossipItem = GOSSIP_ITEM_SALTY_JOHN_THORPE_MENUID;
                     break;
                 case NPC_GUARD_MITCHELLS:
                     uiGossipText = GOSSIP_TEXT_GUARD_MITCHELSS;
-                    charGossipItem = GOSSIP_ITEM_GUARD_MITCHELLS;
+                    charGossipItem = GOSSIP_ITEM_GUARD_MITCHELLS_MENUID;
                     break;
                 default:
                     return false;
             }
 
             if (player->HasAura(SPELL_RIGHTEOUS_VISION) && player->GetQuestStatus(QUEST_THE_HUNT_IS_ON) == QUEST_STATUS_INCOMPLETE)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, charGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, charGossipItem, GOSSIP_ITEM_HIDDEN_CULTIST_OPTIONID, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
             if (me->IsVendor())
                 AddGossipItemFor(player, GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
@@ -1959,6 +1861,138 @@ class spell_kodo_delivered : public SpellScript
     }
 };
 
+/*######
+## Quest 11648: The Art of Persuasion
+######*/
+
+enum TheArtOfPersuasion
+{
+    WHISPER_TORTURE_1                      = 0,
+    WHISPER_TORTURE_2                      = 1,
+    WHISPER_TORTURE_3                      = 2,
+    WHISPER_TORTURE_4                      = 3,
+    WHISPER_TORTURE_5                      = 4,
+    WHISPER_TORTURE_RANDOM_1               = 5,
+    WHISPER_TORTURE_RANDOM_2               = 6,
+    WHISPER_TORTURE_RANDOM_3               = 7,
+
+    WHISPER_TORTURE_PROTO_1                = 8,
+    WHISPER_TORTURE_PROTO_2                = 9,
+    WHISPER_TORTURE_PROTO_3                = 10,
+    WHISPER_TORTURE_PROTO_4                = 11,
+    WHISPER_TORTURE_PROTO_5                = 12,
+    WHISPER_TORTURE_PROTO_6                = 13,
+    WHISPER_TORTURE_PROTO_7                = 14,
+    WHISPER_TORTURE_PROTO_8                = 15,
+    WHISPER_TORTURE_PROTO_9                = 16,
+    WHISPER_TORTURE_PROTO_10               = 17,
+
+    SPELL_NEURAL_NEEDLE_IMPACT             = 45702,
+    SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT   = 48254
+};
+
+// 45634 - Neural Needle
+class spell_borean_tundra_neural_needle : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_neural_needle);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_NEURAL_NEEDLE_IMPACT });
+    }
+
+    void HandleWhisper()
+    {
+        Player* caster = GetCaster()->ToPlayer();
+        Creature* target = GetHitCreature();
+        if (!caster || !target)
+            return;
+
+        target->CastSpell(target, SPELL_NEURAL_NEEDLE_IMPACT);
+
+        if (Aura* aura = caster->GetAura(GetSpellInfo()->Id))
+        {
+            switch (aura->GetStackAmount())
+            {
+                case 1:
+                    target->AI()->Talk(WHISPER_TORTURE_1, caster);
+                    break;
+                case 2:
+                    target->AI()->Talk(WHISPER_TORTURE_2, caster);
+                    break;
+                case 3:
+                    target->AI()->Talk(WHISPER_TORTURE_3, caster);
+                    break;
+                case 4:
+                    target->AI()->Talk(WHISPER_TORTURE_4, caster);
+                    break;
+                case 5:
+                    target->AI()->Talk(WHISPER_TORTURE_5, caster);
+                    caster->KilledMonsterCredit(target->GetEntry());
+                    break;
+                case 6:
+                    target->AI()->Talk(RAND(WHISPER_TORTURE_RANDOM_1, WHISPER_TORTURE_RANDOM_2, WHISPER_TORTURE_RANDOM_3), caster);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_borean_tundra_neural_needle::HandleWhisper);
+    }
+};
+
+// 48252 - Prototype Neural Needle
+class spell_borean_tundra_prototype_neural_needle : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_prototype_neural_needle);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT });
+    }
+
+    void HandleWhisper()
+    {
+        Player* caster = GetCaster()->ToPlayer();
+        Creature* target = GetHitCreature();
+        if (!caster || !target)
+            return;
+
+        target->CastSpell(target, SPELL_PROTOTYPE_NEURAL_NEEDLE_IMPACT);
+
+        uint32 text = 0;
+        if (Aura* aura = caster->GetAura(GetSpellInfo()->Id))
+        {
+            switch (aura->GetStackAmount())
+            {
+                case 1: text = WHISPER_TORTURE_PROTO_1; break;
+                case 2: text = WHISPER_TORTURE_PROTO_2; break;
+                case 3: text = WHISPER_TORTURE_PROTO_3; break;
+                case 4: text = WHISPER_TORTURE_PROTO_4; break;
+                case 5: text = WHISPER_TORTURE_PROTO_5; break;
+                case 6: text = WHISPER_TORTURE_PROTO_6; break;
+                case 7: text = WHISPER_TORTURE_PROTO_7; break;
+                case 8: text = WHISPER_TORTURE_PROTO_8; break;
+                case 9: text = WHISPER_TORTURE_PROTO_9; break;
+                case 10: text = WHISPER_TORTURE_PROTO_10; break;
+                default: return;
+            }
+        }
+
+        if (text)
+            target->AI()->Talk(text, caster);
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_borean_tundra_prototype_neural_needle::HandleWhisper);
+    }
+};
+
 void AddSC_borean_tundra()
 {
     new npc_corastrasza();
@@ -1971,7 +2005,6 @@ void AddSC_borean_tundra()
     new npc_leryssa();
     new npc_general_arlos();
     new npc_beryl_sorcerer();
-    new npc_imprisoned_beryl_sorcerer();
     new npc_trapped_mammoth_calf();
     new npc_valiance_keep_cannoneer();
     new npc_hidden_cultist();
@@ -1985,4 +2018,6 @@ void AddSC_borean_tundra()
     RegisterSpellScript(spell_dispel_freed_soldier_debuff);
     RegisterSpellScript(spell_deliver_kodo);
     RegisterSpellScript(spell_kodo_delivered);
+    RegisterSpellScript(spell_borean_tundra_neural_needle);
+    RegisterSpellScript(spell_borean_tundra_prototype_neural_needle);
 }

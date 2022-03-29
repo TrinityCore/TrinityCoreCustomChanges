@@ -488,6 +488,17 @@ bool AnticheatMgr::MustCheckTempReports(uint8 type)
     return true;
 }
 
+//
+// Dear maintainer:
+//
+// Once you are done trying to 'optimize' this script,
+// and have identify potentionally if there was a terrible
+// mistake that was here or not, please increment the
+// following counter as a warning to the next guy:
+//
+// total_hours_wasted_here = 42
+//
+
 void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 {
     uint32 key = player->GetGUID().GetCounter();

@@ -242,7 +242,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
        }
        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
        {
-           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player {} ({})", player->GetName(), player->GetGUID().ToString());
+           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player %s", player->GetGUID().ToString().c_str());
        }
 
        BuildReport(player, ZAXIS_HACK_REPORT);

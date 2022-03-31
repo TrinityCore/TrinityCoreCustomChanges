@@ -37,7 +37,8 @@ enum ReportTypes
     TELEPORT_PLANE_HACK_REPORT = 4,
     CLIMB_HACK_REPORT = 5,
     TELEPORT_HACK_REPORT = 6,
-    IGNORE_CONTROL_REPORT = 7
+    IGNORE_CONTROL_REPORT = 7,
+    ZAXIS_HACK_REPORT = 8
 
    // MAX_REPORT_TYPES
 };
@@ -51,7 +52,8 @@ enum DetectionTypes
     TELEPORT_PLANE_HACK_DETECTION   = 16,
     CLIMB_HACK_DETECTION            = 32,
     TELEPORT_HACK_DETECTION         = 64,
-    IGNORE_CONTROL_DETECTION        = 128
+    IGNORE_CONTROL_DETECTION        = 128,
+    ZAXIS_HACK_DETECTION            = 256
 };
 
 // GUIDLow is the key.
@@ -94,6 +96,7 @@ class TC_GAME_API AnticheatMgr
         void ClimbHackDetection(Player* player,MovementInfo movementInfo,uint32 opcode);
         void IgnoreControlHackDetection(Player* player, MovementInfo movementInfo);
         void TeleportHackDetection(Player* player, MovementInfo movementInfo);
+        void ZAxisHackDetection(Player* player, MovementInfo movementInfo);
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);

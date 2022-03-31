@@ -205,48 +205,49 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
     if (!sConfigMgr->GetBoolDefault("Anticheat.DetectZaxisHack", true))
         return;
 
-    if (!movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING))
-    {
-        ObjectGuid key = player->GetGUID();
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
+        return;
 
-        float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
-        float newX = movementInfo.pos.GetPositionX();
+   ObjectGuid key = player->GetGUID();
 
-        float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
-        float newY = movementInfo.pos.GetPositionY();
+   float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
+   float newX = movementInfo.pos.GetPositionX();
 
-        float xDiff = fabs(lastX - newX);
-        float yDiff = fabs(lastY - newY);
+   float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
+   float newY = movementInfo.pos.GetPositionY();
 
-        float groundZ_vmap = player->GetMap()->GetHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), true, 50.0f);
-        float groundZ_dyntree = player->GetMap()->GetDynamicMapTree().getHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 50.0f, player->GetPhaseMask());
-        float groundZ = std::max<float>(groundZ_vmap, groundZ_dyntree);
+   float xDiff = fabs(lastX - newX);
+   float yDiff = fabs(lastY - newY);
 
-        if ((xDiff || yDiff) && m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()
-            && player->GetPositionZ() >= groundZ + 5.0f)
-        {
-            if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
-            {
-                // display warning at the center of the screen, hacky way?
-                std::string str = "";
-                str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
-                // need better way to limit chat spam
-                if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
-                {
-                    sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str());
-                }
-            }
-            if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
-            {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player {} ({})", player->GetName(), player->GetGUID().ToString());
-            }
+   float groundZ_vmap = player->GetMap()->GetHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), true, 50.0f);
+   float groundZ_dyntree = player->GetMap()->GetDynamicMapTree().getHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 50.0f, player->GetPhaseMask());
+   float groundZ = std::max<float>(groundZ_vmap, groundZ_dyntree);
 
-            BuildReport(player, ZAXIS_HACK_REPORT);
-        }
-    }
+   if ((xDiff || yDiff) && m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()
+       && player->GetPositionZ() >= groundZ + 5.0f)
+   {
+       if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
+       {
+           // display warning at the center of the screen, hacky way?
+           std::string str = "";
+           str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
+           WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+           data << str;
+           sWorld->SendGlobalGMMessage(&data);
+           // need better way to limit chat spam
+           if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+           {
+               sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str());
+           }
+       }
+       if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
+       {
+           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player {} ({})", player->GetName(), player->GetGUID().ToString());
+       }
+
+       BuildReport(player, ZAXIS_HACK_REPORT);
+   }
+
 }
 
 void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementInfo)

@@ -3359,7 +3359,7 @@ Anticheat.StricterFlyHackCheck = 0
 #       Description: Enables and Auto kick when reports reach threshhold
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
-#       Default:    70 - (Kick at 70 auto reports)
+#       Default:    70 - (Kicks at 70 auto reports)
 #
 
 Anticheat.KickPlayer = 0
@@ -3371,7 +3371,7 @@ Anticheat.ReportsForKick = 75
 #       Description: Enables and Auto ban when reports reach threshhold
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
-#       Default:    70 - (Kick at 70 auto reports)
+#       Default:    70 - (Bans at 70 auto reports)
 #
 
 Anticheat.BanPlayer = 0
@@ -3383,7 +3383,7 @@ Anticheat.ReportsForBan = 70
 #       Description: Enables and Auto Jail when reports reach threshhold
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
-#       Default:    70 - (Kick at 70 auto reports)
+#       Default:    70 - (Jails at 70 auto reports)
 #
 
 Anticheat.JailPlayer = 0

@@ -232,12 +232,12 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
 
    switch (player->GetAreaId())
    {
-   case 4281: //Acherus: The Ebon Hold
-   case 4342: //Acherus: The Ebon Hold
-       return;
-       break;
-   default:
-       break;// Should never happen
+        case 4281: //Acherus: The Ebon Hold
+        case 4342: //Acherus: The Ebon Hold
+            return;
+        break;
+            default:
+        break;// Should never happen
    }
 
    if ((xDiff || yDiff) && m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()

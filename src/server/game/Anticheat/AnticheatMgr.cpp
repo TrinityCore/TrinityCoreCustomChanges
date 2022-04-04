@@ -230,6 +230,16 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
        return;
 
+   switch (player->GetAreaId())
+   {
+   case 4281: //Acherus: The Ebon Hold
+   case 4342: //Acherus: The Ebon Hold
+       return;
+       break;
+   default:
+       break;// Should never happen
+   }
+
    if ((xDiff || yDiff) && m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()
        && player->GetPositionZ() >= groundZ + 5.0f)
    {

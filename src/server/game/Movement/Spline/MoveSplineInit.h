@@ -20,9 +20,10 @@
 
 #include "MoveSplineInitArgs.h"
 
+class ObjectGuid;
 class Unit;
 
-enum class AnimationTier : uint8;
+enum class AnimTier : uint8;
 
 namespace Movement
 {
@@ -70,7 +71,7 @@ namespace Movement
         /* Plays animation after movement done
          * can't be combined with parabolic movement
          */
-        void SetAnimation(AnimationTier anim);
+        void SetAnimation(AnimTier anim);
 
         /* Adds final facing animation
          * sets unit's facing to specified point/angle after all path done
@@ -79,6 +80,7 @@ namespace Movement
         void SetFacing(float angle);
         void SetFacing(Vector3 const& point);
         void SetFacing(Unit const* target);
+        void SetFacing(ObjectGuid const& target);
 
         /* Initializes movement by path
          * @param path - array of points, shouldn't be empty
@@ -161,7 +163,7 @@ namespace Movement
         args.flags.EnableParabolic();
     }
 
-    inline void MoveSplineInit::SetAnimation(AnimationTier anim)
+    inline void MoveSplineInit::SetAnimation(AnimTier anim)
     {
         args.time_perc = 0.f;
         args.flags.EnableAnimation((uint8)anim);

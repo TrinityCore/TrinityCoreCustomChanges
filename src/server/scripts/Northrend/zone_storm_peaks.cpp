@@ -32,67 +32,6 @@
 #include "WorldSession.h"
 
 /*######
-## npc_roxi_ramrocket
-######*/
-
-enum RoxiRamrocket
-{
-    SPELL_MECHANO_HOG               = 60866,
-    SPELL_MEKGINEERS_CHOPPER        = 60867
-};
-
-class npc_roxi_ramrocket : public CreatureScript
-{
-public:
-    npc_roxi_ramrocket() : CreatureScript("npc_roxi_ramrocket") { }
-
-    struct npc_roxi_ramrocketAI : public ScriptedAI
-    {
-        npc_roxi_ramrocketAI(Creature* creature) : ScriptedAI(creature) { }
-
-        bool OnGossipHello(Player* player) override
-        {
-            //Quest Menu
-            if (me->IsQuestGiver())
-                player->PrepareQuestMenu(me->GetGUID());
-
-            //Trainer Menu
-            if (me->IsTrainer())
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
-
-            //Vendor Menu
-            if (me->IsVendor())
-                if (player->HasSpell(SPELL_MECHANO_HOG) || player->HasSpell(SPELL_MEKGINEERS_CHOPPER))
-                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-
-            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-            return true;
-        }
-
-        bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
-        {
-            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            ClearGossipMenuFor(player);
-            switch (action)
-            {
-                case GOSSIP_ACTION_TRAIN:
-                    player->GetSession()->SendTrainerList(me);
-                    break;
-                case GOSSIP_ACTION_TRADE:
-                    player->GetSession()->SendListInventory(me->GetGUID());
-                    break;
-            }
-            return true;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_roxi_ramrocketAI(creature);
-    }
-};
-
-/*######
 ## npc_brunnhildar_prisoner
 ######*/
 
@@ -431,7 +370,7 @@ public:
                     case EVENT_SCRIPT_1:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                             Talk(SAY_BRANN_1, player);
-                        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                        me->RemoveNpcFlag(UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                         if (Creature* voice = me->SummonCreature(NPC_A_DISTANT_VOICE, 7863.43f, -1396.585f, 1538.076f, 2.949606f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 49s))
                             voiceGUID = voice->GetGUID();
                         events.ScheduleEvent(EVENT_SCRIPT_2, 4s);
@@ -442,11 +381,11 @@ public:
                         events.ScheduleEvent(EVENT_SCRIPT_3, 6s);
                         break;
                     case EVENT_SCRIPT_3:
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_WORK_MINING);
+                        me->SetEmoteState(EMOTE_STATE_WORK_MINING);
                         events.ScheduleEvent(EVENT_SCRIPT_4, 6s);
                         break;
                     case EVENT_SCRIPT_4:
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+                        me->SetEmoteState(EMOTE_ONESHOT_NONE);
                         if (Creature* voice = ObjectAccessor::GetCreature(*me, voiceGUID))
                         {
                             voice->CastSpell(voice, SPELL_RESURRECTION);
@@ -735,7 +674,7 @@ class npc_wild_wyrm : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_JAWS_OF_DEATH_PERIODIC);
                         me->RemoveAurasDueToSpell(SPELL_PRY_JAWS_OPEN);
 
-                        me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+                        me->ReplaceAllNpcFlags(UNIT_NPC_FLAG_NONE);
 
                         me->GetMotionMaster()->MoveFall(POINT_FALL);
                     });
@@ -1412,9 +1351,83 @@ class spell_bear_flank_fail : public AuraScript
     }
 };
 
+/*######
+## Quest 12828: Ample Inspiration
+######*/
+
+enum AmpleInspiration
+{
+    SPELL_QUIET_SUICIDE              = 3617,
+    SPELL_SUMMON_MAIN_MAMMOTH_MEAT   = 57444,
+    SPELL_MAMMOTH_SUMMON_OBJECT_1    = 54627,
+    SPELL_MAMMOTH_SUMMON_OBJECT_2    = 54628,
+    SPELL_MAMMOTH_SUMMON_OBJECT_3    = 54623,
+
+    ITEM_EXPLOSIVE_DEVICE            = 40686
+};
+
+// 54581 - Mammoth Explosion Spell Spawner
+class spell_storm_peaks_mammoth_explosion_master : public SpellScript
+{
+    PrepareSpellScript(spell_storm_peaks_mammoth_explosion_master);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(
+        {
+            SPELL_QUIET_SUICIDE,
+            SPELL_SUMMON_MAIN_MAMMOTH_MEAT,
+            SPELL_MAMMOTH_SUMMON_OBJECT_1,
+            SPELL_MAMMOTH_SUMMON_OBJECT_2,
+            SPELL_MAMMOTH_SUMMON_OBJECT_3
+        });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        caster->CastSpell(caster, SPELL_QUIET_SUICIDE);
+        caster->CastSpell(caster, SPELL_SUMMON_MAIN_MAMMOTH_MEAT);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_1);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_1);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_1);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_2);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_2);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_2);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_3);
+        caster->CastSpell(caster, SPELL_MAMMOTH_SUMMON_OBJECT_3);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_storm_peaks_mammoth_explosion_master::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+// 54892 - Unstable Explosive Detonation
+class spell_storm_peaks_unstable_explosive_detonation : public SpellScript
+{
+    PrepareSpellScript(spell_storm_peaks_unstable_explosive_detonation);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return sObjectMgr->GetItemTemplate(ITEM_EXPLOSIVE_DEVICE);
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            caster->DestroyItemCount(ITEM_EXPLOSIVE_DEVICE, 1, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_storm_peaks_unstable_explosive_detonation::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_storm_peaks()
 {
-    new npc_roxi_ramrocket();
     new npc_brunnhildar_prisoner();
     new npc_freed_protodrake();
     new npc_icefang();
@@ -1438,4 +1451,6 @@ void AddSC_storm_peaks()
     RegisterSpellScript(spell_read_pronouncement);
     RegisterSpellScript(spell_bear_flank_master);
     RegisterSpellScript(spell_bear_flank_fail);
+    RegisterSpellScript(spell_storm_peaks_mammoth_explosion_master);
+    RegisterSpellScript(spell_storm_peaks_unstable_explosive_detonation);
 }

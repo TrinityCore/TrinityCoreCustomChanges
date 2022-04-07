@@ -451,7 +451,8 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
         moveType = MOVE_RUN;
 
     // how many yards the player can do in one sec.
-    uint32 speedRate = (uint32)(player->GetSpeed(UnitMoveType(moveType)) + movementInfo.jump.xyspeed);
+    // We remove the added speed for jumping because otherwise permanently jumping doubles your allowed speed
+    uint32 speedRate = (uint32)(player->GetSpeed(UnitMoveType(moveType)));
 
     // how long the player took to move to here.
     uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time, movementInfo.time);
@@ -485,8 +486,9 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 
-    // we did the (uint32) cast to accept a margin of tolerance and drift for falling compensation
-    if (clientSpeedRate > speedRate * 1.25f)
+    // We did the (uint32) cast to accept a margin of tolerance
+    // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
+    if ((clientSpeedRate > speedRate * 1.25f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {

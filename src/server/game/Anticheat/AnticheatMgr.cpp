@@ -54,7 +54,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jump-Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jump-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
         BuildReport(player, JUMP_HACK_REPORT);
     }
@@ -94,7 +94,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
-        TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
     }
     BuildReport(player, WALK_WATER_HACK_REPORT);
 
@@ -128,7 +128,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
     {
-        TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
     }
     BuildReport(player, FLY_HACK_REPORT);
 }
@@ -157,7 +157,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport To Plane - Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport To Plane - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_PLANE_HACK_REPORT);
     }
@@ -192,7 +192,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                 }
                 if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
                 {
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Control - Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Control - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
                 }
                 BuildReport(player, IGNORE_CONTROL_REPORT);
             }
@@ -205,7 +205,10 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
     if (!sConfigMgr->GetBoolDefault("Anticheat.DetectZaxisHack", true))
         return;
 
-    // if we are a ghost we can walk on water
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
+        return;
+
+    // if we are a ghost we can walk on water which may trigger zaxis false hit
     if (!player->IsAlive())
         return;
 
@@ -259,7 +262,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
        }
        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
        {
-           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
        }
 
        BuildReport(player, ZAXIS_HACK_REPORT);
@@ -304,7 +307,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         }
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }
@@ -371,7 +374,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
         BuildReport(player, CLIMB_HACK_REPORT);
     }
@@ -494,7 +497,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             BuildReport(player, SPEED_HACK_REPORT);
         }
@@ -652,7 +655,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
             std::string str = "";
@@ -682,7 +685,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         {
             if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
             std::string str = "";
@@ -713,7 +716,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
     {
         if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s (%s)", player->GetName(), player->GetGUID().ToString().c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
         // display warning at the center of the screen, hacky way?
         std::string str = "";

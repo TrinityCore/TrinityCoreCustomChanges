@@ -257,7 +257,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
            // need better way to limit chat spam
            if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
            {
-               sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str());
+               sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
            }
        }
        if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))

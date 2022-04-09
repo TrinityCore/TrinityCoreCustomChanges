@@ -149,7 +149,7 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatPurgeCommand(ChatHandler* handler, const char* /* args */)
+    static bool HandleAntiCheatPurgeCommand(ChatHandler* handler)
     {
         sAnticheatMgr->AnticheatPurgeCommand(handler);
         handler->PSendSysMessage("The Anticheat daily_player_reports has been purged.");

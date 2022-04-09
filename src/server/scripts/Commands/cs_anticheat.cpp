@@ -39,6 +39,7 @@ public:
             { "global",      HandleAntiCheatGlobalCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
             { "player",      HandleAntiCheatPlayerCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
             { "delete",      HandleAntiCheatDeleteCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
+            { "purge",       HandleAntiCheatPurgeCommand,    rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "handle",      HandleAntiCheatHandleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
             { "parole",      HandleAnticheatParoleCommand,   rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
@@ -145,6 +146,13 @@ public:
         else
             sAnticheatMgr->AnticheatDeleteCommand(command.get<PlayerIdentifier>().GetGUID().GetCounter());
 
+        return true;
+    }
+
+    static bool HandleAntiCheatPurgeCommand(ChatHandler* handler, const char* /* args */)
+    {
+        sAnticheatMgr->AnticheatPurgeCommand(handler);
+        handler->PSendSysMessage("The Anticheat daily_player_reports has been purged.");
         return true;
     }
 

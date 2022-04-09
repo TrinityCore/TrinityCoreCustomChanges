@@ -85,7 +85,7 @@ class TC_GAME_API AnticheatMgr
 
         void AnticheatGlobalCommand(ChatHandler* handler);
         void AnticheatDeleteCommand(uint32 guid);
-
+        void AnticheatPurgeCommand(ChatHandler* handler);
         void ResetDailyReportStates();
     private:
         void SpeedHackDetection(Player* player, MovementInfo movementInfo);

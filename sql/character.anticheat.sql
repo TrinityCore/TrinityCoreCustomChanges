@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS `daily_players_reports`;
 CREATE TABLE IF NOT EXISTS `daily_players_reports` (
   `guid` int unsigned NOT NULL DEFAULT 0,
   `creation_time` int unsigned NOT NULL DEFAULT 0,
@@ -13,7 +12,6 @@ CREATE TABLE IF NOT EXISTS `daily_players_reports` (
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `players_reports_status`;
 CREATE TABLE IF NOT EXISTS `players_reports_status` (
   `guid` int unsigned NOT NULL DEFAULT 0,
   `creation_time` int unsigned NOT NULL DEFAULT 0,
@@ -27,4 +25,3 @@ CREATE TABLE IF NOT EXISTS `players_reports_status` (
   `climb_reports` bigint unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-

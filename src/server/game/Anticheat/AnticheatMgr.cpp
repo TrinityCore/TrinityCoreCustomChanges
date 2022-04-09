@@ -429,16 +429,6 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
             break;// Should never happen
         }
 
-    switch (player->GetAreaId())
-    {
-    case 4281: //Acherus: The Ebon Hold
-    case 4342: //Acherus: The Ebon Hold
-        return;
-        break;
-    default:
-        break;// Should never happen
-    }
-
     uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
     uint8 moveType = 0;
 

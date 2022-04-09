@@ -469,23 +469,6 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     if (!timeDiff)
         timeDiff = 1;
 
-    // Exceptions
-    switch (player->GetClass())
-    {
-    case CLASS_ROGUE:
-        // Killing Spree
-        if (player->GetAura(51690))
-            return;
-        break;
-    case CLASS_MAGE:
-        // Blink
-        if (player->GetAura(1953))
-            return;
-        break;
-    default:
-        break;// Should never happen
-    }
-
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
 

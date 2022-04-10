@@ -151,6 +151,8 @@ public:
 
     static bool HandleAntiCheatPurgeCommand(ChatHandler* handler)
     {
+        // For the sins I am about to commit, may CTHULHU forgive me
+        // this will purge the daily_player_reports which is the cumlative statistics of auto reports
         sAnticheatMgr->AnticheatPurgeCommand(handler);
         handler->PSendSysMessage("The Anticheat daily_player_reports has been purged.");
         return true;

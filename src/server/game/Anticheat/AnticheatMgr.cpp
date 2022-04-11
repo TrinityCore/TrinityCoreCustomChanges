@@ -28,11 +28,19 @@
 #include "World.h"
 #include "WorldSession.h"
 #include "Configuration/Config.h"
+#include "SpellAuras.h"
 
 #define CLIMB_ANGLE 1.87f
 #define LANG_ANTICHEAT_ALERT 30087
 #define LANG_ANTICHEAT_TELEPORT 30088
 #define LANG_ANTICHEAT_IGNORECONTROL 30089
+
+enum Spells
+{
+    SHACKLES = 38505,
+    LFG_SPELL_DUNGEON_DESERTER = 71041,
+    BG_SPELL_DESERTER = 26013
+};
 
 AnticheatMgr::AnticheatMgr()
 {
@@ -741,7 +749,10 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
         player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
         player->SetHomebind(loc, 876);// GM Jail Homebind location
-        player->CastSpell(player, 38505);// shackle him in place to ensure no exploit happens for jail break attempt
+        player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
+        player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player); // LFG_SPELL_DUNGEON_DESERTER
+        player->AddAura(BG_SPELL_DESERTER, player); // BG_SPELL_DESERTER
+
         // publically shame them with a server message
         if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceJail", true))
         {

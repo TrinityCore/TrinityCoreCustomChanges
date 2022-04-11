@@ -3331,18 +3331,18 @@ Anticheat.WriteLog = 0
 
 #     Anticheat.Detect
 #       Description: It represents which detections are enabled (ClimbHack disabled by default).
-#       Default:    1 - (Enabled)
-#                   0 - (Disabled)
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
 
-Anticheat.DetectFlyHack = 1
-Anticheat.DetectWaterWalkHack = 1
-Anticheat.DetectJumpHack = 1
-Anticheat.DetectTelePlaneHack = 1
-Anticheat.DetectSpeedHack = 1
-Anticheat.DetectClimbHack = 1
-Anticheat.DetectTelePortHack = 1
-Anticheat.IgnoreControlHack = 1
-Anticheat.DetectZaxisHack =1
+Anticheat.DetectFlyHack = 0
+Anticheat.DetectWaterWalkHack = 0
+Anticheat.DetectJumpHack = 0
+Anticheat.DetectTelePlaneHack = 0
+Anticheat.DetectSpeedHack = 0
+Anticheat.DetectClimbHack = 0
+Anticheat.DetectTelePortHack = 0
+Anticheat.IgnoreControlHack = 0
+Anticheat.DetectZaxisHack = 0
 
 #     Anticheat.StricterFlyHackCheck
 #       Description: Checks moveflag ascending (may give false positives)

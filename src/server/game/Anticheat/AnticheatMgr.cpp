@@ -750,8 +750,10 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
         player->SetHomebind(loc, 876);// GM Jail Homebind location
         player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
-        player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player); // LFG_SPELL_DUNGEON_DESERTER
-        player->AddAura(BG_SPELL_DESERTER, player); // BG_SPELL_DESERTER
+        Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player);// LFG_SPELL_DUNGEON_DESERTER
+        Aura* bgdesert = player->AddAura(BG_SPELL_DESERTER, player);// BG_SPELL_DESERTER
+        dungdesert->SetDuration(-1);
+        bgdesert->SetDuration(-1);
 
         // publically shame them with a server message
         if (sConfigMgr->GetBoolDefault("Anticheat.AnnounceJail", true))

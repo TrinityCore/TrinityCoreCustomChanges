@@ -104,8 +104,10 @@ public:
         pTarget->TeleportTo(loc);
         pTarget->SetHomebind(loc, 876);// GM Jail Homebind location
         pTarget->CastSpell(pTarget, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
-        pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget); // LFG_SPELL_DUNGEON_DESERTER
-        pTarget->AddAura(BG_SPELL_DESERTER, pTarget); // BG_SPELL_DESERTER
+        Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget);// LFG_SPELL_DUNGEON_DESERTER
+        Aura* bgdesert = pTarget->AddAura(BG_SPELL_DESERTER, pTarget);// BG_SPELL_DESERTER
+        dungdesert->SetDuration(-1);
+        bgdesert->SetDuration(-1);
 
         return true;
     }

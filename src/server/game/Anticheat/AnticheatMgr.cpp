@@ -84,9 +84,18 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
     // we pull the player's individual guid
     uint32 key = player->GetGUID().GetCounter();
 
-    // if the player last movement is no water walking then we ignore the check
-    if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
-        return;
+    // if the player is water walking on water then we are good.
+    if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK)
+    {
+        if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
+        {
+            if (sConfigMgr->GetBoolDefault("Anticheat.WriteLog", true))
+            {
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            }
+            BuildReport(player, WALK_WATER_HACK_REPORT);
+        }
+    }
 
     // if we are a ghost we can walk on water
     if (!player->IsAlive())
@@ -103,14 +112,14 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
         if (player->HasAuraType(SPELL_AURA_WATER_WALK) || player->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
             player->HasAuraType(SPELL_AURA_SAFE_FALL))
         {
-            //Boomer Review Time:
-            //Return stops code execution of the entire function
             return;
         }
 
     }
     else if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
     {
+        //Boomer Review Time:
+        //Return stops code execution of the entire function
         return;
     }
 

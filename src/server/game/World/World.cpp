@@ -1484,7 +1484,25 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PDUMP_NO_PATHS] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowPaths", true);
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true);
 
-    m_bool_configs[CONFIG_ANTICHEAT_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.Enable", true);
+    // ANTICHEAT
+    m_bool_configs[CONFIG_ANTICHEAT_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.Enable", false);
+    m_bool_configs[CONFIG_ANTICHEAT_JUMPHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectJumpHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_WATERWALKHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectWaterWalkHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_FLYHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectFlyHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_FLYHACKSTRICT_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.StricterFlyHackCheck", false);
+    m_bool_configs[CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectTelePlaneHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_IGNORECONTROLHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.IgnoreControlHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ZAXISHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectZaxisHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_TELEPORTHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectTelePortHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CLIMBHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectClimbHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_SPEEDHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectSpeedHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_WRITELOG_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false);
+    m_bool_configs[CONFIG_ANTICHEAT_AUTOKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANNOUNCEKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AnnounceKick", false);
+    m_bool_configs[CONFIG_ANTICHEAT_AUTOBAN_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.BanPlayer", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANNOUNCEBAN_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AnnounceBan", false);
+    m_bool_configs[CONFIG_ANTICHEAT_AUTOJAIL_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.JailPlayer", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANNOUNCEJAIL_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AnnounceJail", false);
     m_int_configs[CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION] = sConfigMgr->GetIntDefault("Anticheat.ReportsForIngameWarnings", 70);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_DAILY_REPORT] = sConfigMgr->GetIntDefault("Anticheat.MaxReportsForDailyReport",70);
     m_int_configs[CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN] = sConfigMgr->GetIntDefault("Anticheat.ReportinChat.Min", 70);

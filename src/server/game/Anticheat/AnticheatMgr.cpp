@@ -82,6 +82,12 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     // we pull the player's individual guid
     uint32 key = player->GetGUID().GetCounter();
+    uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+
+    // We don't need to check for a waterwalk hack if the player hasn't moved
+    // This is necessary since MovementHandler fires if you rotate the camera in place
+    if (!distance2D)
+        return;
 
     // if the player is water walking on water then we are good.
     if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK)

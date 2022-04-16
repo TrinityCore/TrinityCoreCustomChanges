@@ -415,7 +415,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     Position playerPos;
 
     float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
-    float deltaXY = movementInfo.pos.GetExactDist2d(m_Players[key].GetLastMovementInfo().pos);
+    float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
 
     float angle = Position::NormalizeOrientation(tan(deltaZ / deltaXY));
 

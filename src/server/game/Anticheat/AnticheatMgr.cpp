@@ -415,12 +415,12 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     Position playerPos;
 
     float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
-    float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
+    float deltaXY = movementInfo.pos.GetExactDist2d(m_Players[key].GetLastMovementInfo().pos);
 
     float angle = Position::NormalizeOrientation(tan(deltaZ / deltaXY));
 
     //if they somehow climb a impossible angle then we flag them. we ignore the falling flag as this is a climb hack detection not a fall hack detection
-    if ((angle > CLIMB_ANGLE) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (angle > CLIMB_ANGLE)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {

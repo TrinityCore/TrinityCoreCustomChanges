@@ -419,7 +419,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
 
     float angle = Position::NormalizeOrientation(tan(deltaZ / deltaXY));
 
-    //if they somehow climb a impossible angle then we flag them. we ignore the falling flag as this is a climb hack detection not a fall hack detection
+    //if they somehow climb a impossible angle then we flag them.
     if (angle > CLIMB_ANGLE)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

@@ -203,7 +203,6 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
     float x, y;
     player->GetPosition(x, y);
     ObjectGuid key = player->GetGUID();
-    bool unrestricted = movementInfo.pos.GetPositionX() != x || movementInfo.pos.GetPositionY() != y;
 
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;

@@ -156,8 +156,9 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
     /*Thanks to @LilleCarl for info to check extra flag*/
     bool stricterChecks = true;
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_FLYHACKSTRICT_ENABLE))
-    {// super strict way to check, you can only ascended in water and air, we check u are ascending and not in water.
-        stricterChecks = !(movementInfo.HasMovementFlag(MOVEMENTFLAG_ASCENDING) && !player->IsInWater());
+    {// super strict way to check, you can only ascended\descend in water and air, we check u are ascending and not in water.
+     // we are not checking for legal flight here because those checks were dont earlier.
+        stricterChecks = !(movementInfo.HasMovementFlag(MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING) && !player->IsInWater());
     }
 
     // if you are not flying and not ascending then we do a return, you are then not guilty.

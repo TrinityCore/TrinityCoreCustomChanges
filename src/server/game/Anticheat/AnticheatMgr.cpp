@@ -764,15 +764,15 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player);// LFG_SPELL_DUNGEON_DESERTER
             Aura* bgdesert = player->AddAura(BG_SPELL_DESERTER, player);// BG_SPELL_DESERTER
             Aura* silent = player->AddAura(SILENCED, player);// SILENC
-            if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player))// LFG_SPELL_DUNGEON_DESERTER
+            if (dungdesert)// LFG_SPELL_DUNGEON_DESERTER
             {
                 dungdesert->SetDuration(-1);
             }
-            if (Aura* bgdesert = player->AddAura(BG_SPELL_DESERTER, player))// BG_SPELL_DESERTER
+            if (bgdesert)// BG_SPELL_DESERTER
             {
                 bgdesert->SetDuration(-1);
             }
-            if (Aura* silent = player->AddAura(SILENCED, player))// SILENCED
+            if (silent)// SILENCED
             {
                 silent->SetDuration(-1);
             }

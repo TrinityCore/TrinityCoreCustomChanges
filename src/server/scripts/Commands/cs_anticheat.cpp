@@ -108,15 +108,15 @@ public:
         Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget);// LFG_SPELL_DUNGEON_DESERTER
         Aura* bgdesert = pTarget->AddAura(BG_SPELL_DESERTER, pTarget);// BG_SPELL_DESERTER
         Aura* silent = pTarget->AddAura(SILENCED, pTarget);// SILENC
-        if (Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget));// LFG_SPELL_DUNGEON_DESERTER
+        if (dungdesert)// LFG_SPELL_DUNGEON_DESERTER
         {
             dungdesert->SetDuration(-1);
         }
-        if (Aura* bgdesert = pTarget->AddAura(BG_SPELL_DESERTER, pTarget));// BG_SPELL_DESERTER
+        if (bgdesert)// BG_SPELL_DESERTER
         {
             bgdesert->SetDuration(-1);
         }
-        if (Aura* silent = pTarget->AddAura(SILENCED, pTarget));// SILENCED
+        if (silent)// SILENCED
         {
             silent->SetDuration(-1);
         }

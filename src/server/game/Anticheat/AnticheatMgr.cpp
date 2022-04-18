@@ -756,8 +756,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             data << str;
             sWorld->SendGlobalGMMessage(&data);
             // This is where they end up going shaw shank redemption style
-            WorldLocation loc;
-            loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+            WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
             player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
             player->SetHomebind(loc, 876);// GM Jail Homebind location
             player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt

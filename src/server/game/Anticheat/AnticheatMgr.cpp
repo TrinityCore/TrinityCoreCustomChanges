@@ -38,7 +38,9 @@ enum Spells
 {
     SHACKLES = 38505,
     LFG_SPELL_DUNGEON_DESERTER = 71041,
-    BG_SPELL_DESERTER = 26013
+    BG_SPELL_DESERTER = 26013,
+    SILENCED = 23207,
+    RESURRECTION_SICKNESS = 15007
 };
 
 AnticheatMgr::AnticheatMgr()
@@ -108,7 +110,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     // Prevents the False Positive for water walking when you ressurrect.
     // Aura 15007 (Resurrection sickness) is given while dead before returning back to life.
-    if (player->HasAuraType(SPELL_AURA_GHOST) && player->HasAura(15007))
+    if (player->HasAuraType(SPELL_AURA_GHOST) && player->HasAura(RESURRECTION_SICKNESS))
         return;
 
     // if the player previous movement and current movement is water walking then we do a follow up check
@@ -224,8 +226,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
             if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
             {
                 // display warning at the center of the screen, hacky way?
-                std::string str = "";
-                str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -296,8 +297,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
        if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
        {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Ignore Zaxis Hack
            // display warning at the center of the screen, hacky way?
-           std::string str = "";
-           str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
+           std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
            data << str;
            sWorld->SendGlobalGMMessage(&data);
@@ -341,8 +341,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Teleport Hack
             // display warning at the center of the screen, hacky way?
-            std::string str = "";
-            str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -445,40 +444,38 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId())
         switch (player->GetMapId())
         {
-        case 369: //Transport: DEEPRUN TRAM
-        case 607: //Transport: Strands of the Ancients
-        case 582: //Transport: Rut'theran to Auberdine
-        case 584: //Transport: Menethil to Theramore
-        case 586: //Transport: Exodar to Auberdine
-        case 587: //Transport: Feathermoon Ferry
-        case 588: //Transport: Menethil to Auberdine
-        case 589: //Transport: Orgrimmar to Grom'Gol
-        case 590: //Transport: Grom'Gol to Undercity
-        case 591: //Transport: Undercity to Orgrimmar
-        case 592: //Transport: Borean Tundra Test
-        case 593: //Transport: Booty Bay to Ratchet
-        case 594: //Transport: Howling Fjord Sister Mercy (Quest)
-        case 596: //Transport: Naglfar
-        case 610: //Transport: Tirisfal to Vengeance Landing
-        case 612: //Transport: Menethil to Valgarde
-        case 613: //Transport: Orgrimmar to Warsong Hold
-        case 614: //Transport: Stormwind to Valiance Keep
-        case 620: //Transport: Moa'ki to Unu'pe
-        case 621: //Transport: Moa'ki to Kamagua
-        case 622: //Transport: Orgrim's Hammer
-        case 623: //Transport: The Skybreaker
-        case 641: //Transport: Alliance Airship BG
-        case 642: //Transport: Horde Airship BG
-        case 647: //Transport: Orgrimmar to Thunder Bluff
-        case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
-        case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
-        case 712: //Transport: The Skybreaker (IC Dungeon)
-        case 713: //Transport: Orgrim's Hammer (IC Dungeon)
-        case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
-            return;
+            case 369: //Transport: DEEPRUN TRAM
+            case 607: //Transport: Strands of the Ancients
+            case 582: //Transport: Rut'theran to Auberdine
+            case 584: //Transport: Menethil to Theramore
+            case 586: //Transport: Exodar to Auberdine
+            case 587: //Transport: Feathermoon Ferry
+            case 588: //Transport: Menethil to Auberdine
+            case 589: //Transport: Orgrimmar to Grom'Gol
+            case 590: //Transport: Grom'Gol to Undercity
+            case 591: //Transport: Undercity to Orgrimmar
+            case 592: //Transport: Borean Tundra Test
+            case 593: //Transport: Booty Bay to Ratchet
+            case 594: //Transport: Howling Fjord Sister Mercy (Quest)
+            case 596: //Transport: Naglfar
+            case 610: //Transport: Tirisfal to Vengeance Landing
+            case 612: //Transport: Menethil to Valgarde
+            case 613: //Transport: Orgrimmar to Warsong Hold
+            case 614: //Transport: Stormwind to Valiance Keep
+            case 620: //Transport: Moa'ki to Unu'pe
+            case 621: //Transport: Moa'ki to Kamagua
+            case 622: //Transport: Orgrim's Hammer
+            case 623: //Transport: The Skybreaker
+            case 641: //Transport: Alliance Airship BG
+            case 642: //Transport: Horde Airship BG
+            case 647: //Transport: Orgrimmar to Thunder Bluff
+            case 672: //Transport: The Skybreaker (Icecrown Citadel Raid)
+            case 673: //Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+            case 712: //Transport: The Skybreaker (IC Dungeon)
+            case 713: //Transport: Orgrim's Hammer (IC Dungeon)
+            case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
+                return;
             break;
-        default:
-            break;// Should never happen
         }
 
     // sometimes I believe the compiler ignores all my comments
@@ -671,8 +668,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
     if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
     {
         // display warning at the center of the screen, hacky way?
-        std::string str = "";
-        str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
+        std::string str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
         WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
@@ -693,8 +689,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "";
-            str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Kicked for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Kicked for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -724,8 +719,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "";
-            str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Banned Account for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Banned Account for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -757,8 +751,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "";
-            str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Jailed Account for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Auto Jailed Account for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -770,8 +763,19 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
             Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player);// LFG_SPELL_DUNGEON_DESERTER
             Aura* bgdesert = player->AddAura(BG_SPELL_DESERTER, player);// BG_SPELL_DESERTER
-            dungdesert->SetDuration(-1);
-            bgdesert->SetDuration(-1);
+            Aura* silent = player->AddAura(SILENCED, player);// SILENC
+            if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player));// LFG_SPELL_DUNGEON_DESERTER
+            {
+                dungdesert->SetDuration(-1);
+            }
+            if (Aura* bgdesert = player->AddAura(BG_SPELL_DESERTER, player));// BG_SPELL_DESERTER
+            {
+                bgdesert->SetDuration(-1);
+            }
+            if (Aura* silent = player->AddAura(SILENCED, player));// SILENCED
+            {
+                silent->SetDuration(-1);
+            }
 
             // publically shame them with a server message
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANNOUNCEJAIL_ENABLE))

@@ -32,7 +32,8 @@ enum Spells
 {
     SHACKLES = 38505,
     LFG_SPELL_DUNGEON_DESERTER = 71041,
-    BG_SPELL_DESERTER = 26013
+    BG_SPELL_DESERTER = 26013,
+    SILENCED = 23207
 };
 
 class anticheat_commandscript : public CommandScript
@@ -106,8 +107,19 @@ public:
         pTarget->CastSpell(pTarget, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
         Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget);// LFG_SPELL_DUNGEON_DESERTER
         Aura* bgdesert = pTarget->AddAura(BG_SPELL_DESERTER, pTarget);// BG_SPELL_DESERTER
-        dungdesert->SetDuration(-1);
-        bgdesert->SetDuration(-1);
+        Aura* silent = pTarget->AddAura(SILENCED, pTarget);// SILENC
+        if (Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget));// LFG_SPELL_DUNGEON_DESERTER
+        {
+            dungdesert->SetDuration(-1);
+        }
+        if (Aura* bgdesert = pTarget->AddAura(BG_SPELL_DESERTER, pTarget));// BG_SPELL_DESERTER
+        {
+            bgdesert->SetDuration(-1);
+        }
+        if (Aura* silent = pTarget->AddAura(SILENCED, pTarget));// SILENCED
+        {
+            silent->SetDuration(-1);
+        }
 
         return true;
     }
@@ -128,10 +140,8 @@ public:
 
         Player* pTarget = player->GetConnectedPlayer();
 
-        WorldLocation Aloc;
-        WorldLocation Hloc;
-        Aloc = WorldLocation(0, -8833.37f, 628.62f, 94.00f, 1.06f);// Stormwind
-        Hloc = WorldLocation(1, 1569.59f, -4397.63f, 16.06f, 0.54f);// Orgrimmar
+        WorldLocation Aloc = WorldLocation(0, -8833.37f, 628.62f, 94.00f, 1.06f);// Stormwind
+        WorldLocation Hloc = WorldLocation(1, 1569.59f, -4397.63f, 16.06f, 0.54f);// Orgrimmar
 
         if (pTarget->GetTeamId() == TEAM_ALLIANCE)
         {
@@ -146,6 +156,7 @@ public:
         pTarget->RemoveAura(SHACKLES);// remove shackles
         pTarget->RemoveAura(LFG_SPELL_DUNGEON_DESERTER);// LFG_SPELL_DUNGEON_DESERTER
         pTarget->RemoveAura(BG_SPELL_DESERTER);// BG_SPELL_DESERTER
+        pTarget->RemoveAura(SILENCED);// SILENCED
         sAnticheatMgr->AnticheatDeleteCommand(pTarget->GetGUID());// deletes auto reports on player
         return true;
     }

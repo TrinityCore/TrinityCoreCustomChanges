@@ -285,8 +285,6 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
         case 4281: //Acherus: The Ebon Hold
         case 4342: //Acherus: The Ebon Hold
             return;
-        break;
-            default:
    }
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +5 of the ground

@@ -441,6 +441,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // Abandon all hope ye who enter beyond this point
     // We exempt all transports found in 335 to prevent false speed hack hits
     if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId())
+    {
         switch (player->GetMapId())
         {
             case 369: //Transport: DEEPRUN TRAM
@@ -474,8 +475,8 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
             case 713: //Transport: Orgrim's Hammer (IC Dungeon)
             case 718: //Transport: The Mighty Wind (Icecrown Citadel Raid)
                 return;
-            break;
         }
+    }
 
     // sometimes I believe the compiler ignores all my comments
     uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);

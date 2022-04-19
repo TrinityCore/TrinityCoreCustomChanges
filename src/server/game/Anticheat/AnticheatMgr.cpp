@@ -349,8 +349,8 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
 
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString(), opponent->GetName().c_str());
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString(), player->GetName().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
             }
             BuildReport(player, TELEPORT_HACK_REPORT);
             BuildReport(opponent, TELEPORT_HACK_REPORT);
@@ -560,8 +560,8 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
                 sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
                 {
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString(), opponent->GetName().c_str());
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString(), player->GetName().c_str());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
                 }
                 BuildReport(player, SPEED_HACK_REPORT);
                 BuildReport(opponent, SPEED_HACK_REPORT);

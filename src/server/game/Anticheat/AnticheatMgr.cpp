@@ -287,7 +287,6 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
             return;
         break;
             default:
-        break;// Should never happen
    }
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +5 of the ground

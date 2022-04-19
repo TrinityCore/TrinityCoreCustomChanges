@@ -563,7 +563,7 @@ void AnticheatMgr::HandlePlayerLogout(Player* player)
 
 void AnticheatMgr::SavePlayerData(Player* player)
 {
-    CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), m_Players[player->GetGUID().GetCounter()].GetAverage(), m_Players[player->GetGUID().GetCounter()].GetTotalReports(), m_Players[player->GetGUID().GetCounter()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetCreationTime());
+    CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), m_Players[player->GetGUID().GetCounter()].GetAverage(), m_Players[player->GetGUID().GetCounter()].GetTotalReports(), m_Players[player->GetGUID().GetCounter()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(TELEPORT_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(IGNORE_CONTROL_REPORT), m_Players[player->GetGUID()].GetTypeReports(ZAXIS_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
 }
 
 uint32 AnticheatMgr::GetTotalReports(uint32 lowGUID)
@@ -584,6 +584,9 @@ uint32 AnticheatMgr::GetTypeReports(uint32 lowGUID, uint8 type)
 bool AnticheatMgr::MustCheckTempReports(uint8 type)
 {
     if (type == JUMP_HACK_REPORT)
+        return false;
+
+    if (type == SPEED_HACK_REPORT)
         return false;
 
     if (type == TELEPORT_HACK_REPORT)
@@ -658,7 +661,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
     {
         if (!m_Players[key].GetDailyReportState())
         {
-            CharacterDatabase.PExecute("REPLACE INTO daily_players_reports (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), m_Players[player->GetGUID().GetCounter()].GetAverage(), m_Players[player->GetGUID().GetCounter()].GetTotalReports(), m_Players[player->GetGUID().GetCounter()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetCreationTime());
+            CharacterDatabase.PExecute("REPLACE INTO daily_players_reports (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), m_Players[player->GetGUID().GetCounter()].GetAverage(), m_Players[player->GetGUID().GetCounter()].GetTotalReports(), m_Players[player->GetGUID().GetCounter()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(TELEPORT_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(IGNORE_CONTROL_REPORT), m_Players[player->GetGUID()].GetTypeReports(ZAXIS_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
             m_Players[key].SetDailyReportState(true);
         }
     }

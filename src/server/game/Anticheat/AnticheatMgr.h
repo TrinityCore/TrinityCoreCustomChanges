@@ -43,19 +43,6 @@ enum ReportTypes
    // MAX_REPORT_TYPES
 };
 
-enum DetectionTypes
-{
-    SPEED_HACK_DETECTION            = 1,
-    FLY_HACK_DETECTION              = 2,
-    WALK_WATER_HACK_DETECTION       = 4,
-    JUMP_HACK_DETECTION             = 8,
-    TELEPORT_PLANE_HACK_DETECTION   = 16,
-    CLIMB_HACK_DETECTION            = 32,
-    TELEPORT_HACK_DETECTION         = 64,
-    IGNORE_CONTROL_DETECTION        = 128,
-    ZAXIS_HACK_DETECTION            = 256
-};
-
 // GUIDLow is the key.
 typedef std::map<uint32, AnticheatData> AnticheatPlayersDataMap;
 

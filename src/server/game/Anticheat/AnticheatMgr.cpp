@@ -33,6 +33,7 @@
 #define LANG_ANTICHEAT_ALERT 30087
 #define LANG_ANTICHEAT_TELEPORT 30088
 #define LANG_ANTICHEAT_IGNORECONTROL 30089
+#define LANG_ANTICHEAT_DUEL 30090
 
 enum Spells
 {
@@ -332,6 +333,31 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
 
     float xDiff = fabs(lastX - newX);
     float yDiff = fabs(lastY - newY);
+    /* Dueling exploit detection*/
+    if (player->duel)
+    {
+        if ((xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())
+        {
+            Player* opponent = player->duel->Opponent;
+
+            std::string str = "|cFFFFFC00[DUEL ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
+
+            sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
+
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", player->GetName(), player->GetGUID().ToString(), opponent->GetName());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", opponent->GetName(), opponent->GetGUID().ToString(), player->GetName());
+            }
+            BuildReport(player, TELEPORT_HACK_REPORT);
+            BuildReport(opponent, TELEPORT_HACK_REPORT);
+        }
+        else if (player->CanTeleport())
+            player->SetCanTeleport(false);
+    }
     /* Please work */
     if ((xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())// teleport helpers in play
     {
@@ -518,6 +544,31 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
+    /* This Address a new duel exploit, we perform the detection here*/
+    if (player->duel)
+    {
+        if ((clientSpeedRate > speedRate * 1.25f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+        {
+            if (!player->CanTeleport())
+            {
+                Player* opponent = player->duel->Opponent;
+                std::string str = "|cFFFFFC00[DUEL CHEAT ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+
+                sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
+                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                {
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName(), player->GetGUID().ToString(), opponent->GetName());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName(), opponent->GetGUID().ToString(), player->GetName());
+                }
+                BuildReport(player, SPEED_HACK_REPORT);
+                BuildReport(opponent, SPEED_HACK_REPORT);
+            }
+            return;
+        }
+    }
     // We did the (uint32) cast to accept a margin of tolerance
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
     if ((clientSpeedRate > speedRate * 1.25f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))

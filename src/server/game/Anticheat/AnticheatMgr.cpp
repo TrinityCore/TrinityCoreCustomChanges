@@ -637,13 +637,7 @@ bool AnticheatMgr::MustCheckTempReports(uint8 type)
     if (type == JUMP_HACK_REPORT)
         return false;
 
-    if (type == SPEED_HACK_REPORT)
-        return false;
-
     if (type == TELEPORT_HACK_REPORT)
-        return false;
-
-    if (type == IGNORE_CONTROL_REPORT)
         return false;
 
     if (type == ZAXIS_HACK_REPORT)

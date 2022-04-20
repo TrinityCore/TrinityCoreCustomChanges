@@ -384,6 +384,11 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         player->SetCanTeleport(false);
 }
 
+void AnticheatMgr::SetAllowedMovement(Player* player, bool)
+{
+    player->SetCanTeleport(true);
+}
+
 void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))

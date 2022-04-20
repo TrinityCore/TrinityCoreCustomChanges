@@ -57,7 +57,7 @@ class TC_GAME_API AnticheatMgr
            static AnticheatMgr* instance = new AnticheatMgr();
            return instance;
         }
-
+        void SetAllowedMovement(Player* player, bool);
         void StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void SavePlayerData(Player* player);
 

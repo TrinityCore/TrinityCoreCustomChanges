@@ -445,7 +445,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
     float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
 
-    float angle = Position::NormalizeOrientation((tan(deltaZ / deltaXY)) * 250);
+    float angle = Position::NormalizeOrientation(tan(deltaZ / deltaXY));
 
     //if they somehow climb a impossible angle then we flag them.
     if (angle > CLIMB_ANGLE)
@@ -552,40 +552,34 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     /* This Address a new duel exploit, we perform the detection here*/
     if (player->duel)
     {
-        if ((clientSpeedRate > speedRate * 1.25f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+        if ((clientSpeedRate > speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
         {
-            if (!player->CanTeleport())
-            {
-                Player* opponent = player->duel->Opponent;
-                std::string str = "|cFFFFFC00[DUEL CHEAT ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
+            Player* opponent = player->duel->Opponent;
+            std::string str = "|cFFFFFC00[DUEL CHEAT ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
 
-                sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
-                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
-                {
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
-                }
-                BuildReport(player, SPEED_HACK_REPORT);
-                BuildReport(opponent, SPEED_HACK_REPORT);
+            sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
             }
-            return;
+            BuildReport(player, SPEED_HACK_REPORT);
+            BuildReport(opponent, SPEED_HACK_REPORT);
         }
+        return;
     }
     // We did the (uint32) cast to accept a margin of tolerance
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
-    if ((clientSpeedRate > speedRate * 1.25f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if ((clientSpeedRate > speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
-        if (!player->CanTeleport())// Magic. Do not touch. Teleport Helper used to assist with speed hack detection.
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {
-            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
-            {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
-            }
-            BuildReport(player, SPEED_HACK_REPORT);
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
         }
+        BuildReport(player, SPEED_HACK_REPORT);
         return;
     }
 }

@@ -5588,7 +5588,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                 if (Player* player = m_caster->ToPlayer())
                 {
                     // To prevent false positives in the Anticheat system
-                    sAnticheatMgr->SetAllowedMovement(m_caster->ToPlayer(), true);
+                    sAnticheatMgr->SetAllowedMovement(player, true);
                 }
                 break;
             }

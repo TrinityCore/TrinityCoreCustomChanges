@@ -5585,8 +5585,11 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
 
                     m_preGeneratedPath->ShortenPathUntilDist(PositionToVector3(target), objSize); // move back
                 }
-                // To prevent false positives in the Anticheat system
-                sAnticheatMgr->SetAllowedMovement(m_caster->ToPlayer(), true);
+                if (Player* player = m_caster->ToPlayer())
+                {
+                    // To prevent false positives in the Anticheat system
+                    sAnticheatMgr->SetAllowedMovement(m_caster->ToPlayer(), true);
+                }
                 break;
             }
             case SPELL_EFFECT_SKINNING:

@@ -87,7 +87,8 @@ class TC_GAME_API AnticheatMgr
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);
-
+        uint32 _counter = 0;
+        uint32 _alertFrequency;
         AnticheatPlayersDataMap m_Players;                        ///< Player data
 };
 

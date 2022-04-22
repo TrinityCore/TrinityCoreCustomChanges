@@ -226,15 +226,23 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Ignore Control
             if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
             {
-                // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
-                // need better way to limit chat spam
-                if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                // So we dont divide by 0 by accident
+                if (_alertFrequency < 1)
+                    _alertFrequency = 1;
+                if (++_counter % _alertFrequency == 0)
                 {
-                   sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str());
+                    // display warning at the center of the screen, hacky way?
+                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
+                    WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                    data << str;
+                    sWorld->SendGlobalGMMessage(&data);
+                    // need better way to limit chat spam
+                    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                    {
+                        sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str());
+                    }
+                    _counter = 0;
                 }
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
@@ -294,15 +302,23 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    {
        if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
        {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Ignore Zaxis Hack
-           // display warning at the center of the screen, hacky way?
-           std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
-           WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-           data << str;
-           sWorld->SendGlobalGMMessage(&data);
-           // need better way to limit chat spam
-           if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+           _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+           // So we dont divide by 0 by accident
+           if (_alertFrequency < 1)
+               _alertFrequency = 1;
+           if (++_counter % _alertFrequency == 0)
            {
-               sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+                // display warning at the center of the screen, hacky way?
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+                // need better way to limit chat spam
+                if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                {
+                    sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+                }
+                _counter = 0;
            }
        }
        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
@@ -363,15 +379,23 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     {
         if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Teleport Hack
-            // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
-            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-            data << str;
-            sWorld->SendGlobalGMMessage(&data);
-            // need better way to limit chat spam
-            if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+            _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+            // So we dont divide by 0 by accident
+            if (_alertFrequency < 1)
+                _alertFrequency = 1;
+            if (++_counter % _alertFrequency == 0)
             {
-                sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str());
+                // display warning at the center of the screen, hacky way?
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+                // need better way to limit chat spam
+                if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                {
+                    sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str());
+                }
+                _counter = 0;
             }
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
@@ -718,16 +742,24 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 
     if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
     {
-        // display warning at the center of the screen, hacky way?
-        std::string str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
-        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-        data << str;
-        sWorld->SendGlobalGMMessage(&data);
-    }
-    // need better way to limit chat spam
-    if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && (m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX)))
-    {
-        sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+        _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+        // So we dont divide by 0 by accident
+        if (_alertFrequency < 1)
+            _alertFrequency = 1;
+        if (++_counter % _alertFrequency == 0)
+        {
+            // display warning at the center of the screen, hacky way?
+            std::string str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
+        }
+        // need better way to limit chat spam
+        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && (m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX)))
+        {
+            sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+        }
+        _counter = 0;
     }
     // Automatic Moderation, not recommended but not hated
     // Auto Kick

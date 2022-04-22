@@ -3327,6 +3327,13 @@ Anticheat.ReportinChat.Max = 80
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
 
+#     Anticheat.AlertFrequency
+#       Description: Once Ingame warngings and report in chat min is met, this will throttle to alert the gms every other count
+#       Default:     So with 5 being the default, u will get a message alert for every 5 violations.
+#       Anticheat.AlertFrequency = 5
+
+Anticheat.AlertFrequency = 5
+
 Anticheat.WriteLog = 0
 
 #     Anticheat.Detect

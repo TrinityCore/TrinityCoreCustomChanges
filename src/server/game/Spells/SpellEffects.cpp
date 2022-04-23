@@ -1034,6 +1034,11 @@ void Spell::EffectJumpDest()
     float speedXY, speedZ;
     CalculateJumpSpeeds(*effectInfo, unitCaster->GetExactDist2d(destTarget), speedXY, speedZ);
     unitCaster->GetMotionMaster()->MoveJump(*destTarget, speedXY, speedZ, EVENT_JUMP, !m_targets.GetObjectTargetGUID().IsEmpty());
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Spell::EffectTeleportUnits()

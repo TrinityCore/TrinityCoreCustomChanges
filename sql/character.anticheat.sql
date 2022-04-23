@@ -38,3 +38,4 @@ ALTER TABLE `players_reports_status`
 	ADD COLUMN `teleport_reports` BIGINT UNSIGNED NOT NULL DEFAULT '0' AFTER `climb_reports`,
 	ADD COLUMN `ignorecontrol_reports` BIGINT UNSIGNED NOT NULL DEFAULT '0' AFTER `teleport_reports`,
 	ADD COLUMN `zaxis_reports` BIGINT UNSIGNED NOT NULL DEFAULT '0' AFTER `ignorecontrol_reports`;
+	

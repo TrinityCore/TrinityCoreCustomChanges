@@ -573,31 +573,6 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
-    /* This Address a new duel exploit, we perform the detection here*/
-    if (player->duel)
-    {
-        if ((clientSpeedRate > speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
-        {
-            if (!player->CanTeleport())
-            {
-                Player* opponent = player->duel->Opponent;
-                std::string str = "|cFFFFFC00[DUEL CHEAT ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Speed Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
-
-                sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
-                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
-                {
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Speed-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
-                }
-                BuildReport(player, SPEED_HACK_REPORT);
-                BuildReport(opponent, SPEED_HACK_REPORT);
-            }
-        }
-        return;
-    }
     // We did the (uint32) cast to accept a margin of tolerance
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
     if ((clientSpeedRate > speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))

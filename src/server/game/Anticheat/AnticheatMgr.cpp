@@ -275,7 +275,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
        return;
 
-   // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +5 of the ground
+   // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +2.5 of the ground
    if (m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()
        && player->GetPositionZ() >= player->GetFloorZ() + 2.5f)
    {

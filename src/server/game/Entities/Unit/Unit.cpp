@@ -8676,7 +8676,10 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
     {
         MovementPacketSender::SendSpeedChangeToMover(this, mtype, newSpeedFlat);
         // To prevent false positives in the Anticheat system
-        ToPlayer()->SetCanTeleport(true);
+        if (Player* player = ToPlayer())
+        {
+            player->SetCanTeleport(true);
+        }
     }
     else if (IsMovedByClient() && !IsInWorld()) // (1)
         SetSpeedRateReal(mtype, rate);

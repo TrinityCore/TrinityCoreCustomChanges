@@ -206,8 +206,11 @@ public:
         uint32 teleport_reports = sAnticheatMgr->GetTypeReports(guid, 6);
         uint32 ignorecontrol_reports = sAnticheatMgr->GetTypeReports(guid, 7);
         uint32 zaxis_reports = sAnticheatMgr->GetTypeReports(guid, 8);
+        Player* playerTarget = player->GetConnectedPlayer();
+        uint32 latency = 0;
+        latency = playerTarget->GetSession()->GetLatency();
 
-        handler->PSendSysMessage("Information about player %s", player->GetName().c_str());
+        handler->PSendSysMessage("Information about player %s || Latency %u ms", player->GetName().c_str(), latency);
         handler->PSendSysMessage("Average: %f || Total Reports: %u ", average, total_reports);
         handler->PSendSysMessage("Speed Reports: %u || Fly Reports: %u || Jump Reports: %u ", speed_reports, fly_reports, jump_reports);
         handler->PSendSysMessage("Walk On Water Reports: %u  || Teleport To Plane Reports: %u", waterwalk_reports, teleportplane_reports);

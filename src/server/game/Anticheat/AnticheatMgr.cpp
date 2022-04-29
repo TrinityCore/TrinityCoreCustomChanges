@@ -72,7 +72,9 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo /* movementInf
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jump-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jump-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
         }
         BuildReport(player, JUMP_HACK_REPORT);
     }
@@ -99,7 +101,9 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
             }
             BuildReport(player, WALK_WATER_HACK_REPORT);
         }
@@ -133,7 +137,9 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
 
     if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
     {
-        TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+        uint32 latency = 0;
+        latency = player->GetSession()->GetLatency();
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Walk on Water - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
     }
     BuildReport(player, WALK_WATER_HACK_REPORT);
 
@@ -172,7 +178,9 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
     {
-        TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+        uint32 latency = 0;
+        latency = player->GetSession()->GetLatency();
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
     }
     BuildReport(player, FLY_HACK_REPORT);
 }
@@ -202,7 +210,9 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport To Plane - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport To Plane - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
         }
         BuildReport(player, TELEPORT_PLANE_HACK_REPORT);
     }
@@ -239,17 +249,21 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                     data << str;
                     sWorld->SendGlobalGMMessage(&data);
+                    uint32 latency = 0;
+                    latency = player->GetSession()->GetLatency();
                     // need better way to limit chat spam
                     if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
                     {
-                        sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str());
+                        sWorld->SendGMText(LANG_ANTICHEAT_IGNORECONTROL, player->GetName().c_str(), latency);
                     }
                     _counter = 0;
                 }
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Control - Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Control - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
             }
             BuildReport(player, IGNORE_CONTROL_REPORT);
         }
@@ -294,17 +308,21 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
                 // need better way to limit chat spam
                 if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
                 {
-                    sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+                    sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str(), latency);
                 }
                 _counter = 0;
            }
        }
        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
        {
-           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+           uint32 latency = 0;
+           latency = player->GetSession()->GetLatency();
+           TC_LOG_INFO("anticheat", "AnticheatMgr:: Ignore Zaxis Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
        }
 
        BuildReport(player, ZAXIS_HACK_REPORT);
@@ -341,13 +359,16 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
-
-            sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), opponent->GetName().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            uint32 latency2 = 0;
+            latency2 = opponent->GetSession()->GetLatency();
+            sWorld->SendGMText(LANG_ANTICHEAT_DUEL, player->GetName().c_str(), latency, opponent->GetName().c_str(), latency2);
 
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str());
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), opponent->GetName().c_str(), latency);
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: DUEL ALERT Teleport-Hack detected player %s (%s) while dueling %s - Latency: %u ms", opponent->GetName().c_str(), opponent->GetGUID().ToString().c_str(), player->GetName().c_str(), latency2);
             }
             BuildReport(player, TELEPORT_HACK_REPORT);
             BuildReport(opponent, TELEPORT_HACK_REPORT);
@@ -371,17 +392,21 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
                 // need better way to limit chat spam
                 if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
                 {
-                    sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str());
+                    sWorld->SendGMText(LANG_ANTICHEAT_TELEPORT, player->GetName().c_str(), latency);
                 }
                 _counter = 0;
             }
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }
@@ -457,7 +482,9 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
         }
         BuildReport(player, CLIMB_HACK_REPORT);
     }
@@ -562,7 +589,9 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
             }
             BuildReport(player, SPEED_HACK_REPORT);
         }
@@ -713,7 +742,9 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         // need better way to limit chat spam
         if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && (m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX)))
         {
-            sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str());
+            uint32 latency = 0;
+            latency = player->GetSession()->GetLatency();
+            sWorld->SendGMText(LANG_ANTICHEAT_ALERT, player->GetName().c_str(), player->GetName().c_str(), latency);
         }
         _counter = 0;
     }

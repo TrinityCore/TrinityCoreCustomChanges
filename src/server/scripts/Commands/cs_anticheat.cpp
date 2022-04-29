@@ -50,7 +50,7 @@ public:
             { "delete",      HandleAntiCheatDeleteCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "purge",       HandleAntiCheatPurgeCommand,    rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "handle",      HandleAntiCheatHandleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
-            { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
+            { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::No  },
             { "parole",      HandleAnticheatParoleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "warn",        HandleAnticheatWarnCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes }
         };

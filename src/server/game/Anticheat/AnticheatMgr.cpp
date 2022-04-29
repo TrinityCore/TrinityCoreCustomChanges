@@ -217,10 +217,12 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
+    uint32 latency = 0;
+    latency = player->GetSession()->GetLatency() >= 400;
     //So here we check if hte player has a root state and not in a vehicle
-    if (player->HasUnitState(UNIT_STATE_ROOT) && !player->GetVehicle())
-    {// Here we cehck if the x and y position changes while rooted, Nothing moves when rooted, no exception
-     // except for lag, we can legitimately blame lag for false hits, but if your latency is that bad you shouldnt be playing on the server
+    // except for lag, we can legitimately blame lag for false hits, so we see if they are above 400 then we exempt the check
+    if (player->HasUnitState(UNIT_STATE_ROOT) && !player->GetVehicle() && !latency)
+    {// Here we check if the x and y position changes while rooted, Nothing moves when rooted, no exception
         bool unrestricted = movementInfo.pos.GetPositionX() != x || movementInfo.pos.GetPositionY() != y;
         if (unrestricted)
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Ignore Control
@@ -272,7 +274,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
 
    // We want to exclude this LiquidStatus from detection because it leads to false positives on boats, docks etc.
    // Basically everytime you stand on a game object in water
-   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
+   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER && movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
        return;
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +2.5 of the ground

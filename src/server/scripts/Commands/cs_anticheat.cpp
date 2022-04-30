@@ -50,7 +50,7 @@ public:
             { "delete",      HandleAntiCheatDeleteCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "purge",       HandleAntiCheatPurgeCommand,    rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "handle",      HandleAntiCheatHandleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
-            { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::No  },
+            { "jail",        HandleAnticheatJailCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes },
             { "parole",      HandleAnticheatParoleCommand,   rbac::RBAC_ROLE_ADMINISTRATOR,           Console::Yes },
             { "warn",        HandleAnticheatWarnCommand,     rbac::RBAC_ROLE_GAMEMASTER,              Console::Yes }
         };
@@ -98,7 +98,10 @@ public:
         Player* pTarget = player->GetConnectedPlayer();
 
         // teleport both to jail.
-        handler->GetSession()->GetPlayer()->TeleportTo(1, 16226.5f, 16403.6f, -64.5f, 3.2f);
+        if (!handler->IsConsole())
+        {
+            handler->GetSession()->GetPlayer()->TeleportTo(1, 16226.5f, 16403.6f, -64.5f, 3.2f);
+        }
 
         WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
         pTarget->TeleportTo(loc);
@@ -157,19 +160,23 @@ public:
         return true;
     }
 
-    static bool HandleAntiCheatDeleteCommand(ChatHandler* /*handler*/, Variant<EXACT_SEQUENCE("deleteall"), PlayerIdentifier> command)
+    static bool HandleAntiCheatDeleteCommand(ChatHandler* handler, Optional<PlayerIdentifier> player)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
             return false;
 
-        if (command.holds_alternative<EXACT_SEQUENCE("deleteall")>())
-            sAnticheatMgr->AnticheatDeleteCommand(0);
-        else
-            sAnticheatMgr->AnticheatDeleteCommand(command.get<PlayerIdentifier>().GetGUID().GetCounter());
-
+        if (!player)
+            player = PlayerIdentifier::FromTarget(handler);
+        if (!player)
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        sAnticheatMgr->AnticheatDeleteCommand(player->GetGUID());
+        handler->PSendSysMessage("Anticheat players_reports_status deleted for player %s", player->GetName().c_str());
         return true;
     }
-
     static bool HandleAntiCheatPurgeCommand(ChatHandler* handler)
     {
         // For the sins I am about to commit, may CTHULHU forgive me

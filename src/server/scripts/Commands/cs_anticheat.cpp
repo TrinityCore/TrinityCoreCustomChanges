@@ -167,7 +167,7 @@ public:
 
         if (!player)
             player = PlayerIdentifier::FromTarget(handler);
-        if (!player)
+        if (!player || !player->IsConnected())
         {
             handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
             handler->SetSentErrorMessage(true);

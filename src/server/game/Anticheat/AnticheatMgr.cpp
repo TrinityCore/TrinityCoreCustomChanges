@@ -443,7 +443,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     WalkOnWaterHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
     TeleportPlaneHackDetection(player, movementInfo);
-    ClimbHackDetection(player, movementInfo);
+    ClimbHackDetection(player, movementInfo, opcode);
     TeleportHackDetection(player, movementInfo);
     IgnoreControlHackDetection(player, movementInfo);
     ZAxisHackDetection(player, movementInfo);
@@ -452,7 +452,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 }
 
 // basic detection
-void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_CLIMBHACK_ENABLE))
         return;
@@ -461,6 +461,14 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo)
     if (player->IsInWater() ||
         player->IsFlying() ||
         player->IsFalling())
+        return;
+
+    // If the player jumped, we dont want to check for climb hack
+    // This can lead to false positives for climbing game objects legit
+    if (opcode == MSG_MOVE_JUMP)
+        return;
+
+    if (player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
         return;
 
     Position playerPos;

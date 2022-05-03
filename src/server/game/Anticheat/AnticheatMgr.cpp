@@ -457,8 +457,6 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo)
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_CLIMBHACK_ENABLE))
         return;
 
-    uint32 key = player->GetGUID().GetCounter();
-
     // in this case we don't care if they are "legal" flags, they are handled in another parts of the Anticheat Manager.
     if (player->IsInWater() ||
         player->IsFlying() ||

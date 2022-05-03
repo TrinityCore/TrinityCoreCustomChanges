@@ -38,7 +38,8 @@ enum ReportTypes
     CLIMB_HACK_REPORT = 5,
     TELEPORT_HACK_REPORT = 6,
     IGNORE_CONTROL_REPORT = 7,
-    ZAXIS_HACK_REPORT = 8
+    ZAXIS_HACK_REPORT = 8,
+    ANTISWIM_HACK_REPORT = 9
 
    // MAX_REPORT_TYPES
 };
@@ -84,6 +85,7 @@ class TC_GAME_API AnticheatMgr
         void IgnoreControlHackDetection(Player* player, MovementInfo movementInfo);
         void TeleportHackDetection(Player* player, MovementInfo movementInfo);
         void ZAxisHackDetection(Player* player, MovementInfo movementInfo);
+        void AntiSwimHackDetection(Player* player, MovementInfo movementInfo);
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);

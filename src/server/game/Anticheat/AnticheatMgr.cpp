@@ -29,7 +29,6 @@
 #include "World.h"
 #include "WorldSession.h"
 
-#define CLIMB_ANGLE 1.87f
 #define LANG_ANTICHEAT_ALERT 30087
 #define LANG_ANTICHEAT_TELEPORT 30088
 #define LANG_ANTICHEAT_IGNORECONTROL 30089
@@ -444,7 +443,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     WalkOnWaterHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
     TeleportPlaneHackDetection(player, movementInfo);
-    ClimbHackDetection(player, movementInfo, opcode);
+    ClimbHackDetection(player, movementInfo);
     TeleportHackDetection(player, movementInfo);
     IgnoreControlHackDetection(player, movementInfo);
     ZAxisHackDetection(player, movementInfo);
@@ -453,16 +452,12 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 }
 
 // basic detection
-void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
+void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_CLIMBHACK_ENABLE))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
-
-    if (opcode != MSG_MOVE_HEARTBEAT ||
-        m_Players[key].GetLastOpcode() != MSG_MOVE_HEARTBEAT)
-        return;
 
     // in this case we don't care if they are "legal" flags, they are handled in another parts of the Anticheat Manager.
     if (player->IsInWater() ||
@@ -472,22 +467,25 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
 
     Position playerPos;
 
-    float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
-    float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
+    float diffz = fabs(movementInfo.pos.GetPositionZ() - playerPos.GetPositionZ());
+    float tanangle = movementInfo.pos.GetExactDist2d(&playerPos) / diffz;
 
-    float angle = Position::NormalizeOrientation(tan(deltaZ / deltaXY));
-
-    //if they somehow climb a impossible angle then we flag them.
-    if (angle > CLIMB_ANGLE)
+    if (!player->HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_SWIMMING))
     {
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (movementInfo.pos.GetPositionZ() > playerPos.GetPositionZ() &&
+            diffz > 1.87f && tanangle < 0.57735026919f) // 30 degrees
         {
-            uint32 latency = 0;
-            latency = player->GetSession()->GetLatency();
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Climb-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+            }
+
+            BuildReport(player, CLIMB_HACK_REPORT);
         }
-        BuildReport(player, CLIMB_HACK_REPORT);
     }
+
 }
 
 void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)

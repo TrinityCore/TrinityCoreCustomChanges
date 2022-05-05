@@ -94,7 +94,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
         return;
 
     // if the player is water walking on water then we are good.
-    if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK)
+    if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK && !player->IsFlying())
     {
         if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING))
         {

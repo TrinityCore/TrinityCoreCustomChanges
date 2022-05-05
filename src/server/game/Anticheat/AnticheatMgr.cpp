@@ -536,7 +536,7 @@ void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInf
         {
             uint32 latency = 0;
             latency = player->GetSession()->GetLatency();
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Gravity-Hack detected player {} ({}) - Latency: {} ms", player->GetName(), player->GetGUID().ToString(), latency);
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Gravity-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
         }
         BuildReport(player, GRAVITY_HACK_REPORT);
     }

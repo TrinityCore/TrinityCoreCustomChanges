@@ -530,7 +530,7 @@ void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInf
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_GRAVITYSWIM_ENABLE))
         return;
 
-    if (!player->HasUnitState(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
+    if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {

@@ -511,6 +511,15 @@ void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementIn
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANTISWIM_ENABLE))
         return;
 
+    if (player->GetAreaId())
+    {
+        switch (player->GetAreaId())
+        {
+        case 2100: //Maraudon https://github.com/TrinityCore/TrinityCore/issues/27946
+            return;
+        }
+    }
+
     if (player->GetLiquidStatus() == LIQUID_MAP_UNDER_WATER && !movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

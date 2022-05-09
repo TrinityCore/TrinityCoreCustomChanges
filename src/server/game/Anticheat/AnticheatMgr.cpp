@@ -456,7 +456,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     }
     if (player->GetLiquidStatus() == LIQUID_MAP_UNDER_WATER)
     {
-        AntiSwimHackDetection(player, movementInfo);
+        AntiSwimHackDetection(player, movementInfo, opcode);
     }
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
@@ -506,7 +506,7 @@ void AnticheatMgr::ClimbHackDetection(Player* player, MovementInfo movementInfo,
 }
 
 // basic detection
-void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANTISWIM_ENABLE))
         return;
@@ -515,10 +515,21 @@ void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementIn
     {
         switch (player->GetAreaId())
         {
-        case 2100: //Maraudon https://github.com/TrinityCore/TrinityCore/issues/27946
-            return;
+            case 2100: //Maraudon https://github.com/TrinityCore/TrinityCore/issues/27946
+                return;
         }
     }
+
+    if (player->GetLiquidStatus() == (LIQUID_MAP_ABOVE_WATER | LIQUID_MAP_WATER_WALK | LIQUID_MAP_IN_WATER))
+    {
+        return;
+    }
+
+    if (opcode == MSG_MOVE_JUMP)
+        return;
+
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING || MOVEMENTFLAG_SWIMMING))
+        return;
 
     if (player->GetLiquidStatus() == LIQUID_MAP_UNDER_WATER && !movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {

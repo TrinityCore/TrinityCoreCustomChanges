@@ -81,7 +81,7 @@ class TC_GAME_API AnticheatMgr
         void FlyHackDetection(Player* player, MovementInfo movementInfo);
         void WalkOnWaterHackDetection(Player* player, MovementInfo movementInfo);
         void JumpHackDetection(Player* player, MovementInfo movementInfo,uint32 opcode);
-        void TeleportPlaneHackDetection(Player* player, MovementInfo);
+        void TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void ClimbHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void IgnoreControlHackDetection(Player* player, MovementInfo movementInfo);
         void TeleportHackDetection(Player* player, MovementInfo movementInfo);

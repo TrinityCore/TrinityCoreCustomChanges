@@ -184,19 +184,20 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
     BuildReport(player, FLY_HACK_REPORT);
 }
 
-void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
     uint32 key = player->GetGUID().GetCounter();
 
-    if (m_Players[key].GetLastMovementInfo().pos.GetPositionZ() != 0 ||
-        movementInfo.pos.GetPositionZ() != 0)
+    if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
         return;
 
-    //Ignore if you are falling
-    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (opcode == (MSG_MOVE_FALL_LAND))
+        return;
+
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_SWIMMING))
         return;
 
     float x, y, z;
@@ -204,7 +205,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     float ground_Z = player->GetMap()->GetHeight(x, y, z);
     float z_diff = fabs(ground_Z - z);
 
-    // we are not really walking there we check if there is only a z-axis difference
+    // we are not really walking there
     if (z_diff > 1.0f)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
@@ -441,7 +442,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
-    TeleportPlaneHackDetection(player, movementInfo);
+    TeleportPlaneHackDetection(player, movementInfo, opcode);
     ClimbHackDetection(player, movementInfo, opcode);
     TeleportHackDetection(player, movementInfo);
     IgnoreControlHackDetection(player, movementInfo);

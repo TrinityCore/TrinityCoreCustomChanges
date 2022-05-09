@@ -189,6 +189,15 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
+    if (player->GetAreaId())
+    {
+        switch (player->GetAreaId())
+        {
+        case 2100: //Maraudon https://github.com/TrinityCore/TrinityCore/issues/27946
+            return;
+        }
+    }
+
     uint32 key = player->GetGUID().GetCounter();
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)

@@ -189,15 +189,6 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
-    if (player->GetAreaId())
-    {
-        switch (player->GetAreaId())
-        {
-        case 2100: //Maraudon https://github.com/TrinityCore/TrinityCore/issues/27946
-            return;
-        }
-    }
-
     uint32 key = player->GetGUID().GetCounter();
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
@@ -209,10 +200,9 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_SWIMMING))
         return;
 
-    float x, y, z;
-    player->GetPosition(x, y, z);
-    float ground_Z = player->GetMap()->GetHeight(x, y, z);
-    float z_diff = fabs(ground_Z - z);
+    float pos_z = player->GetPositionZ();
+    float ground_Z = player->GetFloorZ();
+    float z_diff = fabs(ground_Z - pos_z);
 
     // we are not really walking there
     if (z_diff > 1.0f)

@@ -550,6 +550,11 @@ void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInf
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_GRAVITY_ENABLE))
         return;
 
+    if (player->HasAuraType(SPELL_AURA_FEATHER_FALL))
+    {
+        return;
+    }
+
     if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

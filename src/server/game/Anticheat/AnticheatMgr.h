@@ -83,7 +83,7 @@ class TC_GAME_API AnticheatMgr
         void JumpHackDetection(Player* player, MovementInfo movementInfo,uint32 opcode);
         void TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void ClimbHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
-        void IgnoreControlHackDetection(Player* player, MovementInfo movementInfo);
+        void IgnoreControlHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void TeleportHackDetection(Player* player, MovementInfo movementInfo);
         void ZAxisHackDetection(Player* player, MovementInfo movementInfo);
         void AntiSwimHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);

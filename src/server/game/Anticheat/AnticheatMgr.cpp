@@ -200,6 +200,10 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_SWIMMING))
         return;
 
+    // If he is flying we dont need to check
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
+        return;
+
     float pos_z = player->GetPositionZ();
     float ground_Z = player->GetFloorZ();
     float z_diff = fabs(ground_Z - pos_z);
@@ -217,13 +221,22 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     }
 }
 
-void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     float x, y;
     player->GetPosition(x, y);
     ObjectGuid key = player->GetGUID();
 
-    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_IGNORECONTROLHACK_ENABLE))
+        return;
+
+    if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
+        return;
+
+    if (opcode == (MSG_MOVE_FALL_LAND))
+        return;
+
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_SWIMMING))
         return;
 
     uint32 latency = 0;
@@ -444,7 +457,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     TeleportPlaneHackDetection(player, movementInfo, opcode);
     ClimbHackDetection(player, movementInfo, opcode);
     TeleportHackDetection(player, movementInfo);
-    IgnoreControlHackDetection(player, movementInfo);
+    IgnoreControlHackDetection(player, movementInfo, opcode);
     GravityHackDetection(player, movementInfo);
     if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK)
     {

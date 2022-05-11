@@ -206,10 +206,11 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     float pos_z = player->GetPositionZ();
     float ground_Z = player->GetFloorZ();
-    float z_diff = fabs(ground_Z - pos_z);
+    float groundZ = player->GetMapHeight(player->GetPositionX(), player->GetPositionY(), MAX_HEIGHT);
+    float floorZ = player->GetMapHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
 
     // we are not really walking there
-    if (z_diff > 1.0f)
+    if (groundZ == floorZ && (fabs(ground_Z - pos_z) > 1.0f || fabs(ground_Z - pos_z) < -1.0f))
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {

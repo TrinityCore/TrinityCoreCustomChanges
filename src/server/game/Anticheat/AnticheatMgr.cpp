@@ -189,6 +189,11 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
+    if (player->HasAuraType(SPELL_AURA_WATER_WALK) || player->HasAuraType(SPELL_AURA_WATER_BREATHING))
+    {
+        return;
+    }
+
     uint32 key = player->GetGUID().GetCounter();
 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
@@ -459,7 +464,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     ClimbHackDetection(player, movementInfo, opcode);
     TeleportHackDetection(player, movementInfo);
     IgnoreControlHackDetection(player, movementInfo, opcode);
-    GravityHackDetection(player, movementInfo);
+    GravityHackDetection(player, movementInfo, opcode);
     if (player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK)
     {
         WalkOnWaterHackDetection(player, movementInfo);
@@ -559,35 +564,29 @@ void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementIn
     }
 }
 
-void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_GRAVITY_ENABLE))
         return;
-
-    if (player->GetAreaId())
-    {
-        switch (player->GetAreaId())
-        {
-        case 4458: //sparksockett mine field
-        case 4419: //Snowblindhills tiny area near sparksockett mine field
-            return;
-        }
-    }
 
     if (player->HasAuraType(SPELL_AURA_FEATHER_FALL))
     {
         return;
     }
 
-    if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
+    uint32 key = player->GetGUID().GetCounter();
+    if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
     {
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
         {
-            uint32 latency = 0;
-            latency = player->GetSession()->GetLatency();
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Gravity-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Gravity-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+            }
+            BuildReport(player, GRAVITY_HACK_REPORT);
         }
-        BuildReport(player, GRAVITY_HACK_REPORT);
     }
 }
 

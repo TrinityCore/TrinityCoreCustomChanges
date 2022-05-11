@@ -113,8 +113,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo movemen
         return;
 
     // Prevents the False Positive for water walking when you ressurrect.
-    // Aura 15007 (Resurrection sickness) is given while dead before returning back to life.
-    if (player->HasAuraType(SPELL_AURA_GHOST) && player->HasAura(RESURRECTION_SICKNESS))
+    if (m_Players[key].GetLastOpcode() == MSG_DELAY_GHOST_TELEPORT)
         return;
 
     // if the player previous movement and current movement is water walking then we do a follow up check
@@ -189,10 +188,8 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPANEHACK_ENABLE))
         return;
 
-    if (player->HasAuraType(SPELL_AURA_WATER_WALK) || player->HasAuraType(SPELL_AURA_WATER_BREATHING))
-    {
+    if (player->HasAuraType(SPELL_AURA_WATER_WALK) || player->HasAuraType(SPELL_AURA_WATER_BREATHING) || player->HasAuraType(SPELL_AURA_GHOST))
         return;
-    }
 
     uint32 key = player->GetGUID().GetCounter();
 
@@ -540,9 +537,7 @@ void AnticheatMgr::AntiSwimHackDetection(Player* player, MovementInfo movementIn
     }
 
     if (player->GetLiquidStatus() == (LIQUID_MAP_ABOVE_WATER | LIQUID_MAP_WATER_WALK | LIQUID_MAP_IN_WATER))
-    {
         return;
-    }
 
     if (opcode == MSG_MOVE_JUMP)
         return;

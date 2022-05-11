@@ -564,6 +564,16 @@ void AnticheatMgr::GravityHackDetection(Player* player, MovementInfo movementInf
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_GRAVITY_ENABLE))
         return;
 
+    if (player->GetAreaId())
+    {
+        switch (player->GetAreaId())
+        {
+        case 4458: //sparksockett mine field
+        case 4419: //Snowblindhills tiny area near sparksockett mine field
+            return;
+        }
+    }
+
     if (player->HasAuraType(SPELL_AURA_FEATHER_FALL))
     {
         return;

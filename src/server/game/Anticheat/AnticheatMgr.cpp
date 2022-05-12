@@ -29,10 +29,10 @@
 #include "World.h"
 #include "WorldSession.h"
 
-#define LANG_ANTICHEAT_ALERT 30087
-#define LANG_ANTICHEAT_TELEPORT 30088
-#define LANG_ANTICHEAT_IGNORECONTROL 30089
-#define LANG_ANTICHEAT_DUEL 30090
+constexpr auto LANG_ANTICHEAT_ALERT = 30087;
+constexpr auto LANG_ANTICHEAT_TELEPORT = 30088;
+constexpr auto LANG_ANTICHEAT_IGNORECONTROL = 30089;
+constexpr auto LANG_ANTICHEAT_DUEL = 30090;
 
 enum Spells
 {

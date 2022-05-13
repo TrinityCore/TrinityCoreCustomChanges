@@ -193,6 +193,13 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     uint32 key = player->GetGUID().GetCounter();
 
+    uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+
+    // We don't need to check for a water walking hack if the player hasn't moved
+    // This is necessary since MovementHandler fires if you rotate the camera in place
+    if (!distance2D)
+        return;
+
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
         return;
 
@@ -215,7 +222,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     float floorZ = player->GetMapHeight(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
 
     // we are not really walking there
-    if (groundZ == floorZ && (fabs(ground_Z - pos_z) > 1.0f || fabs(ground_Z - pos_z) < -1.0f))
+    if (groundZ == floorZ && (fabs(ground_Z - pos_z) > 2.0f || fabs(ground_Z - pos_z) < -1.0f))
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
         {

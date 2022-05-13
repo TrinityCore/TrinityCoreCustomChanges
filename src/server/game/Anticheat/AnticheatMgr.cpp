@@ -303,7 +303,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
 
    // We want to exclude this LiquidStatus from detection because it leads to false positives on boats, docks etc.
    // Basically everytime you stand on a game object in water
-   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER && movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
        return;
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +2.5 of the ground

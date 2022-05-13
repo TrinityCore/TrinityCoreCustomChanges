@@ -199,6 +199,9 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (opcode == (MSG_MOVE_FALL_LAND))
         return;
 
+    if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
+        return;
+
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_SWIMMING))
         return;
 

@@ -655,7 +655,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
 
     WorldPacket data(MSG_MOVE_KNOCK_BACK, 66);
     WriteMovementInfo(&data, &movementInfo);
-
+    _player->SetCanTeleport(true);
     // knockback specific info
     data << movementInfo.jump.sinAngle;
     data << movementInfo.jump.cosAngle;

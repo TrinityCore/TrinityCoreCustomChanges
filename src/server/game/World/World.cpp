@@ -487,6 +487,24 @@ void World::LoadConfigSettings(bool reload)
         sMetric->LoadFromConfigs();
     }
 
+    // Nemesis Anticheat Config Values
+    m_bool_configs[CONFIG_ANTICHEAT_ENABLED] = sConfigMgr->GetBoolDefault("Anticheat.Enabled", false);
+    m_bool_configs[CONFIG_ANTICHEAT_SPEED_HACK] = sConfigMgr->GetBoolDefault("Anticheat.SpeedHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_FLY_HACK] = sConfigMgr->GetBoolDefault("Anticheat.FlyHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_TELEPORT_HACK] = sConfigMgr->GetBoolDefault("Anticheat.TeleportHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_JUMP_HACK] = sConfigMgr->GetBoolDefault("Anticheat.JumpHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CLIMB_HACK] = sConfigMgr->GetBoolDefault("Anticheat.ClimbHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_GRAVITY_HACK] = sConfigMgr->GetBoolDefault("Anticheat.GravityHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANTIKNOCKBACK_HACK] = sConfigMgr->GetBoolDefault("Anticheat.AntiknockbackHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ZAXIS_HACK] = sConfigMgr->GetBoolDefault("Anticheat.ZAxisHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_WATERWALK_HACK] = sConfigMgr->GetBoolDefault("Anticheat.WaterwalkHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANTISWIM_HACK] = sConfigMgr->GetBoolDefault("Anticheat.AntiswimHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_IGNORECONTROL_HACK] = sConfigMgr->GetBoolDefault("Anticheat.IgnoreControlHack", false);
+    m_float_configs[CONFIG_ANTICHEAT_TOLERANCE] = sConfigMgr->GetFloatDefault("Anticheat.SpeedHack.Tolerance", 1.075f);
+    m_float_configs[CONFIG_ANTICHEAT_MAXSLOPE] = sConfigMgr->GetFloatDefault("Anticheat.ClimbHack.MaxSlope", 0.9599f);
+    m_int_configs[CONFIG_ANTICHEAT_RESET_TIMER] = sConfigMgr->GetIntDefault("Anticheat.Reset.Timer", 5000);
+    m_int_configs[CONFIG_ANTICHEAT_HACK_COUNTER] = sConfigMgr->GetIntDefault("Anticheat.Hack.Counter", 3);
+
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
     Motd::SetMotd(sConfigMgr->GetStringDefault("Motd", "Welcome to a Trinity Core Server."));

@@ -3959,6 +3959,7 @@ Logger.scripts.hotswap=3,Console Server
 Logger.sql.sql=5,Console DBErrors
 Logger.sql.updates=3,Console Server
 Logger.mmaps=3,Server
+Logger.anticheat=3,Console Server
 
 #Logger.achievement=3,Console Server
 #Logger.addon=3,Console Server
@@ -4144,6 +4145,65 @@ Metric.OverallStatusInterval = 1
 
 #Metric.Threshold.world_update_sessions_time = 100
 #Metric.Threshold.worldsession_update_opcode_time = 50
+
+#
+###################################################################################################
+
+###################################################################################################
+#   Nemesis Anti-Cheat System
+#
+#   Anticheat.Enable
+#      Description: Enables or disables the Anticheat System
+#      Default:     0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.Enabled = 1
+
+#   False Positive Reduction
+#   Hack.Counter        (Int, Default 3)   - How many positive hack detections a player needs to generate a report
+#   Reset.Timer    (Int, Default 5000)  - How much time in ms we want to wait until resetting the hack counter
+#
+#   Example: With default values, a player has to trigger a hack detection 3 times in the span of 5 seconds to generate a cheat report
+Anticheat.Hack.Counter = 3
+Anticheat.Reset.Timer = 5000
+
+#   Anticheat Subsystems - Enable or Disable as needed
+#   Speedhack - cheaters running faster than allowed
+#   Tolerance - Percentage increase of allowed speed (Default 1.075 for 7.5% increase)
+Anticheat.SpeedHack = 1
+Anticheat.SpeedHack.Tolerance = 1.075
+
+#   Flyhack - cheaters flying when not allowed
+Anticheat.FlyHack = 1
+
+#   TeleportHack - cheaters teleporting from A to B when not allowed
+Anticheat.TeleportHack = 1
+
+#   JumpHack - cheaters using multiple jumps at once, reaching higher areas
+Anticheat.JumpHack = 1
+
+#   AntiknockbackHack - cheaters ignoring knockbacks
+Anticheat.AntiknockbackHack = 1
+
+#   GravityHack - Manipulating gravity so player can jump higher
+Anticheat.GravityHack = 1
+
+#   ClimbHack - cheaters climbing hills they should not be able to
+#   MaxSlope - Maximum angle in radians a player can climb (Default 55 degrees converted to radian -> 0.9599)
+Anticheat.ClimbHack = 1
+Anticheat.ClimbHack.MaxSlope = 0.9599
+
+#   ZAxisHack - cheaters hovering
+Anticheat.ZAxisHack = 1
+
+#   WaterwalkHack - cheaters walking on water and can disengange from combat that way
+Anticheat.WaterwalkHack = 1
+
+#   AntiswimHack - cheaters walking in water
+Anticheat.AntiswimHack = 1
+
+#   IgnoreControlHack - cheaters ignoring control loss effects
+Anticheat.IgnoreControlHack = 1
 
 #
 ###################################################################################################

@@ -126,7 +126,7 @@ void AntiCheatMgr::HackDetection(MovementInfo movementInfo, uint32 opcode)
             CheckForJumpHack(opcode);
 
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_GRAVITY_HACK))
-            CheckForGravityHack(movementInfo, opcode);
+            CheckForGravityHack(movementInfo);
 
         // Only need to check for FlyHack if the player is actually flying
         // With our tested Cheat Tool we need to check for Ascending/Descending since MOVEMENTFLAG_FLYING is not triggered
@@ -257,7 +257,7 @@ void AntiCheatMgr::CheckForJumpHack(uint32 opcode)
 
 // GravityHack
 // We check if the player has an abnormal jump speed
-void AntiCheatMgr::CheckForGravityHack(MovementInfo movementInfo, uint32 opcode)
+void AntiCheatMgr::CheckForGravityHack(MovementInfo movementInfo)
 {
     // We only want to check if the player jumped to not cause false positives on knockbacks
     if (_lastOpcode != MSG_MOVE_JUMP)

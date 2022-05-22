@@ -52,7 +52,7 @@ private:
     void CheckForFlyHack();
     void CheckForTeleportHack();
     void CheckForJumpHack(uint32 opcode);
-    void CheckForGravityHack(MovementInfo movementInfo, uint32 opcode);
+    void CheckForGravityHack(MovementInfo movementInfo);
     void CheckForClimbHack(MovementInfo movementInfo, uint32 opcode);
     void CheckForZAxisHack(MovementInfo movementInfo);
     void CheckForWaterwalkHack();

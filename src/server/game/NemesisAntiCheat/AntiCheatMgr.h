@@ -34,8 +34,10 @@ With feedback and support from https://github.com/acidmanifesto
 #include "Chat.h"
 #include "Player.h"
 #include "World.h"
+#include "WorldSession.h"
 
 class Player;
+class WorldSession;
 
 class TC_GAME_API AntiCheatMgr
 {

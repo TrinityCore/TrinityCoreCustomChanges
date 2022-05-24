@@ -25,6 +25,7 @@ https://github.com/Jinnaix
 With feedback and support from https://github.com/acidmanifesto
 */
 
+#include "AntiCheatMgr.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "Log.h"

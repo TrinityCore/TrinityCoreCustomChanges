@@ -25,12 +25,12 @@ https://github.com/Jinnaix
 With feedback and support from https://github.com/acidmanifesto
 */
 
-#include "AntiCheatMgr.h"
 #include "DatabaseEnv.h"
-#include "Map.h"
 #include "DBCStores.h"
-#include "Realm.h"
 #include "Log.h"
+#include "Map.h"
+#include "Realm.h"
+#include "WorldSession.h"
 
 AntiCheatMgr::AntiCheatMgr(Player* player)
 {

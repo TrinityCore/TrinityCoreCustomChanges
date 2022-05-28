@@ -90,17 +90,17 @@ namespace
         uint8 loc = player->GetSession()->GetSessionDbcLocale();
 
         if (PageC[player] > 0)
-            AddGossipItemFor(player, 7, PREV_PAGE, GOSSIP_PREV_PAGEC, 0);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, PREV_PAGE, GOSSIP_PREV_PAGEC, 0);
 
         VCatDest_t i (PageC[player] * NB_ITEM_PAGE);
         for ( ; i < TabCatDest.size() && i < (NB_ITEM_PAGE * (PageC[player] + 1)); ++i)
         {
             if (TabCatDest[i].IsAllowedToTeleport(player))
-                AddGossipItemFor(player, 3, TabCatDest[i].GetName(loc, player->IsGameMaster()).c_str(), GOSSIP_SHOW_DEST, i); //book categorie
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, TabCatDest[i].GetName(loc, player->IsGameMaster()).c_str(), GOSSIP_SHOW_DEST, i); //book categorie
         }
 
         if (i < TabCatDest.size())
-            AddGossipItemFor(player, 7, NEXT_PAGE, GOSSIP_NEXT_PAGEC, 0);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, NEXT_PAGE, GOSSIP_NEXT_PAGEC, 0);
 
         SendGossipMenuFor(player, MSG_CAT, creature);
     }
@@ -111,7 +111,7 @@ namespace
         uint8 loc = player->GetSession()->GetSessionDbcLocale();
 
         if (PageD[player] > 0)
-            AddGossipItemFor(player,7, PREV_PAGE, GOSSIP_PREV_PAGED, 0);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, PREV_PAGE, GOSSIP_PREV_PAGED, 0);
 
         CatDest::VDest_t i (PageD[player] * NB_ITEM_PAGE);
         for ( ; i < TabCatDest[Cat[player]].size() && i < (NB_ITEM_PAGE * (PageD[player] + 1)); ++i)
@@ -123,14 +123,14 @@ namespace
                 name = TabCatDest[Cat[player]].GetDest(i).m_name[0];
             name = "|TInterface/ICONS/"+icon+":"+size+":"+size+"|t "+name;
 
-            AddGossipItemFor(player, 2, name.c_str(), GOSSIP_TELEPORT, i); //taxi destination
+            AddGossipItemFor(player, GOSSIP_ICON_TAXI, name.c_str(), GOSSIP_TELEPORT, i); //taxi destination
         }
 
         if (i < TabCatDest[Cat[player]].size())
-            AddGossipItemFor(player, 7, NEXT_PAGE, GOSSIP_NEXT_PAGED, 0);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, NEXT_PAGE, GOSSIP_NEXT_PAGED, 0);
 
         if (CatDest::CountOfCategoryAllowedBy(player) > 1)
-            AddGossipItemFor(player, 7, MAIN_MENU, GOSSIP_MAIN_MENU, 0);
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, MAIN_MENU, GOSSIP_MAIN_MENU, 0);
 
         SendGossipMenuFor(player,MSG_DEST, creature);
     }

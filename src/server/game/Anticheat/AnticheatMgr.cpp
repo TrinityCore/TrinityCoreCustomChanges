@@ -19,6 +19,7 @@
 #include "AnticheatScripts.h"
 #include "AccountMgr.h"
 #include "DatabaseEnv.h"
+#include "Dbcstores.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapManager.h"

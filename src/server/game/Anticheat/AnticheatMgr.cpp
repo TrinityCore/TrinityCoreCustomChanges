@@ -745,6 +745,12 @@ void AnticheatMgr::SavePlayerData(Player* player)
     CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), m_Players[player->GetGUID().GetCounter()].GetAverage(), m_Players[player->GetGUID().GetCounter()].GetTotalReports(), m_Players[player->GetGUID().GetCounter()].GetTypeReports(SPEED_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(FLY_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(JUMP_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(WALK_WATER_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(TELEPORT_PLANE_HACK_REPORT), m_Players[player->GetGUID().GetCounter()].GetTypeReports(CLIMB_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(TELEPORT_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(IGNORE_CONTROL_REPORT), m_Players[player->GetGUID()].GetTypeReports(ZAXIS_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(ANTISWIM_HACK_REPORT), m_Players[player->GetGUID()].GetTypeReports(GRAVITY_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
 }
 
+void AnticheatMgr::OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode)
+{
+    if (!AccountMgr::IsAdminAccount(player->GetSession()->GetSecurity()) || sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE_ON_GM))
+        sAnticheatMgr->StartHackDetection(player, mi, opcode);
+}
+
 uint32 AnticheatMgr::GetTotalReports(uint32 lowGUID)
 {
     return m_Players[lowGUID].GetTotalReports();
@@ -979,8 +985,10 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 // these are the supporters for the gm commands in cs_anticheat.cpp
 void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
 {   // .anticheat global gm command
-    // MySQL will sort all for us, anyway this is not the best way we must only save the anticheat data not whole player's data!.
-    ObjectAccessor::SaveAllPlayers();
+    // save All Anticheat Player Data before displaying global stats
+    for (SessionMap::const_iterator itr = sWorld->GetAllSessions().begin(); itr != sWorld->GetAllSessions().end(); ++itr)
+        if (Player* plr = itr->second->GetPlayer())
+            sAnticheatMgr->SavePlayerData(plr);
 
     QueryResult resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
     if (!resultDB)

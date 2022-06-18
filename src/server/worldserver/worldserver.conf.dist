@@ -3306,7 +3306,7 @@ Anticheat.Enable = 1
 #       Default:    0 - (Disabled)
 #                   1 - (Enabled)
 
-Anticheat.EnabledOnGmAccounts = 1
+Anticheat.EnabledOnGmAccounts = 0
 
 #     Anticheat.ReportsForIngameWarnings
 #       Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.

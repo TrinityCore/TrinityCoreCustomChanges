@@ -30,6 +30,7 @@
 #include "PetDefines.h"
 #include "PlayerTaxi.h"
 #include "QuestDef.h"
+#include "AntiCheatMgr.h"
 #include <memory>
 #include <queue>
 #include <unordered_set>
@@ -75,6 +76,7 @@ class PlayerSocial;
 class ReputationMgr;
 class SpellCastTargets;
 class TradeData;
+class AntiCheatMgr;
 
 enum InventoryType : uint8;
 enum ItemClass : uint8;
@@ -2195,6 +2197,12 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         std::string GetDebugInfo() const override;
 
+        /*********************************************************/
+        /***               ANTICHEAT SYSTEM                    ***/
+        /*********************************************************/
+
+        AntiCheatMgr* GetAntiCheat();
+
     protected:
         // Gamemaster whisper whitelist
         GuidList WhisperList;
@@ -2507,6 +2515,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         AchievementMgr* m_achievementMgr;
         ReputationMgr*  m_reputationMgr;
+
+        AntiCheatMgr* m_antiCheatMgr;
 
         uint32 m_ChampioningFaction;
 

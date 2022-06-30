@@ -78,6 +78,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "AntiCheatMgr.h"
 #include <cmath>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -8682,6 +8683,10 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
         MovementPacketSender::SendSpeedChangeToAll(this, mtype, newSpeedFlat);
     }
 
+    // If the Speed Changes we dont want to have a false positive on our speed hack
+    if (Player* player = ToPlayer())
+        player->GetAntiCheat()->SetAllowedMovement(true);
+
     // explaination of (1):
     // If the player is not in the world yet, it won't reply to the packets requiring an ack. And once the player is in the world, next time a movement
     // packet which requires an ack is sent to the client (change of speed for example), the client is kicked from the
@@ -12230,6 +12235,12 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         if (HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || HasAuraType(SPELL_AURA_FLY))
             SetCanFly(true, true);
     }
+
+    if (Player* player = ToPlayer())
+    {
+        player->GetAntiCheat()->SetAllowedMovement(true);
+        player->GetAntiCheat()->SetKnockback(true);
+    }
 }
 
 float Unit::GetCombatRatingReduction(CombatRating cr) const
@@ -12679,6 +12690,10 @@ void Unit::ExitVehicle(Position const* /*exitPosition*/)
     //! This function can be called at upper level code to initialize an exit from the passenger's side.
     if (!m_vehicle)
         return;
+
+    // We need to call this so two player mounts dont trigger hack detection
+    if (Player* player = ToPlayer())
+        player->GetAntiCheat()->SetAllowedMovement(true);
 
     GetVehicleBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, GetGUID());
     //! The following call would not even be executed successfully as the

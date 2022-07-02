@@ -248,7 +248,7 @@ public:
         {
             int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
             CloseGossipMenuFor(player);
-
+            ClearGossipMenuFor(player);
             switch (gossipListId)
             {
             case OPTIONSKIPDK:

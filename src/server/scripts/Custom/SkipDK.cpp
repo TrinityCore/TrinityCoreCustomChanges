@@ -37,6 +37,10 @@
 #include "World.h"
 #include "WorldSession.h"
 
+constexpr auto OPTIONSKIPDK = 0;
+constexpr auto YESSKIPDK = 1;
+constexpr auto NOSKIPDK = 2;
+
 class Trinitycore_skip_deathknight_announce : public PlayerScript
 {
 public:
@@ -107,9 +111,15 @@ public:
                     player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
                 }
                 if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
+                }
                 else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
+                }
                 if (player->GetTeam() == ALLIANCE)
                     player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
                 else
@@ -165,9 +175,15 @@ public:
                     player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
                 }
                 if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
+                }
                 else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
+                }
                 if (player->GetTeam() == ALLIANCE)
                     player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
                 else
@@ -220,7 +236,7 @@ public:
                 case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
                 default: localizedEntry = LOCALE_LICHKING_0;
                 }
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, 11);
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
             }
 
             player->TalkedToCreature(me->GetEntry(), me->GetGUID());
@@ -232,16 +248,16 @@ public:
         {
             int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
             CloseGossipMenuFor(player);
-
+            ClearGossipMenuFor(player);
             switch (gossipListId)
             {
-            case 11:
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, 12);
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, 13);
+            case OPTIONSKIPDK:
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
                 break;
 
-            case 12:
+            case YESSKIPDK:
                 if (player->GetLevel() <= DKL)
                 {
                     player->SetLevel(DKL);
@@ -286,9 +302,15 @@ public:
                     player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
                 }
                 if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
+                }
                 else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
+                {
                     player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
+                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
+                }
                 if (player->GetTeam() == ALLIANCE)
                     player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
                 else
@@ -297,7 +319,7 @@ public:
                 CloseGossipMenuFor(player);
                 break;
 
-            case 13://close
+            case NOSKIPDK://close
                 CloseGossipMenuFor(player);
                 break;
 

@@ -41,6 +41,43 @@ constexpr auto OPTIONSKIPDK = 0;
 constexpr auto YESSKIPDK = 1;
 constexpr auto NOSKIPDK = 2;
 
+void Trinitycore_skip_deathknight_HandleSkip(Player* player)
+{
+    //Not sure where DKs were supposed to pick this up from, leaving as the one manual add
+    player->AddItem(6948, true); //Hearthstone
+
+    // these are all the starter quests that award talent points, quest items, or spells
+    int STARTER_QUESTS[39] = { 12593, 12619, 12842, 12848, 12636, 12641, 12657, 12678, 12679, 12680, 12687, 12698, 12701, 12706, 12716, 12719, 12720, 12722, 12724, 12725, 12727, 12733, 12739, 12742, 12743, 12744, 12745, 12746, 12747, 12748, 12749, 12750, 12751, 12754, 12755, 12756, 12757, 12779, 12801 };
+
+    for (auto questId : STARTER_QUESTS)
+    {
+        if (player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
+        {
+            player->AddQuest(sObjectMgr->GetQuestTemplate(questId), nullptr);
+            player->RewardQuest(sObjectMgr->GetQuestTemplate(questId), false, player);
+        }
+    }
+
+    int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
+    if (player->GetLevel() <= DKL)
+    {
+        //GiveLevel updates character properties more thoroughly than SetLevel
+        player->GiveLevel(DKL);
+    }
+
+    //Don't need to save all players, just current
+    player->SaveToDB();
+
+    if (player->GetTeam() == ALLIANCE)
+    {
+        player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
+    }
+    else
+    {
+        player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
+    }
+}
+
 class Trinitycore_skip_deathknight_announce : public PlayerScript
 {
 public:
@@ -154,43 +191,6 @@ public:
         return new npc_SkipLichAI(creature);
     }
 };
-
-void Trinitycore_skip_deathknight_HandleSkip(Player* player)
-{
-    //Not sure where DKs were supposed to pick this up from, leaving as the one manual add
-    player->AddItem(6948, true); //Hearthstone
-
-    // these are all the starter quests that award talent points, quest items, or spells
-    int STARTER_QUESTS[39] = { 12593, 12619, 12842, 12848, 12636, 12641, 12657, 12678, 12679, 12680, 12687, 12698, 12701, 12706, 12716, 12719, 12720, 12722, 12724, 12725, 12727, 12733, 12739, 12742, 12743, 12744, 12745, 12746, 12747, 12748, 12749, 12750, 12751, 12754, 12755, 12756, 12757, 12779, 12801 };
-
-    for (auto questId : STARTER_QUESTS)
-    {
-        if (player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
-        {
-            player->AddQuest(sObjectMgr->GetQuestTemplate(questId), nullptr);
-            player->RewardQuest(sObjectMgr->GetQuestTemplate(questId), false, player);
-        }
-    }
-
-    int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
-    if (player->GetLevel() <= DKL)
-    {
-        //GiveLevel updates character properties more thoroughly than SetLevel
-        player->GiveLevel(DKL);
-    }
-
-    //Don't need to save all players, just current
-    player->SaveToDB();
-
-    if (player->GetTeam() == ALLIANCE)
-    {
-        player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
-    }
-    else
-    {
-        player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
-    }
-}
 
 void AddSC_skip_StarterArea()
 {

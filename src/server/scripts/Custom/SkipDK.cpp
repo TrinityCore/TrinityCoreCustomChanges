@@ -246,18 +246,22 @@ public:
 
         bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
         {
+            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
             int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
             CloseGossipMenuFor(player);
             ClearGossipMenuFor(player);
-            switch (gossipListId)
+            if (action == OPTIONSKIPDK)
             {
-            case OPTIONSKIPDK:
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
                 AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-                break;
+                return true;
+            }
 
+            switch (action)
+            {
             case YESSKIPDK:
+            {
                 if (player->GetLevel() <= DKL)
                 {
                     player->SetLevel(DKL);
@@ -318,14 +322,13 @@ public:
                 ObjectAccessor::SaveAllPlayers();//Save
                 CloseGossipMenuFor(player);
                 break;
+            }
 
             case NOSKIPDK://close
+            {
                 CloseGossipMenuFor(player);
                 break;
-
-            default:
-
-                break;
+            }
             }
             return true;
         }

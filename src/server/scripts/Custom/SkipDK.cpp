@@ -41,6 +41,120 @@ constexpr auto OPTIONSKIPDK = 0;
 constexpr auto YESSKIPDK = 1;
 constexpr auto NOSKIPDK = 2;
 
+class Trinitycore_skip_deathknight_announce : public PlayerScript
+{
+public:
+    Trinitycore_skip_deathknight_announce() : PlayerScript("Trinitycore_skip_deathknight_announce") { }
+
+    void OnLogin(Player* Player, bool /*firstLogin*/) override
+    {
+        if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
+        {
+            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
+        }
+    }
+};
+
+class Trinitycore_skip_deathknight : public PlayerScript
+{
+public:
+    Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
+
+    void OnLogin(Player* player, bool firstLogin) override
+    {
+        if (firstLogin && player->GetAreaId() == 4342)
+        {
+            //These changes make it so user mistakes in the configuration file don't cause this to run 2x
+            if ((sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() == SEC_PLAYER)
+                || (sConfigMgr->GetBoolDefault("GM.Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() >= SEC_MODERATOR))
+            {
+                Trinitycore_skip_deathknight_HandleSkip(player);
+            }
+        }
+    }
+};
+
+#define LOCALE_LICHKING_0 "I wish to skip the Death Knight starter questline."
+#define LOCALE_LICHKING_1 "죽음의 기사 스타터 퀘스트 라인을 건너뛰고 싶습니다."
+#define LOCALE_LICHKING_2 "Je souhaite sauter la série de quêtes de démarrage du Chevalier de la mort."
+#define LOCALE_LICHKING_3 "Ich möchte die Todesritter-Starter-Questreihe überspringen."
+#define LOCALE_LICHKING_4 "我想跳過死亡騎士新手任務線。"
+#define LOCALE_LICHKING_5 "我想跳過死亡騎士新手任務線。"
+#define LOCALE_LICHKING_6 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
+#define LOCALE_LICHKING_7 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
+#define LOCALE_LICHKING_8 "Я хочу пропустить начальную цепочку заданий Рыцаря Смерти."
+
+class Trinitycore_optional_deathknight_skip : public CreatureScript
+{
+public:
+    Trinitycore_optional_deathknight_skip() : CreatureScript("npc_tc_skip_lich") { }
+
+    struct npc_SkipLichAI : public ScriptedAI
+    {
+        npc_SkipLichAI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool OnGossipHello(Player* player) override
+        {
+            if (me->IsQuestGiver())
+            {
+                player->PrepareQuestMenu(me->GetGUID());
+            }
+
+            if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Optional.Enable", true))
+            {
+                char const* localizedEntry;
+                switch (player->GetSession()->GetSessionDbcLocale())
+                {
+                    case LOCALE_koKR: localizedEntry = LOCALE_LICHKING_1; break;
+                    case LOCALE_frFR: localizedEntry = LOCALE_LICHKING_2; break;
+                    case LOCALE_deDE: localizedEntry = LOCALE_LICHKING_3; break;
+                    case LOCALE_zhCN: localizedEntry = LOCALE_LICHKING_4; break;
+                    case LOCALE_zhTW: localizedEntry = LOCALE_LICHKING_5; break;
+                    case LOCALE_esES: localizedEntry = LOCALE_LICHKING_6; break;
+                    case LOCALE_esMX: localizedEntry = LOCALE_LICHKING_7; break;
+                    case LOCALE_ruRU: localizedEntry = LOCALE_LICHKING_8; break;
+                    case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
+                    default: localizedEntry = LOCALE_LICHKING_0;
+                }
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
+            }
+
+            player->TalkedToCreature(me->GetEntry(), me->GetGUID());
+            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+        {
+            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
+            ClearGossipMenuFor(player);
+
+            switch (action)
+            {
+                case OPTIONSKIPDK:
+                    //Would love for this to become a confirm popup, but not sure how to do yet
+                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
+                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
+                    SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+                    break;
+                case YESSKIPDK:
+                    Trinitycore_skip_deathknight_HandleSkip(player);
+                    CloseGossipMenuFor(player);
+                    break;
+                case NOSKIPDK:
+                    CloseGossipMenuFor(player);
+                    break;
+            }
+            return true;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_SkipLichAI(creature);
+    }
+};
+
 void Trinitycore_skip_deathknight_HandleSkip(Player* player)
 {
     //Not sure where DKs were supposed to pick this up from, leaving as the one manual add
@@ -77,117 +191,6 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
         player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
     }
 }
-
-class Trinitycore_skip_deathknight_announce : public PlayerScript
-{
-public: Trinitycore_skip_deathknight_announce() : PlayerScript("Trinitycore_skip_deathknight_announce") { }
-
-      void OnLogin(Player* Player, bool /*firstLogin*/) override
-      {
-          if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
-          {
-              ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
-          }
-      }
-};
-
-class Trinitycore_skip_deathknight : public PlayerScript
-{
-public: Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
-
-      void OnLogin(Player* player, bool firstLogin) override
-      {
-          if (firstLogin && player->GetAreaId() == 4342)
-          {
-              //These changes make it so user mistakes in the configuration file don't cause this to run 2x
-              if ((sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() == SEC_PLAYER)
-                  || (sConfigMgr->GetBoolDefault("GM.Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() >= SEC_MODERATOR))
-              {
-                  Trinitycore_skip_deathknight_HandleSkip(player);
-              }
-          }
-      }
-};
-
-#define LOCALE_LICHKING_0 "I wish to skip the Death Knight starter questline."
-#define LOCALE_LICHKING_1 "죽음의 기사 스타터 퀘스트 라인을 건너뛰고 싶습니다."
-#define LOCALE_LICHKING_2 "Je souhaite sauter la série de quêtes de démarrage du Chevalier de la mort."
-#define LOCALE_LICHKING_3 "Ich möchte die Todesritter-Starter-Questreihe überspringen."
-#define LOCALE_LICHKING_4 "我想跳過死亡騎士新手任務線。"
-#define LOCALE_LICHKING_5 "我想跳過死亡騎士新手任務線。"
-#define LOCALE_LICHKING_6 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
-#define LOCALE_LICHKING_7 "Deseo saltarme la línea de misiones de inicio del Caballero de la Muerte."
-#define LOCALE_LICHKING_8 "Я хочу пропустить начальную цепочку заданий Рыцаря Смерти."
-
-class Trinitycore_optional_deathknight_skip : public CreatureScript
-{
-public: Trinitycore_optional_deathknight_skip() : CreatureScript("npc_tc_skip_lich") { }
-
-      struct npc_SkipLichAI : public ScriptedAI
-      {
-          npc_SkipLichAI(Creature* creature) : ScriptedAI(creature) { }
-
-          bool OnGossipHello(Player* player) override
-          {
-              if (me->IsQuestGiver())
-              {
-                  player->PrepareQuestMenu(me->GetGUID());
-              }
-
-              if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Optional.Enable", true))
-              {
-                  char const* localizedEntry;
-                  switch (player->GetSession()->GetSessionDbcLocale())
-                  {
-                  case LOCALE_koKR: localizedEntry = LOCALE_LICHKING_1; break;
-                  case LOCALE_frFR: localizedEntry = LOCALE_LICHKING_2; break;
-                  case LOCALE_deDE: localizedEntry = LOCALE_LICHKING_3; break;
-                  case LOCALE_zhCN: localizedEntry = LOCALE_LICHKING_4; break;
-                  case LOCALE_zhTW: localizedEntry = LOCALE_LICHKING_5; break;
-                  case LOCALE_esES: localizedEntry = LOCALE_LICHKING_6; break;
-                  case LOCALE_esMX: localizedEntry = LOCALE_LICHKING_7; break;
-                  case LOCALE_ruRU: localizedEntry = LOCALE_LICHKING_8; break;
-                  case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
-                  default: localizedEntry = LOCALE_LICHKING_0;
-                  }
-                  AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
-              }
-
-              player->TalkedToCreature(me->GetEntry(), me->GetGUID());
-              SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-              return true;
-          }
-
-          bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
-          {
-              uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-              ClearGossipMenuFor(player);
-
-              switch (action)
-              {
-                  case OPTIONSKIPDK:
-                      //Would love for this to become a confirm popup, but not sure how to do yet
-                      AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
-                      AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
-                      SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-                      break;
-                  case YESSKIPDK:
-                      Trinitycore_skip_deathknight_HandleSkip(player);
-                      CloseGossipMenuFor(player);
-                      break;
-                  case NOSKIPDK:
-                      CloseGossipMenuFor(player);
-                      break;
-              }
-              return true;
-          }
-      };
-
-      CreatureAI* GetAI(Creature* creature) const override
-      {
-          return new npc_SkipLichAI(creature);
-      }
-};
 
 void AddSC_skip_StarterArea()
 {

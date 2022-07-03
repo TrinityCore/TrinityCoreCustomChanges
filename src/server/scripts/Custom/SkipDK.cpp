@@ -1,4 +1,4 @@
-/*
+﻿/*
 * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
 *
 * This program is free software; you can redistribute it and/or modify it
@@ -41,157 +41,72 @@ constexpr auto OPTIONSKIPDK = 0;
 constexpr auto YESSKIPDK = 1;
 constexpr auto NOSKIPDK = 2;
 
-class Trinitycore_skip_deathknight_announce : public PlayerScript
+void Trinitycore_skip_deathknight_HandleSkip(Player* player)
 {
-public:
-    Trinitycore_skip_deathknight_announce() : PlayerScript("Trinitycore_skip_deathknight_announce") { }
+    //Not sure where DKs were supposed to pick this up from, leaving as the one manual add
+    player->AddItem(6948, true); //Hearthstone
 
-    void OnLogin(Player* Player, bool /*firstLogin*/) override
+    // these are all the starter quests that award talent points, quest items, or spells
+    int STARTER_QUESTS[39] = { 12593, 12619, 12842, 12848, 12636, 12641, 12657, 12678, 12679, 12680, 12687, 12698, 12701, 12706, 12716, 12719, 12720, 12722, 12724, 12725, 12727, 12733, 12739, 12742, 12743, 12744, 12745, 12746, 12747, 12748, 12749, 12750, 12751, 12754, 12755, 12756, 12757, 12779, 12801 };
+
+    for (auto questId : STARTER_QUESTS)
     {
-        if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
+        if (player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
         {
-            ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
+            player->AddQuest(sObjectMgr->GetQuestTemplate(questId), nullptr);
+            player->RewardQuest(sObjectMgr->GetQuestTemplate(questId), false, player);
         }
     }
+
+    int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
+    if (player->GetLevel() <= DKL)
+    {
+        //GiveLevel updates character properties more thoroughly than SetLevel
+        player->GiveLevel(DKL);
+    }
+
+    //Don't need to save all players, just current
+    player->SaveToDB();
+
+    if (player->GetTeam() == ALLIANCE)
+    {
+        player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
+    }
+    else
+    {
+        player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
+    }
+}
+
+class Trinitycore_skip_deathknight_announce : public PlayerScript
+{
+public: Trinitycore_skip_deathknight_announce() : PlayerScript("Trinitycore_skip_deathknight_announce") { }
+
+      void OnLogin(Player* Player, bool /*firstLogin*/) override
+      {
+          if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Announce.enable", true))
+          {
+              ChatHandler(Player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Trinitycore Skip Deathknight Starter |rmodule.");
+          }
+      }
 };
 
 class Trinitycore_skip_deathknight : public PlayerScript
 {
-public:
-    Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
+public: Trinitycore_skip_deathknight() : PlayerScript("Trinitycore_skip_deathknight") { }
 
-    void OnLogin(Player* player, bool firstLogin) override
-    {
-        int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
-
-        if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true))
-        {
-            if (player->GetSession()->GetSecurity() == SEC_PLAYER && player->GetAreaId() == 4342)
-            {
-                if (!firstLogin)
-                    return;
-                player->SetLevel(DKL);
-                player->LearnSpell(53428, false);//runeforging
-                player->LearnSpell(53441, false);//runeforging
-                player->LearnSpell(53344, false);//runeforging
-                player->LearnSpell(62158, false);//runeforging
-                player->LearnSpell(33391, false);//journeyman riding
-                player->LearnSpell(54586, false);//runeforging credit
-                player->LearnSpell(48778, false);//acherus deathcharger
-                player->LearnSkillRewardedSpells(776, 375);//Runeforging
-                player->LearnSkillRewardedSpells(960, 375);//Runeforging
-                player->EquipNewItem(EQUIPMENT_SLOT_HEAD, 38661, true);//Greathelm of the Scourge Champion
-                player->EquipNewItem(EQUIPMENT_SLOT_WRISTS, 38666, true);//Plated Saronite Bracers
-                player->EquipNewItem(EQUIPMENT_SLOT_WAIST, 38668, true);//The Plaguebringer's Girdle
-                player->EquipNewItem(EQUIPMENT_SLOT_HANDS, 38667, true);//Bloodbane's Gauntlets of Command
-                player->EquipNewItem(EQUIPMENT_SLOT_CHEST, 38665, true);//Saronite War Plate
-                player->EquipNewItem(EQUIPMENT_SLOT_LEGS, 38669, true);//Engraved Saronite Legplates
-                player->EquipNewItem(EQUIPMENT_SLOT_SHOULDERS, 38663, true);// Blood-Soaked Saronite Plated Spaulders
-                player->EquipNewItem(EQUIPMENT_SLOT_FEET, 38670, true);//Greaves of the Slaughter
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET1, 38675, true);//Signet of the Dark Brotherhood
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET2, 38674, true);//Soul Harvester's Charm
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER1, 38671, true);//Valanar's Signet Ring
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER2, 38672, true);// Keleseth's Signet Ring
-                player->AddItem(39320, true);//Sky Darkener's Shroud of Blood
-                player->AddItem(38664, true);//Sky Darkener's Shroud of the Unholy
-                player->AddItem(39322, true);//Shroud of the North Wind
-                player->AddItem(38632, true);//Greatsword of the Ebon Blade
-                player->AddItem(6948, true);//Hearthstone
-                player->AddItem(38707, true);//Runed Soulblade
-                player->AddItem(40483, true);//Insignia of the Scourge
-
-                if (player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12657), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), false, player);
-                }
-                if (player->GetQuestStatus(12801) == QUEST_STATUS_NONE)//The Light of Dawn
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12801), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
-                }
-                else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE)
-                    player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
-                else
-                    player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
-                ObjectAccessor::SaveAllPlayers();//Save
-            }
-        }
-
-        if (sConfigMgr->GetBoolDefault("GM.Skip.Deathknight.Starter.Enable", true))
-        {
-            if (player->GetSession()->GetSecurity() >= SEC_MODERATOR && player->GetAreaId() == 4342)
-            {
-                if (!firstLogin)
-                    return;
-                player->SetLevel(DKL);
-                player->LearnSpell(53428, false);//runeforging
-                player->LearnSpell(53441, false);//runeforging
-                player->LearnSpell(53344, false);//runeforging
-                player->LearnSpell(62158, false);//runeforging
-                player->LearnSpell(33391, false);//journeyman riding
-                player->LearnSpell(54586, false);//runeforging credit
-                player->LearnSpell(48778, false);//acherus deathcharger
-                player->LearnSkillRewardedSpells(776, 375);//Runeforging
-                player->LearnSkillRewardedSpells(960, 375);//Runeforging
-                player->EquipNewItem(EQUIPMENT_SLOT_HEAD, 38661, true);//Greathelm of the Scourge Champion
-                player->EquipNewItem(EQUIPMENT_SLOT_WRISTS, 38666, true);//Plated Saronite Bracers
-                player->EquipNewItem(EQUIPMENT_SLOT_WAIST, 38668, true);//The Plaguebringer's Girdle
-                player->EquipNewItem(EQUIPMENT_SLOT_HANDS, 38667, true);//Bloodbane's Gauntlets of Command
-                player->EquipNewItem(EQUIPMENT_SLOT_CHEST, 38665, true);//Saronite War Plate
-                player->EquipNewItem(EQUIPMENT_SLOT_LEGS, 38669, true);//Engraved Saronite Legplates
-                player->EquipNewItem(EQUIPMENT_SLOT_SHOULDERS, 38663, true);// Blood-Soaked Saronite Plated Spaulders
-                player->EquipNewItem(EQUIPMENT_SLOT_FEET, 38670, true);//Greaves of the Slaughter
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET1, 38675, true);//Signet of the Dark Brotherhood
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET2, 38674, true);//Soul Harvester's Charm
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER1, 38671, true);//Valanar's Signet Ring
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER2, 38672, true);// Keleseth's Signet Ring
-                player->AddItem(39320, true);//Sky Darkener's Shroud of Blood
-                player->AddItem(38664, true);//Sky Darkener's Shroud of the Unholy
-                player->AddItem(39322, true);//Shroud of the North Wind
-                player->AddItem(38632, true);//Greatsword of the Ebon Blade
-                player->AddItem(6948, true);//Hearthstone
-                player->AddItem(38707, true);//Runed Soulblade
-                player->AddItem(40483, true);//Insignia of the Scourge
-
-                if (player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12657), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), false, player);
-                }
-                if (player->GetQuestStatus(12801) == QUEST_STATUS_NONE)//The Light of Dawn
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12801), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
-                }
-                else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE)
-                    player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
-                else
-                    player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
-                ObjectAccessor::SaveAllPlayers();//Save
-            }
-        }
-    }
+      void OnLogin(Player* player, bool firstLogin) override
+      {
+          if (firstLogin && player->GetAreaId() == 4342)
+          {
+              //These changes make it so user mistakes in the configuration file don't cause this to run 2x
+              if ((sConfigMgr->GetBoolDefault("Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() == SEC_PLAYER)
+                  || (sConfigMgr->GetBoolDefault("GM.Skip.Deathknight.Starter.Enable", true) && player->GetSession()->GetSecurity() >= SEC_MODERATOR))
+              {
+                  Trinitycore_skip_deathknight_HandleSkip(player);
+              }
+          }
+      }
 };
 
 #define LOCALE_LICHKING_0 "I wish to skip the Death Knight starter questline."
@@ -206,138 +121,72 @@ public:
 
 class Trinitycore_optional_deathknight_skip : public CreatureScript
 {
-public:
-    Trinitycore_optional_deathknight_skip() : CreatureScript("npc_tc_skip_lich") { }
+public: Trinitycore_optional_deathknight_skip() : CreatureScript("npc_tc_skip_lich") { }
 
-    struct npc_SkipLichAI : public ScriptedAI
-    {
-        npc_SkipLichAI(Creature* creature) : ScriptedAI(creature) { }
+      struct npc_SkipLichAI : public ScriptedAI
+      {
+          npc_SkipLichAI(Creature* creature) : ScriptedAI(creature) { }
 
-        bool OnGossipHello(Player* player) override
-        {
-            if (me->IsQuestGiver())
-            {
-                player->PrepareQuestMenu(me->GetGUID());
-            }
+          bool OnGossipHello(Player* player) override
+          {
+              if (me->IsQuestGiver())
+              {
+                  player->PrepareQuestMenu(me->GetGUID());
+              }
 
-            if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Optional.Enable", true))
-            {
-                char const* localizedEntry;
-                switch (player->GetSession()->GetSessionDbcLocale())
-                {
-                case LOCALE_koKR: localizedEntry = LOCALE_LICHKING_1; break;
-                case LOCALE_frFR: localizedEntry = LOCALE_LICHKING_2; break;
-                case LOCALE_deDE: localizedEntry = LOCALE_LICHKING_3; break;
-                case LOCALE_zhCN: localizedEntry = LOCALE_LICHKING_4; break;
-                case LOCALE_zhTW: localizedEntry = LOCALE_LICHKING_5; break;
-                case LOCALE_esES: localizedEntry = LOCALE_LICHKING_6; break;
-                case LOCALE_esMX: localizedEntry = LOCALE_LICHKING_7; break;
-                case LOCALE_ruRU: localizedEntry = LOCALE_LICHKING_8; break;
-                case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
-                default: localizedEntry = LOCALE_LICHKING_0;
-                }
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
-            }
+              if (sConfigMgr->GetBoolDefault("Skip.Deathknight.Optional.Enable", true))
+              {
+                  char const* localizedEntry;
+                  switch (player->GetSession()->GetSessionDbcLocale())
+                  {
+                  case LOCALE_koKR: localizedEntry = LOCALE_LICHKING_1; break;
+                  case LOCALE_frFR: localizedEntry = LOCALE_LICHKING_2; break;
+                  case LOCALE_deDE: localizedEntry = LOCALE_LICHKING_3; break;
+                  case LOCALE_zhCN: localizedEntry = LOCALE_LICHKING_4; break;
+                  case LOCALE_zhTW: localizedEntry = LOCALE_LICHKING_5; break;
+                  case LOCALE_esES: localizedEntry = LOCALE_LICHKING_6; break;
+                  case LOCALE_esMX: localizedEntry = LOCALE_LICHKING_7; break;
+                  case LOCALE_ruRU: localizedEntry = LOCALE_LICHKING_8; break;
+                  case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
+                  default: localizedEntry = LOCALE_LICHKING_0;
+                  }
+                  AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
+              }
 
-            player->TalkedToCreature(me->GetEntry(), me->GetGUID());
-            SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-            return true;
-        }
+              player->TalkedToCreature(me->GetEntry(), me->GetGUID());
+              SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+              return true;
+          }
 
-        bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
-        {
-            uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
-            CloseGossipMenuFor(player);
-            ClearGossipMenuFor(player);
-            if (action == OPTIONSKIPDK)
-            {
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
-                SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-                return true;
-            }
+          bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+          {
+              uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
+              ClearGossipMenuFor(player);
 
-            switch (action)
-            {
-            case YESSKIPDK:
-            {
-                if (player->GetLevel() <= DKL)
-                {
-                    player->SetLevel(DKL);
-                }
-                player->LearnSpell(53428, false);//runeforging
-                player->LearnSpell(53441, false);//runeforging
-                player->LearnSpell(53344, false);//runeforging
-                player->LearnSpell(62158, false);//runeforging
-                player->LearnSpell(33391, false);//journeyman riding
-                player->LearnSpell(54586, false);//runeforging credit
-                player->LearnSpell(48778, false);//acherus deathcharger
-                player->LearnSkillRewardedSpells(776, 375);//Runeforging
-                player->LearnSkillRewardedSpells(960, 375);//Runeforging
-                player->EquipNewItem(EQUIPMENT_SLOT_HEAD, 38661, true);//Greathelm of the Scourge Champion
-                player->EquipNewItem(EQUIPMENT_SLOT_WRISTS, 38666, true);//Plated Saronite Bracers
-                player->EquipNewItem(EQUIPMENT_SLOT_WAIST, 38668, true);//The Plaguebringer's Girdle
-                player->EquipNewItem(EQUIPMENT_SLOT_HANDS, 38667, true);//Bloodbane's Gauntlets of Command
-                player->EquipNewItem(EQUIPMENT_SLOT_CHEST, 38665, true);//Saronite War Plate
-                player->EquipNewItem(EQUIPMENT_SLOT_LEGS, 38669, true);//Engraved Saronite Legplates
-                player->EquipNewItem(EQUIPMENT_SLOT_SHOULDERS, 38663, true);// Blood-Soaked Saronite Plated Spaulders
-                player->EquipNewItem(EQUIPMENT_SLOT_FEET, 38670, true);//Greaves of the Slaughter
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET1, 38675, true);//Signet of the Dark Brotherhood
-                player->EquipNewItem(EQUIPMENT_SLOT_TRINKET2, 38674, true);//Soul Harvester's Charm
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER1, 38671, true);//Valanar's Signet Ring
-                player->EquipNewItem(EQUIPMENT_SLOT_FINGER2, 38672, true);// Keleseth's Signet Ring
-                player->AddItem(39320, true);//Sky Darkener's Shroud of Blood
-                player->AddItem(38664, true);//Sky Darkener's Shroud of the Unholy
-                player->AddItem(39322, true);//Shroud of the North Wind
-                player->AddItem(38632, true);//Greatsword of the Ebon Blade
-                player->AddItem(6948, true);//Hearthstone
-                player->AddItem(38707, true);//Runed Soulblade
-                player->AddItem(40483, true);//Insignia of the Scourge
+              switch (action)
+              {
+                  case OPTIONSKIPDK:
+                      //Would love for this to become a confirm popup, but not sure how to do yet
+                      AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
+                      AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
+                      SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+                      break;
+                  case YESSKIPDK:
+                      Trinitycore_skip_deathknight_HandleSkip(player);
+                      CloseGossipMenuFor(player);
+                      break;
+                  case NOSKIPDK:
+                      CloseGossipMenuFor(player);
+                      break;
+              }
+              return true;
+          }
+      };
 
-                if (player->GetQuestStatus(12657) == QUEST_STATUS_NONE)//The Might Of The Scourge
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12657), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12657), false, player);
-                }
-                if (player->GetQuestStatus(12801) == QUEST_STATUS_NONE)//The Light of Dawn
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(12801), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(12801), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE && player->GetQuestStatus(13188) == QUEST_STATUS_NONE)//Where Kings Walk
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13188), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13188), false, player);
-                }
-                else if (player->GetTeam() == HORDE && player->GetQuestStatus(13189) == QUEST_STATUS_NONE)//Saurfang's Blessing
-                {
-                    player->AddQuest(sObjectMgr->GetQuestTemplate(13189), nullptr);
-                    player->RewardQuest(sObjectMgr->GetQuestTemplate(13189), false, player);
-                }
-                if (player->GetTeam() == ALLIANCE)
-                    player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
-                else
-                    player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
-                ObjectAccessor::SaveAllPlayers();//Save
-                CloseGossipMenuFor(player);
-                break;
-            }
-
-            case NOSKIPDK://close
-            {
-                CloseGossipMenuFor(player);
-                break;
-            }
-            }
-            return true;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_SkipLichAI(creature);
-    }
+      CreatureAI* GetAI(Creature* creature) const override
+      {
+          return new npc_SkipLichAI(creature);
+      }
 };
 
 void AddSC_skip_StarterArea()

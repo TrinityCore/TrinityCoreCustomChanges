@@ -73,7 +73,7 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
             break;
         case RACE_ORC:
             specialSurpriseQuestId = 12748;
-            break;        
+            break;
         case RACE_TROLL:
             specialSurpriseQuestId = 12749;
             break;

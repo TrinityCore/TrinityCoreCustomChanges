@@ -736,6 +736,211 @@ class spell_dragonblight_high_executor_branding_iron : public SpellScript
     }
 };
 
+/*######
+## Quest 12260: The Perfect Dissemblance
+######*/
+
+enum ThePerfectDissemblance
+{
+    SPELL_BANSHEES_MAGIC_MIRROR     = 48648
+};
+
+// 48692 - The Perfect Dissemblance: Quest Completion Script
+class spell_dragonblight_cancel_banshees_magic_mirror : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_cancel_banshees_magic_mirror);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_BANSHEES_MAGIC_MIRROR });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->RemoveAurasDueToSpell(SPELL_BANSHEES_MAGIC_MIRROR);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_cancel_banshees_magic_mirror::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 12274: A Fall From Grace
+######*/
+
+enum AFallFromGrace
+{
+    SPELL_PRIEST_IMAGE_FEMALE     = 48761,
+    SPELL_PRIEST_IMAGE_MALE       = 48763
+};
+
+// 48762 - A Fall from Grace: Scarlet Raven Priest Image - Master
+class spell_dragonblight_scarlet_raven_priest_image_master : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_scarlet_raven_priest_image_master);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_PRIEST_IMAGE_FEMALE, SPELL_PRIEST_IMAGE_MALE });
+    }
+
+    void HandleAfterHit()
+    {
+        if (Player* target = GetHitUnit()->ToPlayer())
+            target->CastSpell(target, target->GetNativeGender() == GENDER_FEMALE ? SPELL_PRIEST_IMAGE_FEMALE : SPELL_PRIEST_IMAGE_MALE);
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_dragonblight_scarlet_raven_priest_image_master::HandleAfterHit);
+    }
+};
+
+// 48769 - A Fall from Grace: Quest Completion Script
+class spell_dragonblight_cancel_scarlet_raven_priest_image : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_cancel_scarlet_raven_priest_image);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_PRIEST_IMAGE_FEMALE, SPELL_PRIEST_IMAGE_MALE });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_IMAGE_FEMALE);
+        GetCaster()->RemoveAurasDueToSpell(SPELL_PRIEST_IMAGE_MALE);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_cancel_scarlet_raven_priest_image::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 12232: Bombard the Ballistae
+######*/
+
+enum BombardTheBallistae
+{
+    SPELL_BALLISTA_BOW               = 48351,
+    SPELL_BALLISTA_FRAME             = 48352,
+    SPELL_BALLISTA_MISSILE           = 48353,
+    SPELL_BALLISTA_WHEEL             = 48354,
+    SPELL_BALLISTA_KNOCKBACK         = 52687
+};
+
+// 48347 - Bombard the Ballistae: FX Master
+class spell_dragonblight_bombard_the_ballistae_fx_master : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_bombard_the_ballistae_fx_master);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(
+        {
+            SPELL_BALLISTA_BOW,
+            SPELL_BALLISTA_FRAME,
+            SPELL_BALLISTA_MISSILE,
+            SPELL_BALLISTA_WHEEL,
+            SPELL_BALLISTA_KNOCKBACK
+        });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        caster->CastSpell(caster, SPELL_BALLISTA_BOW);
+        caster->CastSpell(caster, SPELL_BALLISTA_FRAME);
+        caster->CastSpell(caster, SPELL_BALLISTA_MISSILE);
+        caster->CastSpell(caster, SPELL_BALLISTA_WHEEL);
+        caster->CastSpell(caster, SPELL_BALLISTA_WHEEL);
+        caster->CastSpell(caster, SPELL_BALLISTA_WHEEL);
+        caster->CastSpell(caster, SPELL_BALLISTA_WHEEL);
+        caster->CastSpell(caster, SPELL_BALLISTA_KNOCKBACK);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_bombard_the_ballistae_fx_master::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 12060, 12061: Projections and Plans
+######*/
+
+enum ProjectionsAndPlans
+{
+    SPELL_TELE_MOONREST_GARDENS    = 47324,
+    SPELL_TELE_SURGE_NEEDLE        = 47325,
+
+    AREA_SURGE_NEEDLE              = 4156,
+    AREA_MOONREST_GARDENS          = 4157
+};
+
+// 47097 - Surge Needle Teleporter
+class spell_dragonblight_surge_needle_teleporter : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_surge_needle_teleporter);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_TELE_MOONREST_GARDENS, SPELL_TELE_SURGE_NEEDLE });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        switch (caster->GetAreaId())
+        {
+            case AREA_SURGE_NEEDLE:
+                caster->CastSpell(caster, SPELL_TELE_MOONREST_GARDENS);
+                break;
+            case AREA_MOONREST_GARDENS:
+                caster->CastSpell(caster, SPELL_TELE_SURGE_NEEDLE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_surge_needle_teleporter::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 12125, 12126, 12127: In Service of Blood & In Service of the Unholy & In Service of Frost
+######*/
+
+// 47703 - Unholy Union
+// 47724 - Frost Draw
+// 50252 - Blood Draw
+class spell_dragonblight_fill_blood_unholy_frost_gem : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_fill_blood_unholy_frost_gem);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo({ uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), uint32(GetEffectValue()));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_fill_blood_unholy_frost_gem::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_dragonblight()
 {
     RegisterCreatureAI(npc_commander_eligor_dawnbringer);
@@ -747,4 +952,10 @@ void AddSC_dragonblight()
     RegisterSpellScript(spell_dragonblight_moti_hourglass_cast_see_invis_on_master);
     RegisterSpellScript(spell_dragonblight_call_out_injured_soldier);
     RegisterSpellScript(spell_dragonblight_high_executor_branding_iron);
+    RegisterSpellScript(spell_dragonblight_cancel_banshees_magic_mirror);
+    RegisterSpellScript(spell_dragonblight_scarlet_raven_priest_image_master);
+    RegisterSpellScript(spell_dragonblight_cancel_scarlet_raven_priest_image);
+    RegisterSpellScript(spell_dragonblight_bombard_the_ballistae_fx_master);
+    RegisterSpellScript(spell_dragonblight_surge_needle_teleporter);
+    RegisterSpellScript(spell_dragonblight_fill_blood_unholy_frost_gem);
 }

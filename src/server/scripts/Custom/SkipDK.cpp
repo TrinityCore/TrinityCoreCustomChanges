@@ -37,9 +37,7 @@
 #include "World.h"
 #include "WorldSession.h"
 
-constexpr auto OPTIONSKIPDK = 0;
 constexpr auto YESSKIPDK = 1;
-constexpr auto NOSKIPDK = 2;
 
 void Trinitycore_skip_deathknight_HandleSkip(Player* player)
 {
@@ -47,16 +45,61 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
     player->AddItem(6948, true); //Hearthstone
 
     // these are all the starter quests that award talent points, quest items, or spells
-    int STARTER_QUESTS[39] = { 12593, 12619, 12842, 12848, 12636, 12641, 12657, 12678, 12679, 12680, 12687, 12698, 12701, 12706, 12716, 12719, 12720, 12722, 12724, 12725, 12727, 12733, 12739, 12742, 12743, 12744, 12745, 12746, 12747, 12748, 12749, 12750, 12751, 12754, 12755, 12756, 12757, 12779, 12801 };
+    int STARTER_QUESTS[33] = { 12593, 12619, 12842, 12848, 12636, 12641, 12657, 12678, 12679, 12680, 12687, 12698, 12701, 12706, 12716, 12719, 12720, 12722, 12724, 12725, 12727, 12733, -1, 12751, 12754, 12755, 12756, 12757, 12779, 12801, 13165, 13166 };
 
-    for (auto questId : STARTER_QUESTS)
+    int specialSurpriseQuestId = -1;
+    switch (player->GetRace())
+    {
+        case RACE_TAUREN:
+            specialSurpriseQuestId = 12739;
+            break;
+        case RACE_HUMAN:
+            specialSurpriseQuestId = 12742;
+            break;
+        case RACE_NIGHTELF:
+            specialSurpriseQuestId = 12743;
+            break;
+        case RACE_DWARF:
+            specialSurpriseQuestId = 12744;
+            break;
+        case RACE_GNOME:
+            specialSurpriseQuestId = 12745;
+            break;
+        case RACE_DRAENEI:
+            specialSurpriseQuestId = 12746;
+            break;
+        case RACE_BLOODELF:
+            specialSurpriseQuestId = 12747;
+            break;
+        case RACE_ORC:
+            specialSurpriseQuestId = 12748;
+            break;        
+        case RACE_TROLL:
+            specialSurpriseQuestId = 12749;
+            break;
+        case RACE_UNDEAD_PLAYER:
+            specialSurpriseQuestId = 12750;
+            break;
+    }
+
+    STARTER_QUESTS[22] = specialSurpriseQuestId;
+    STARTER_QUESTS[32] = player->GetTeam() == ALLIANCE ? 13188 : 13189;
+
+    for (int questId : STARTER_QUESTS)
     {
         if (player->GetQuestStatus(questId) == QUEST_STATUS_NONE)
         {
             player->AddQuest(sObjectMgr->GetQuestTemplate(questId), nullptr);
-            player->RewardQuest(sObjectMgr->GetQuestTemplate(questId), false, player);
+            player->RewardQuest(sObjectMgr->GetQuestTemplate(questId), 0, player, false);
         }
     }
+
+    //these are alternate reward items from quest 12679, item 39320 is chosen by default as the reward
+    player->AddItem(38664, true);//Sky Darkener's Shroud of the Unholy
+    player->AddItem(39322, true);//Shroud of the North Wind
+
+    //these are alternate reward items from quest 12801, item 38633 is chosen by default as the reward
+    player->AddItem(38632, true);//Greatsword of the Ebon Blade
 
     int DKL = sConfigMgr->GetFloatDefault("Skip.Deathknight.Start.Level", 58);
     if (player->GetLevel() <= DKL)
@@ -153,7 +196,7 @@ public:
                     case LOCALE_enUS: localizedEntry = LOCALE_LICHKING_0; break;
                     default: localizedEntry = LOCALE_LICHKING_0;
                 }
-                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, OPTIONSKIPDK);
+                AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, localizedEntry, GOSSIP_SENDER_MAIN, YESSKIPDK, "Are you sure you want to skip the starting zone?", 0, false);
             }
 
             player->TalkedToCreature(me->GetEntry(), me->GetGUID());
@@ -164,24 +207,16 @@ public:
         bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
         {
             uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            ClearGossipMenuFor(player);
+            //ClearGossipMenuFor(player);
 
             switch (action)
             {
-                case OPTIONSKIPDK:
-                    //Would love for this to become a confirm popup, but not sure how to do yet
-                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Yes", GOSSIP_SENDER_MAIN, YESSKIPDK);
-                    AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "No", GOSSIP_SENDER_MAIN, NOSKIPDK);
-                    SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
-                    break;
                 case YESSKIPDK:
                     Trinitycore_skip_deathknight_HandleSkip(player);
                     CloseGossipMenuFor(player);
                     break;
-                case NOSKIPDK:
-                    CloseGossipMenuFor(player);
-                    break;
             }
+
             return true;
         }
     };

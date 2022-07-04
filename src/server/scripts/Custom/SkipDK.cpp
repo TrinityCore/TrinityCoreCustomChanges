@@ -117,7 +117,7 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
     }
     else
     {
-        player->TeleportTo(1, 1569.59f, -4397.63f, 16.06f, 0.54f);//Orgrimmar
+        player->TeleportTo(1, 1569.59f, -4397.63f, 7.70f, 0.54f);//Orgrimmar
     }
 }
 
@@ -207,7 +207,6 @@ public:
         bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
         {
             uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
-            //ClearGossipMenuFor(player);
 
             switch (action)
             {

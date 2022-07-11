@@ -107,7 +107,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 4: // outland misc
                 player->SetReputation(933, 84000); // consortium
                 player->SetReputation(935, 84000); // shatar
-                player->SetReputation(942, 84000); // cenarion               
+                player->SetReputation(942, 84000); // cenarion
                 player->SetReputation(967, 84000); // violet eye
                 player->SetReputation(970, 84000); // sporegar
                 player->SetReputation(989, 84000); // keepers of time
@@ -129,12 +129,12 @@ public:
                     player->SetReputation(941, 84000); // mag'har
                 }
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 5: 
+            case GOSSIP_ACTION_INFO_DEF + 5:
                 player->SetReputation(1104, 84000); // frenzyheart tribe
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 6: 
+            case GOSSIP_ACTION_INFO_DEF + 6:
                 player->SetReputation(1105, 84000); // oracles
-                break; 
+                break;
             case GOSSIP_ACTION_INFO_DEF + 7: // northrend misc
                 player->SetReputation(1073, 84000); // kaluk
                 player->SetReputation(1090, 84000); // kirin tor
@@ -219,7 +219,6 @@ public:
                 player->SetSkill(129, 0, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
                 break;
-            
             default:
                 return false;
             }

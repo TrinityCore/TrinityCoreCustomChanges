@@ -145,78 +145,76 @@ public:
                 player->SetReputation(1156, 84000); // ashen verdict
                 if (player->GetFaction() == ALLIANCE)
                 {
-                    player->SetReputation(1037, 84000); // alliance vanguard
-                    player->SetReputation(1050, 84000); // valiance expedition
-                    player->SetReputation(1068, 84000); // explorers league
-                    player->SetReputation(1094, 84000); // silver covenant
+                    player->SetReputation(1050, 86000); // valiance expedition
+                    player->SetReputation(1068, 86000); // explorers league
+                    player->SetReputation(1094, 86000); // silver covenant
                 }
                 else
                 {
-                    player->SetReputation(1052, 84000); // horde expedition
-                    player->SetReputation(1064, 84000); // taunka
-                    player->SetReputation(1067, 84000); // hand of vengeance
-                    player->SetReputation(1085, 84000); // warsong offensive
-                    player->SetReputation(1124, 84000); // sunreavers
+                    player->SetReputation(1064, 86000); // taunka
+                    player->SetReputation(1067, 86000); // hand of vengeance
+                    player->SetReputation(1085, 86000); // warsong offensive
+                    player->SetReputation(1124, 86000); // sunreavers
                 }
                 break;
             case GOSSIP_ACTION_INFO_DEF + 20: // jc
                 player->LearnSpell(51311, true);
-                player->SetSkill(755, 0, 450, 450);
+                player->SetSkill(755, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 755);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 21: // inscription
                 player->LearnSpell(45363, true);
-                player->SetSkill(773, 0, 450, 450);
+                player->SetSkill(773, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 773);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 22: // alchemy
                 player->LearnSpell(51304, true);
-                player->SetSkill(171, 0, 450, 450);
+                player->SetSkill(171, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 171);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 23: // blacksmithing
                 player->LearnSpell(51300, true);
-                player->SetSkill(164, 0, 450, 450);
+                player->SetSkill(164, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 164);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 24: // enchanting
                 player->LearnSpell(51313, true);
-                player->SetSkill(333, 0, 450, 450);
+                player->SetSkill(333, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 333);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 25: // engineering
                 player->LearnSpell(51306, true);
-                player->SetSkill(202, 0, 450, 450);
+                player->SetSkill(202, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 202);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 26: // herbalism
                 player->LearnSpell(50300, true);
-                player->SetSkill(182, 0, 450, 450);
+                player->SetSkill(182, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 182);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 27: // leatherworking
                 player->LearnSpell(51302, true);
-                player->SetSkill(165, 0, 450, 450);
+                player->SetSkill(165, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 165);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 28: // mining
                 player->LearnSpell(50310, true);
-                player->SetSkill(186, 0, 450, 450);
+                player->SetSkill(186, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 186);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 29: // skinning
                 player->LearnSpell(50305, true);
-                player->SetSkill(393, 0, 450, 450);
+                player->SetSkill(393, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 393);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 30: // tailoring
                 player->LearnSpell(51309, true);
-                player->SetSkill(197, 0, 450, 450);
+                player->SetSkill(197, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 197);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 31: // first aid
                 player->LearnSpell(45542, true);
-                player->SetSkill(129, 0, 450, 450);
+                player->SetSkill(129, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
                 break;
             default:

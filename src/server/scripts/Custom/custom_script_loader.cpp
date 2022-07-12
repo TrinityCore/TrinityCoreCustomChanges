@@ -19,9 +19,9 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
-void AddSC_paymaster_npc();
+void Add_paymaster_npc();
 
 void AddCustomScripts()
 {
-    AddSC_paymaster_npc();
+    Add_paymaster_npc();
 }

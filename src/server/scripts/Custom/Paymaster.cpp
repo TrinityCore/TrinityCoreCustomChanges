@@ -231,7 +231,7 @@ public:
     }
 };
 
-void AddSC_paymaster_npc()
+void Add_paymaster_npc()
 {
     new Trinitycore_Paymaster_announce();
     new npc_paymaster();

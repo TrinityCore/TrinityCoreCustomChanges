@@ -143,7 +143,7 @@ public:
                 player->SetReputation(1106, 84000); // argent crusade
                 player->SetReputation(1119, 84000); // sons of hodir
                 player->SetReputation(1156, 84000); // ashen verdict
-                if (player->GetFaction() == ALLIANCE)
+                if (player->GetTeam() == ALLIANCE)
                 {
                     player->SetReputation(1050, 86000); // valiance expedition
                     player->SetReputation(1068, 86000); // explorers league

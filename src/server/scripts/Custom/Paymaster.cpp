@@ -53,16 +53,16 @@ public:
                 const int32 addGold = sConfigMgr->GetIntDefault("Paymaster.AddGold", 5000);
 
                 std::ostringstream goldMessage;
-                goldMessage << addGold << " gold";
+                goldMessage << "I want " << addGold << " gold";
 
                 AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, goldMessage.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "Profession Trainer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to be Aldor.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to be Scryer.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want Outland Reputation", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Frenzyheart Tribe.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Oracles.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want Northrend Reputation", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to learn a Profession", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Aldor", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Scryer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want Outland Reputations", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Frenzyheart Tribe", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to align with the Oracles", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want Northrend Reputations", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
             }
             return true;
@@ -88,16 +88,16 @@ public:
                 break;
             case GOSSIP_ACTION_INFO_DEF + 1:
                 ClearGossipMenuFor(player);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Fishing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Alchemy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Blacksmithing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 23);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Enchanting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 24);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Engineering", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 25);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Fishing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Herbalism", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 26);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Leatherworking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 27);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Mining", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 28);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Skinning", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 29);

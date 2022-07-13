@@ -55,7 +55,7 @@ public:
                 std::ostringstream goldMessage;
                 goldMessage << addGold << " gold";
 
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, goldMessage.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, goldMessage.str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
                 AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "Profession Trainer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to be Aldor.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
                 AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "I want to be Scryer.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
@@ -96,6 +96,7 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Skinning", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 29);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Tailoring", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 30);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 31);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 32);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
                 return true;
             case GOSSIP_ACTION_INFO_DEF + 2: // aldor
@@ -216,6 +217,11 @@ public:
                 player->LearnSpell(45542, true);
                 player->SetSkill(129, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 32: // cooking
+                player->LearnSpell(51296, true);
+                player->SetSkill(185, 1, 450, 450);
+                learn_commandscript::HandleLearnSkillRecipesHelper(player, 185);
                 break;
             default:
                 return false;

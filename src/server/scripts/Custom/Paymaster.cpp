@@ -91,7 +91,6 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Fishing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19);
-
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Alchemy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
@@ -103,7 +102,6 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Mining", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 28);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Skinning", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 29);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Tailoring", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 30);
-                
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
                 return true;
             case GOSSIP_ACTION_INFO_DEF + 2: // aldor

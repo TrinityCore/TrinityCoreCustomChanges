@@ -72,8 +72,12 @@ public:
         {
             uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
 
-            if (action > GOSSIP_ACTION_INFO_DEF + 4 && player->GetFreePrimaryProfessionPoints() == 0)
+            //just canceling if they already have 2 primary professions
+            if (action >= GOSSIP_ACTION_INFO_DEF + 20 && player->GetFreePrimaryProfessionPoints() == 0)
+            {
+                CloseGossipMenuFor(player);
                 return false;
+            }
 
             const int32 addGold = sConfigMgr->GetIntDefault("Paymaster.AddGold", 5000);
 
@@ -84,6 +88,10 @@ public:
                 break;
             case GOSSIP_ACTION_INFO_DEF + 1:
                 ClearGossipMenuFor(player);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 17);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 18);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Fishing", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 19);
+
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Jewelcrafting", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Inscription", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Alchemy", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
@@ -95,8 +103,7 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Mining", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 28);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Skinning", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 29);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Tailoring", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 30);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "First Aid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 31);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cooking", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 32);
+                
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
                 return true;
             case GOSSIP_ACTION_INFO_DEF + 2: // aldor
@@ -158,6 +165,21 @@ public:
                     player->SetReputation(1124, 86000); // sunreavers
                 }
                 break;
+            case GOSSIP_ACTION_INFO_DEF + 17: // first aid
+                player->LearnSpell(45542, true);
+                player->SetSkill(129, 1, 450, 450);
+                learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 18: // cooking
+                player->LearnSpell(51296, true);
+                player->SetSkill(185, 1, 450, 450);
+                learn_commandscript::HandleLearnSkillRecipesHelper(player, 185);
+                break;
+            case GOSSIP_ACTION_INFO_DEF + 19: // fishing
+                player->LearnSpell(51294, true); // grandmaster
+                player->LearnSpell(43308, true); // find fish                
+                player->SetSkill(356, 1, 450, 450);
+                break;
             case GOSSIP_ACTION_INFO_DEF + 20: // jc
                 player->LearnSpell(51311, true);
                 player->SetSkill(755, 1, 450, 450);
@@ -213,17 +235,9 @@ public:
                 player->SetSkill(197, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 197);
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 31: // first aid
-                player->LearnSpell(45542, true);
-                player->SetSkill(129, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 32: // cooking
-                player->LearnSpell(51296, true);
-                player->SetSkill(185, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 185);
-                break;
+            
             default:
+                CloseGossipMenuFor(player);
                 return false;
             }
             CloseGossipMenuFor(player);

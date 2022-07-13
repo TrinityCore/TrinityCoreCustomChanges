@@ -233,7 +233,6 @@ public:
                 player->SetSkill(197, 1, 450, 450);
                 learn_commandscript::HandleLearnSkillRecipesHelper(player, 197);
                 break;
-            
             default:
                 CloseGossipMenuFor(player);
                 return false;

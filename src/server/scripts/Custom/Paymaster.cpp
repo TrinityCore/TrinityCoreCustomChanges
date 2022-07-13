@@ -177,7 +177,7 @@ public:
                 break;
             case GOSSIP_ACTION_INFO_DEF + 19: // fishing
                 player->LearnSpell(51294, true); // grandmaster
-                player->LearnSpell(43308, true); // find fish                
+                player->LearnSpell(43308, true); // find fish
                 player->SetSkill(356, 1, 450, 450);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 20: // jc

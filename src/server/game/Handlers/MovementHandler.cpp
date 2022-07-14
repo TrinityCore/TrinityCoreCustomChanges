@@ -359,7 +359,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvData)
         mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
 
     if (plrMover)
-        sAnticheatMgr->StartHackDetection(plrMover, movementInfo, opcode);
+        sAnticheatMgr->OnPlayerMove(plrMover, movementInfo, opcode);
+
     /* process position-change */
     WorldPacket data(opcode, recvData.size());
     int64 movementTime = (int64) movementInfo.time + _timeSyncClockDelta;

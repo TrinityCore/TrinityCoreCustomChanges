@@ -3323,6 +3323,13 @@ LevelReq.Mail = 1
 
 Anticheat.Enable = 1
 
+#     Anticheat.EnabledOnGmAccounts
+#       Description: Enables detection for GM accounts
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.EnabledOnGmAccounts = 0
+
 #     Anticheat.ReportsForIngameWarnings
 #       Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
 #       Default:     70

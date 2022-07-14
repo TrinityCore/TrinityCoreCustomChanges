@@ -1488,6 +1488,7 @@ void World::LoadConfigSettings(bool reload)
 
     // ANTICHEAT
     m_bool_configs[CONFIG_ANTICHEAT_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.Enable", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ENABLE_ON_GM] = sConfigMgr->GetBoolDefault("Anticheat.EnabledOnGmAccounts", false);
     m_bool_configs[CONFIG_ANTICHEAT_JUMPHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectJumpHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_WATERWALKHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectWaterWalkHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_FLYHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectFlyHack", false);

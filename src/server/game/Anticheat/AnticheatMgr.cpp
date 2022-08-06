@@ -493,7 +493,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     {
         AntiSwimHackDetection(player, movementInfo, opcode);
     }
-    AntiKnockBackHactDetection(player, movementInfo);
+    AntiKnockBackHackDetection(player, movementInfo);
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
 }
@@ -715,7 +715,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 }
 
 // basic detection
-void AnticheatMgr::AntiKnockBackHactDetection(Player* player, MovementInfo movementInfo)
+void AnticheatMgr::AntiKnockBackHackDetection(Player* player, MovementInfo movementInfo)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANTIKNOCKBACK_ENABLE))
         return;

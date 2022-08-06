@@ -246,6 +246,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
     m_canTeleport = false;
+    m_canKnockback = false;
     m_trade = nullptr;
 
     m_cinematic = 0;

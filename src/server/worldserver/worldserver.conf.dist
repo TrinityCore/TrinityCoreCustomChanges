@@ -3381,6 +3381,7 @@ Anticheat.IgnoreControlHack = 0
 Anticheat.DetectZaxisHack = 0
 Anticheat.AntiSwimHack = 0
 Anticheat.DetectGravityHack = 0
+Anticheat.AntiKnockBack = 0
 
 #     Anticheat.StricterFlyHackCheck
 #       Description: Checks moveflag ascending (may give false positives)

@@ -2131,6 +2131,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool CanTeleport() { return m_canTeleport; }
         bool isAllowedToLoot(Creature const* creature) const;
         void SetCanTeleport(bool value) { m_canTeleport = value; }
+        bool CanKnockback() { return m_canKnockback; }
+        void SetCanKnockback(bool value) { m_canKnockback = value; }
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         uint8 GetRunesState() const { return m_runes->runeState; }
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
@@ -2499,6 +2501,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool m_bCanDelayTeleport;
         bool m_bHasDelayedTeleport;
         bool m_canTeleport;
+        bool m_canKnockback;
         std::unique_ptr<PetStable> m_petStable;
 
         // Temporary removed pet cache

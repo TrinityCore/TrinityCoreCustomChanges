@@ -13,9 +13,8 @@
 #include "SharedDefines.h"
 #include "World.h"
 #include "WorldSession.h"
-#include "DataStores/DBCStores.h"
-#include "Spells/SpellMgr.h"
-#include <Commands/cs_learn.cpp>
+#include "DBCStores.h"
+#include "SpellMgr.h"
 
 class Trinitycore_Paymaster_announce : public PlayerScript
 {
@@ -166,12 +165,12 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 17: // first aid
                 player->LearnSpell(45542, true);
                 player->SetSkill(129, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 129);
+                HandleLearnSkillRecipesHelper(player, 129);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 18: // cooking
                 player->LearnSpell(51296, true);
                 player->SetSkill(185, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 185);
+                HandleLearnSkillRecipesHelper(player, 185);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 19: // fishing
                 player->LearnSpell(51294, true); // grandmaster
@@ -181,57 +180,57 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 20: // jc
                 player->LearnSpell(51311, true);
                 player->SetSkill(755, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 755);
+                HandleLearnSkillRecipesHelper(player, 755);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 21: // inscription
                 player->LearnSpell(45363, true);
                 player->SetSkill(773, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 773);
+                HandleLearnSkillRecipesHelper(player, 773);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 22: // alchemy
                 player->LearnSpell(51304, true);
                 player->SetSkill(171, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 171);
+                HandleLearnSkillRecipesHelper(player, 171);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 23: // blacksmithing
                 player->LearnSpell(51300, true);
                 player->SetSkill(164, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 164);
+                HandleLearnSkillRecipesHelper(player, 164);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 24: // enchanting
                 player->LearnSpell(51313, true);
                 player->SetSkill(333, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 333);
+                HandleLearnSkillRecipesHelper(player, 333);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 25: // engineering
                 player->LearnSpell(51306, true);
                 player->SetSkill(202, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 202);
+                HandleLearnSkillRecipesHelper(player, 202);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 26: // herbalism
                 player->LearnSpell(50300, true);
                 player->SetSkill(182, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 182);
+                HandleLearnSkillRecipesHelper(player, 182);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 27: // leatherworking
                 player->LearnSpell(51302, true);
                 player->SetSkill(165, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 165);
+                HandleLearnSkillRecipesHelper(player, 165);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 28: // mining
                 player->LearnSpell(50310, true);
                 player->SetSkill(186, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 186);
+                HandleLearnSkillRecipesHelper(player, 186);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 29: // skinning
                 player->LearnSpell(50305, true);
                 player->SetSkill(393, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 393);
+                HandleLearnSkillRecipesHelper(player, 393);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 30: // tailoring
                 player->LearnSpell(51309, true);
                 player->SetSkill(197, 1, 450, 450);
-                learn_commandscript::HandleLearnSkillRecipesHelper(player, 197);
+                HandleLearnSkillRecipesHelper(player, 197);
                 break;
             default:
                 CloseGossipMenuFor(player);
@@ -239,6 +238,40 @@ public:
             }
             CloseGossipMenuFor(player);
             return true;
+        }
+
+        static void HandleLearnSkillRecipesHelper(Player* player, uint32 skillId)
+        {
+            uint32 classmask = player->GetClassMask();
+
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                if (!skillLine)
+                    continue;
+
+                // wrong skill
+                if (skillLine->SkillLine != skillId)
+                    continue;
+
+                // not high rank
+                if (skillLine->SupercededBySpell)
+                    continue;
+
+                // skip racial skills
+                if (skillLine->RaceMask != 0)
+                    continue;
+
+                // skip wrong class skills
+                if (skillLine->ClassMask && (skillLine->ClassMask & classmask) == 0)
+                    continue;
+
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(skillLine->Spell);
+                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, player, false))
+                    continue;
+
+                player->LearnSpell(skillLine->Spell, false);
+            }
         }
     };
 

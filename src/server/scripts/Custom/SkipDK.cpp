@@ -112,7 +112,7 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
     player->SaveToDB();
 
     WorldLocation Aloc = WorldLocation(0, -8866.55f, 671.39f, 97.90f, 5.27f);// Stormwind
-    WorldLocation Hloc = WorldLocation(1, 1637.62f, -4440.22, 15.78f, 2.42f);// Orgrimmar
+    WorldLocation Hloc = WorldLocation(1, 1637.62f, -4440.22f, 15.78f, 2.42f);// Orgrimmar
 
     if (player->GetTeam() == ALLIANCE)
     {

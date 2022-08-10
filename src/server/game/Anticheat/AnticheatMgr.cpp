@@ -390,7 +390,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     /* Dueling exploit detection*/
     if (player->duel)
     {
-        if ((zDiff >= 10.0f && !player->IsFlying() || xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())
+        if (((zDiff >= 10.0f && !player->IsFlying()) || xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())
         {
             Player* opponent = player->duel->Opponent;
 
@@ -416,7 +416,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
             player->SetCanTeleport(false);
     }
     /* Please work */
-    if ((zDiff >= 10.0f && !player->IsFlying() || xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())// teleport helpers in play
+    if (((zDiff >= 10.0f && !player->IsFlying()) || xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport())// teleport helpers in play
     {
         if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Teleport Hack

@@ -241,9 +241,13 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
 void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
-    float x, y;
-    player->GetPosition(x, y);
     ObjectGuid key = player->GetGUID();
+
+    float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
+    float newX = movementInfo.pos.GetPositionX();
+
+    float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
+    float newY = movementInfo.pos.GetPositionY();
 
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_IGNORECONTROLHACK_ENABLE))
         return;
@@ -263,7 +267,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
     // except for lag, we can legitimately blame lag for false hits, so we see if they are above 400 then we exempt the check
     if (player->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED) && !player->GetVehicle() && !latency)
     {// Here we check if the x and y position changes while rooted, Nothing moves when rooted, no exception
-        bool unrestricted = movementInfo.pos.GetPositionX() != x || movementInfo.pos.GetPositionY() != y;
+        bool unrestricted = newX != lastX || newY != lastY;
         if (unrestricted)
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Ignore Control
             if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))

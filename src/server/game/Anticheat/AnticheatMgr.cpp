@@ -265,7 +265,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
     latency = player->GetSession()->GetLatency() >= 400;
     //So here we check if hte player has a root state and not in a vehicle
     // except for lag, we can legitimately blame lag for false hits, so we see if they are above 400 then we exempt the check
-    if (player->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED) && !player->GetVehicle() && !latency)
+    if ((player->HasAuraType(SPELL_AURA_MOD_STUN) || player->HasAuraType(SPELL_AURA_MOD_ROOT)) && !player->GetVehicle() && !latency)
     {// Here we check if the x and y position changes while rooted, Nothing moves when rooted, no exception
         bool unrestricted = newX != lastX || newY != lastY;
         if (unrestricted)

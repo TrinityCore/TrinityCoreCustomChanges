@@ -391,7 +391,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     float yDiff = fabs(lastY - newY);
     float zDiff = fabs(lastZ - newZ);
 
-    if (player->IsFalling() || player->IsFalling() && player->IsMounted())
+    if (player->IsFalling() || (player->IsFalling() && player->IsMounted()))
         return;
 
     /* Dueling exploit detection*/

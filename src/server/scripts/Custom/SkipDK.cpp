@@ -111,13 +111,18 @@ void Trinitycore_skip_deathknight_HandleSkip(Player* player)
     //Don't need to save all players, just current
     player->SaveToDB();
 
+    WorldLocation Aloc = WorldLocation(0, -8866.55f, 671.39f, 97.90f, 5.27f);// Stormwind
+    WorldLocation Hloc = WorldLocation(1, 1637.62f, -4440.22f, 15.78f, 2.42f);// Orgrimmar
+
     if (player->GetTeam() == ALLIANCE)
     {
         player->TeleportTo(0, -8833.37f, 628.62f, 94.00f, 1.06f);//Stormwind
+        player->SetHomebind(Aloc, 1637);// Stormwind Homebind location
     }
     else
     {
         player->TeleportTo(1, 1569.59f, -4397.63f, 7.70f, 0.54f);//Orgrimmar
+        player->SetHomebind(Hloc, 1653);// Orgrimmar Homebind location
     }
 }
 

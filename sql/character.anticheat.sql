@@ -10,10 +10,14 @@ CREATE TABLE IF NOT EXISTS `daily_players_reports` (
   `waterwalk_reports` bigint unsigned NOT NULL DEFAULT 0,
   `teleportplane_reports` bigint unsigned NOT NULL DEFAULT 0,
   `climb_reports` bigint unsigned NOT NULL DEFAULT 0,
-  `teleport_reports` bigint unsigned NOT NULL DEFAULT '0',
+  `teleport_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `ignorecontrol_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `zaxis_reports` bigint unsigned NOT NULL DEFAULT 0,
   `antiswim_reports` bigint unsigned NOT NULL DEFAULT 0,
   `gravity_reports` bigint unsigned NOT NULL DEFAULT 0,
   `antiknockback_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `no_fall_damage_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `op_ack_hack_reports` bigint unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -28,10 +32,14 @@ CREATE TABLE IF NOT EXISTS `players_reports_status` (
   `waterwalk_reports` bigint unsigned NOT NULL DEFAULT 0,
   `teleportplane_reports` bigint unsigned NOT NULL DEFAULT 0,
   `climb_reports` bigint unsigned NOT NULL DEFAULT 0,
-  `teleport_reports` bigint unsigned NOT NULL DEFAULT '0',
+  `teleport_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `ignorecontrol_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `zaxis_reports` bigint unsigned NOT NULL DEFAULT 0,
   `antiswim_reports` bigint unsigned NOT NULL DEFAULT 0,
   `gravity_reports` bigint unsigned NOT NULL DEFAULT 0,
   `antiknockback_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `no_fall_damage_reports` bigint unsigned NOT NULL DEFAULT 0,
+  `op_ack_hack_reports` bigint unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -43,6 +51,8 @@ ALTER TABLE `daily_players_reports`
     ADD COLUMN `antiswim_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `zaxis_reports`,
     ADD COLUMN `gravity_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `antiswim_reports`;
     ADD COLUMN `antiknockback_reports` bigint unsigned NOT NULL DEFAULT 0 AFTER `gravity_reports`;
+    ADD COLUMN `no_fall_damage_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `antiknockback_reports`;
+	ADD COLUMN `op_ack_hack_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `no_fall_damage_reports`;
 
 ALTER TABLE `players_reports_status`
     ADD COLUMN `teleport_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `climb_reports`,
@@ -51,3 +61,5 @@ ALTER TABLE `players_reports_status`
     ADD COLUMN `antiswim_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `zaxis_reports`,
     ADD COLUMN `gravity_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `antiswim_reports`;
 	ADD COLUMN `antiknockback_reports` bigint unsigned NOT NULL DEFAULT 0 AFTER `gravity_reports`;
+    ADD COLUMN `no_fall_damage_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `antiknockback_reports`;
+	ADD COLUMN `op_ack_hack_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `no_fall_damage_reports`;

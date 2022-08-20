@@ -29,3 +29,13 @@ void AnticheatScripts::OnLogin(Player* player,bool)
 {
     sAnticheatMgr->HandlePlayerLogin(player);
 }
+
+void AnticheatScripts::OnUpdate(Player* player, uint32 diff)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE))
+    {
+        return;
+    }
+
+    sAnticheatMgr->AckUpdate(player, diff);
+}

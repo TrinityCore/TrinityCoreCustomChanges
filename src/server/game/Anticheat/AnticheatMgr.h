@@ -41,13 +41,30 @@ enum ReportTypes
     ZAXIS_HACK_REPORT = 8,
     ANTISWIM_HACK_REPORT = 9,
     GRAVITY_HACK_REPORT = 10,
-    ANTIKNOCK_BACK_HACK_REPORT = 11
+    ANTIKNOCK_BACK_HACK_REPORT = 11,
+    NO_FALL_DAMAGE_HACK_REPORT = 12,
+    OP_ACK_HACK_REPORT = 13
 
    // MAX_REPORT_TYPES
 };
 
 // GUIDLow is the key.
 typedef std::map<uint32, AnticheatData> AnticheatPlayersDataMap;
+
+class TC_GAME_API ServerOrderData
+{
+public:
+    ServerOrderData(uint32 serv, uint32 resp) : serverOpcode1(serv), serverOpcode2(0), clientResp(resp), lastSent(0), lastRcvd(0), counter(0) {}
+    ServerOrderData(uint32 serv1, uint32 serv2, uint32 resp) : serverOpcode1(serv1), serverOpcode2(serv2), clientResp(resp), lastSent(0), lastRcvd(0), counter(0) {}
+
+    uint32 serverOpcode1;
+    uint32 serverOpcode2;
+    uint32 clientResp;
+
+    uint32 lastSent;
+    uint32 lastRcvd;
+    int32 counter;
+};
 
 class TC_GAME_API AnticheatMgr
 {
@@ -69,6 +86,13 @@ class TC_GAME_API AnticheatMgr
 
         void HandlePlayerLogin(Player* player);
         void HandlePlayerLogout(Player* player);
+        void AckUpdate(Player* player, uint32 diff);
+        void DoActions(Player* player);
+
+        // orders
+        void OrderSent(WorldPacket const* data);
+        void CheckForOrderAck(uint32 opcode);
+        std::vector<ServerOrderData> _opackorders; // Packets sent by server, triggering *_ACK from client
 
         uint32 GetTotalReports(uint32 lowGUID);
         float GetAverage(uint32 lowGUID);
@@ -91,11 +115,14 @@ class TC_GAME_API AnticheatMgr
         void AntiSwimHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
         void AntiKnockBackHackDetection(Player* player, MovementInfo movementInfo);
         void GravityHackDetection(Player* player, MovementInfo movementInfo);
+        void NoFallDamageDetection(Player* player, MovementInfo movementInfo);
+        void BGStartExploit(Player* player, MovementInfo movementInfo);
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);
         uint32 _counter = 0;
-        uint32 _alertFrequency;
+        uint32 _alertFrequency = 0;
+        uint32 _updateCheckTimer = 4000;
         AnticheatPlayersDataMap m_Players;                        ///< Player data
 };
 

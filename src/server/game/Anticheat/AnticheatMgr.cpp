@@ -18,6 +18,7 @@
 #include "AnticheatMgr.h"
 #include "AnticheatScripts.h"
 #include "AccountMgr.h"
+#include "Battleground.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
 #include "Log.h"
@@ -34,6 +35,10 @@ constexpr auto LANG_ANTICHEAT_ALERT = 30087;
 constexpr auto LANG_ANTICHEAT_TELEPORT = 30088;
 constexpr auto LANG_ANTICHEAT_IGNORECONTROL = 30089;
 constexpr auto LANG_ANTICHEAT_DUEL = 30090;
+constexpr auto LANG_ANTICHEAT_BG_EXPLOIT = 30091;
+
+// Time between server sends acknowledgement, and client is actually acknowledged
+constexpr auto ALLOWED_ACK_LAG = 2000;
 
 enum Spells
 {
@@ -52,6 +57,29 @@ AnticheatMgr::AnticheatMgr()
     **    May you share freely, never taking more than you give.
     **    CTHULHU is watching ^(;,;)^
     */
+    _opackorders =
+    {
+        { SMSG_FORCE_WALK_SPEED_CHANGE, CMSG_FORCE_WALK_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_RUN_SPEED_CHANGE, CMSG_FORCE_RUN_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_RUN_BACK_SPEED_CHANGE, CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_SWIM_SPEED_CHANGE, CMSG_FORCE_SWIM_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_TURN_RATE_CHANGE, CMSG_FORCE_TURN_RATE_CHANGE_ACK },
+        { SMSG_FORCE_PITCH_RATE_CHANGE, CMSG_FORCE_PITCH_RATE_CHANGE_ACK },
+        { SMSG_FORCE_FLIGHT_SPEED_CHANGE, CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE, CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK },
+        { SMSG_FORCE_MOVE_ROOT, CMSG_FORCE_MOVE_ROOT_ACK },
+        { SMSG_FORCE_MOVE_UNROOT, CMSG_FORCE_MOVE_UNROOT_ACK },
+        { SMSG_MOVE_KNOCK_BACK, CMSG_MOVE_KNOCK_BACK_ACK },
+        { SMSG_MOVE_FEATHER_FALL, SMSG_MOVE_NORMAL_FALL, CMSG_MOVE_FEATHER_FALL_ACK },
+        { SMSG_MOVE_SET_HOVER, SMSG_MOVE_UNSET_HOVER, CMSG_MOVE_HOVER_ACK },
+        { SMSG_MOVE_SET_CAN_FLY, SMSG_MOVE_UNSET_CAN_FLY, CMSG_MOVE_SET_CAN_FLY_ACK },
+        { SMSG_MOVE_WATER_WALK, SMSG_MOVE_LAND_WALK, CMSG_MOVE_WATER_WALK_ACK },
+        { SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, SMSG_MOVE_UNSET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK },
+        { SMSG_MOVE_GRAVITY_ENABLE, CMSG_MOVE_GRAVITY_ENABLE_ACK },
+        { SMSG_MOVE_GRAVITY_DISABLE, CMSG_MOVE_GRAVITY_DISABLE_ACK },
+        { SMSG_MOVE_SET_COLLISION_HGT, CMSG_MOVE_SET_COLLISION_HGT_ACK }
+    };
 }
 
 AnticheatMgr::~AnticheatMgr()
@@ -506,6 +534,14 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
         AntiSwimHackDetection(player, movementInfo, opcode);
     }
     AntiKnockBackHackDetection(player, movementInfo);
+    NoFallDamageDetection(player, movementInfo);
+    if (Battleground* bg = player->GetBattleground())
+    {
+        if (bg->GetStatus() == STATUS_WAIT_JOIN)
+        {
+            BGStartExploit(player, movementInfo);
+        }
+    }
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
 }
@@ -753,6 +789,473 @@ void AnticheatMgr::AntiKnockBackHackDetection(Player* player, MovementInfo movem
         player->SetCanKnockback(false);
 }
 
+// basic detection
+void AnticheatMgr::NoFallDamageDetection(Player* player, MovementInfo movementInfo)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_NO_FALL_DAMAGE_ENABLE))
+        return;
+
+    // ghost can not get damaged
+    if (player->HasAuraType(SPELL_AURA_GHOST))
+        return;
+
+    // players with water walk aura jumping on to the water from ledge would not get damage and neither will safe fall and feather fall
+    if (((player->HasAuraType(SPELL_AURA_WATER_WALK) && player->GetLiquidStatus() == LIQUID_MAP_WATER_WALK && !player->IsFlying())) ||
+        player->HasAuraType(SPELL_AURA_FEATHER_FALL) || player->HasAuraType(SPELL_AURA_SAFE_FALL))
+    {
+        return;
+    }
+
+    ObjectGuid key = player->GetGUID();
+
+    float lastZ = m_Players[key].GetLastMovementInfo().pos.GetPositionZ();
+    float newZ = movementInfo.pos.GetPositionZ();
+    float zDiff = fabs(lastZ - newZ);
+    int32 safe_fall = player->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
+    float damageperc = 0.018f * (zDiff - safe_fall) - 0.2426f;
+    uint32 damage = (uint32)(damageperc * player->GetMaxHealth() * sWorld->getRate(RATE_DAMAGE_FALL));
+
+    // in the Player::Handlefall 14.57f is used to calculated the damageperc formula below to 0 for fall damamge
+
+    if (movementInfo.pos.GetPositionZ() < m_Players[key].GetLastMovementInfo().pos.GetPositionZ() && zDiff > 14.57f)
+    {
+        if (movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING) || m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+        {
+            if (damage == 0 && !player->IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
+            {
+                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                {
+                    uint32 latency = 0;
+                    latency = player->GetSession()->GetLatency();
+                    TC_LOG_INFO("anticheat.module", "AnticheatMgr:: No Fall Damage - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                }
+                BuildReport(player, NO_FALL_DAMAGE_HACK_REPORT);
+            }
+        }
+    }
+}
+
+void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_HACK_ENABLE))
+        return;
+
+    ObjectGuid key = player->GetGUID();
+
+    switch (player->GetMapId())
+    {
+    case 30: // Alterac Valley
+    {
+        if (Battleground* bg = player->GetBattleground())
+        {
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                // Outside of starting area before BG has started.
+                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 770.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG AV has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG AV Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+
+                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -536.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG AV has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG AV Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+            }
+        }
+        break;
+    }
+    case 489: // Warsong Gulch
+    {
+        // Only way to get this high is with engineering items malfunction.
+        if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
+        {
+            _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+            // So we dont divide by 0 by accident
+            if (_alertFrequency < 1)
+                _alertFrequency = 1;
+            if (++_counter % _alertFrequency == 0)
+            {
+                // display warning at the center of the screen, hacky way?
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG WG has started!";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                // need better way to limit chat spam
+                if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                {
+                    sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                }
+                _counter = 0;
+            }
+
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG WG Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+            }
+            BuildReport(player, TELEPORT_HACK_REPORT);
+        }
+
+        if (Battleground* bg = player->GetBattleground())
+        {
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                // Outside of starting area before BG has started.
+                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1490.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG WG has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG WG Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG WG has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG WG Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+            }
+        }
+        break;
+    }
+    case 529: // Arathi Basin
+    {
+        if (Battleground* bg = player->GetBattleground())
+        {
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                // Outside of starting area before BG has started.
+                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1270.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG AB has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG AB Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG AB has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG AB Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+            }
+        }
+        break;
+    }
+    case 566: // Eye of the Storm
+    {
+        if (Battleground* bg = player->GetBattleground())
+        {
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                // Outside of starting area before BG has started.
+                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 2512.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG EOTS has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG EOTS Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG EOTS has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG EOTS Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+            }
+        }
+        break;
+    }
+    case 628: // Island Of Conquest
+    {
+        if (Battleground* bg = player->GetBattleground())
+        {
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                // Outside of starting area before BG has started.
+                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() > 412.0f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG IOC has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG IOC Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f)
+                {
+                    _alertFrequency = sWorld->getIntConfig(CONFIG_ANTICHEAT_ALERT_FREQUENCY);
+                    // So we dont divide by 0 by accident
+                    if (_alertFrequency < 1)
+                        _alertFrequency = 1;
+                    if (++_counter % _alertFrequency == 0)
+                    {
+                        // display warning at the center of the screen, hacky way?
+                        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG IOC has started!";
+                        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                        data << str;
+                        sWorld->SendGlobalGMMessage(&data);
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        // need better way to limit chat spam
+                        if (m_Players[key].GetTotalReports() >= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN) && m_Players[key].GetTotalReports() <= sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX))
+                        {
+                            sWorld->SendGMText(LANG_ANTICHEAT_BG_EXPLOIT, player->GetName().c_str(), player->GetName().c_str(), latency);
+                        }
+                        _counter = 0;
+                    }
+
+                    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                    {
+                        uint32 latency = 0;
+                        latency = player->GetSession()->GetLatency();
+                        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG IOC Start Bound Exploit-Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                    }
+
+                    BuildReport(player, TELEPORT_HACK_REPORT);
+                }
+            }
+        }
+        break;
+    }
+    return;
+    }
+}
+
 void AnticheatMgr::StartScripts()
 {
     new AnticheatScripts();
@@ -780,16 +1283,74 @@ void AnticheatMgr::HandlePlayerLogout(Player* player)
     m_Players.erase(player->GetGUID().GetCounter());
 }
 
+void AnticheatMgr::AckUpdate(Player* player, uint32 diff)
+{
+    if (_updateCheckTimer <= diff)
+    {
+        DoActions(player);
+        _updateCheckTimer = 4000;
+    }
+    else
+    {
+        _updateCheckTimer -= diff;
+    }
+}
+
+void AnticheatMgr::DoActions(Player* player)
+{
+    auto const now = getMSTime();
+
+    for (auto& order : _opackorders)
+    {
+        if (order.counter > 0 && order.lastRcvd < order.lastSent && (now - order.lastSent) > ALLOWED_ACK_LAG)
+        {
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            {
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                TC_LOG_INFO("anticheat.module", "AnticheatMgr:: OP Ack Manipulation - Hack detected player %s (%s) - Latency: %u ms", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency);
+                order.counter = 0;
+            }
+            BuildReport(player, OP_ACK_HACK_REPORT);
+        }
+    }
+}
+
+void AnticheatMgr::OrderSent(WorldPacket const* data)
+{
+    for (auto& order : _opackorders)
+    {
+        if (order.serverOpcode1 == data->GetOpcode() || order.serverOpcode2 == data->GetOpcode())
+        {
+            order.lastSent = getMSTime();
+            ++order.counter;
+            break;
+        }
+    }
+}
+
+void AnticheatMgr::CheckForOrderAck(uint32 opcode)
+{
+    for (auto& order : _opackorders)
+    {
+        if (order.clientResp == opcode)
+        {
+            --order.counter;
+            break;
+        }
+    }
+}
+
 void AnticheatMgr::SavePlayerData(Player* player)
 {
     AnticheatData playerData = m_Players[player->GetGUID().GetCounter()];
-    CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
+    CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,no_fall_damage_reports,op_ack_hack_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), playerData.GetTypeReports(NO_FALL_DAMAGE_HACK_REPORT), playerData.GetTypeReports(OP_ACK_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
 }
 
 void AnticheatMgr::SavePlayerDataDaily(Player* player)
 {
     AnticheatData playerData = m_Players[player->GetGUID().GetCounter()];
-    CharacterDatabase.PExecute("REPLACE INTO daily_players_reports (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
+    CharacterDatabase.PExecute("REPLACE INTO daily_players_reports (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,no_fall_damage_reports,op_ack_hack_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), playerData.GetTypeReports(NO_FALL_DAMAGE_HACK_REPORT), playerData.GetTypeReports(OP_ACK_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
 }
 
 void AnticheatMgr::OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode)
@@ -828,6 +1389,12 @@ bool AnticheatMgr::MustCheckTempReports(uint8 type)
         return false;
 
     if (type == ANTIKNOCK_BACK_HACK_REPORT)
+        return false;
+
+    if (type == NO_FALL_DAMAGE_HACK_REPORT)
+        return false;
+
+    if (type == OP_ACK_HACK_REPORT)
         return false;
 
     return true;
@@ -894,7 +1461,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         if (!m_Players[key].GetDailyReportState())
         {
             AnticheatData playerData = m_Players[player->GetGUID().GetCounter()];
-            CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
+            CharacterDatabase.PExecute("REPLACE INTO players_reports_status (guid,average,total_reports,speed_reports,fly_reports,jump_reports,waterwalk_reports,teleportplane_reports,climb_reports,teleport_reports,ignorecontrol_reports,zaxis_reports,antiswim_reports,gravity_reports,antiknockback_reports,no_fall_damage_reports,op_ack_hack_reports,creation_time) VALUES (%u,%f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u);", player->GetGUID().GetCounter(), playerData.GetAverage(), playerData.GetTotalReports(), playerData.GetTypeReports(SPEED_HACK_REPORT), playerData.GetTypeReports(FLY_HACK_REPORT), playerData.GetTypeReports(JUMP_HACK_REPORT), playerData.GetTypeReports(WALK_WATER_HACK_REPORT), playerData.GetTypeReports(TELEPORT_PLANE_HACK_REPORT), playerData.GetTypeReports(CLIMB_HACK_REPORT), playerData.GetTypeReports(TELEPORT_HACK_REPORT), playerData.GetTypeReports(IGNORE_CONTROL_REPORT), playerData.GetTypeReports(ZAXIS_HACK_REPORT), playerData.GetTypeReports(ANTISWIM_HACK_REPORT), playerData.GetTypeReports(GRAVITY_HACK_REPORT), playerData.GetTypeReports(ANTIKNOCK_BACK_HACK_REPORT), playerData.GetTypeReports(NO_FALL_DAMAGE_HACK_REPORT), m_Players[player->GetGUID()].GetCreationTime());
             m_Players[key].SetDailyReportState(true);
         }
     }

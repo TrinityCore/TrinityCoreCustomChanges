@@ -17,6 +17,7 @@
 
 #include "AnticheatScripts.h"
 #include "AnticheatMgr.h"
+#include "World.h"
 
 AnticheatScripts::AnticheatScripts(): PlayerScript("AnticheatScripts") {}
 

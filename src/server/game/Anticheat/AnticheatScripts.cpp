@@ -33,7 +33,7 @@ void AnticheatScripts::OnLogin(Player* player,bool)
 
 void AnticheatScripts::OnUpdate(Player* player, uint32 diff)
 {
-    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE))
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE) && !sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
     {
         return;
     }

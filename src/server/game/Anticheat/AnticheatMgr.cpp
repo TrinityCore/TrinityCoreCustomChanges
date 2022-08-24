@@ -307,7 +307,6 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
     const bool no_swim_above_water = movementInfo.pos.GetPositionZ() - 7.0f >= player->GetMap()->GetWaterLevel(movementInfo.pos.GetPositionX(), movementInfo.pos.GetPositionY());
     const bool no_swim_water = no_swim_in_water && no_swim_above_water;
 
-
     // Chain or double multi jumping is not a thing in 335
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
     {

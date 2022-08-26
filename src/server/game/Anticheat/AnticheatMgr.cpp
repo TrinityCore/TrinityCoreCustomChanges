@@ -323,6 +323,12 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
         if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && !player->IsFalling())
             return;
 
+        uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+
+        // This is necessary since MovementHandler fires if you rotate the camera in place
+        if (!distance2D)
+            return;
+
         if (ground_Z > 5.0f && movementInfo.pos.GetPositionZ() >= player->GetPositionZ())
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

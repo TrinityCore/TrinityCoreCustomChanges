@@ -320,6 +320,9 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
     }
     else if (no_fly_auras && no_fly_flags && no_swim_water)
     {
+        if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && !player->IsFalling())
+            return;
+
         if (ground_Z > 5.0f && movementInfo.pos.GetPositionZ() >= player->GetPositionZ())
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

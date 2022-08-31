@@ -233,7 +233,7 @@ public:
             QueryResult resultCDB = CharacterDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
 
             handler->PSendSysMessage("|cFFFFA500-----------------------------------------------------------------");
-            handler->PSendSysMessage("Information about player %s || Latency %u ms", player->GetName().c_str(), latency);
+            handler->PSendSysMessage("|cFF20B2AAInformation about player: |cffffff00%s", player->GetName().c_str());
             handler->PSendSysMessage("|cffff0000IP Address: |cffffff00%s |cffff0000Latency |cffffff00%u ms", player->GetConnectedPlayer()->GetSession()->GetRemoteAddress().c_str(), latency);
             if (resultADB)
             {

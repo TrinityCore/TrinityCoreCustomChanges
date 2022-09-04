@@ -454,7 +454,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_TELEPORTHACK_ENABLE))
         return;
 
-    ObjectGuid key = player->GetGUID();
+    uint32 key = player->GetGUID().GetCounter();
 
     if (m_Players[key].GetLastMovementInfo().pos.GetPositionX() == movementInfo.pos.GetPositionX())
         return;
@@ -543,7 +543,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
 
 void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
-    ObjectGuid key = player->GetGUID();
+    uint32 key = player->GetGUID().GetCounter();
 
     float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
     float newX = movementInfo.pos.GetPositionX();
@@ -675,7 +675,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ZAXISHACK_ENABLE))
         return;
 
-   ObjectGuid key = player->GetGUID();
+   uint32 key = player->GetGUID().GetCounter();
 
    // If he is flying we dont need to check
    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
@@ -804,7 +804,7 @@ void AnticheatMgr::AntiKnockBackHackDetection(Player* player, MovementInfo movem
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANTIKNOCKBACK_ENABLE))
         return;
 
-    ObjectGuid key = player->GetGUID();
+    uint32 key = player->GetGUID().GetCounter();
 
     //if a knockback helper is not passed then we ignore
     //if player has root state we ignore, knock back does not break root
@@ -842,7 +842,7 @@ void AnticheatMgr::NoFallDamageDetection(Player* player, MovementInfo movementIn
         return;
     }
 
-    ObjectGuid key = player->GetGUID();
+    uint32 key = player->GetGUID().GetCounter();
 
     float lastZ = m_Players[key].GetLastMovementInfo().pos.GetPositionZ();
     float newZ = movementInfo.pos.GetPositionZ();
@@ -876,7 +876,7 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_HACK_ENABLE))
         return;
 
-    ObjectGuid key = player->GetGUID();
+    uint32 key = player->GetGUID().GetCounter();
 
     switch (player->GetMapId())
     {

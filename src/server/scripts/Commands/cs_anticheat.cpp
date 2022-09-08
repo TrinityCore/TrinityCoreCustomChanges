@@ -275,7 +275,6 @@ public:
             {
                 do
                 {
-                    Field* fields = resultLDB->Fetch();
                     handler->PSendSysMessage("|cffff0000Macro Requiring Lua unlock Detected: |cffffff00Yes");
                 } while (resultLDB->NextRow());
             }
@@ -342,7 +341,6 @@ public:
             {
                 do
                 {
-                    Field* fields = resultLDB->Fetch();
                     handler->PSendSysMessage("Macro Requiring Lua unlock Detected: Yes");
                 } while (resultLDB->NextRow());
             }

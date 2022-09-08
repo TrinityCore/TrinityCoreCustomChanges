@@ -1501,6 +1501,10 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ANTICHEAT_SPEEDHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectSpeedHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_ANTISWIM_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AntiSwimHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_GRAVITY_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectGravityHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_ANTIKNOCKBACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AntiKnockBack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_NO_FALL_DAMAGE_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.NoFallDamage", false);
+    m_bool_configs[CONFIG_ANTICHEAT_BG_START_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectBGStartHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.OpAckOrderHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_WRITELOG_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false);
     m_bool_configs[CONFIG_ANTICHEAT_AUTOKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", false);
     m_bool_configs[CONFIG_ANTICHEAT_ANNOUNCEKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AnnounceKick", false);

@@ -27,6 +27,7 @@ class AnticheatScripts: public PlayerScript
 
         void OnLogout(Player* player);
         void OnLogin(Player* player,bool);
+        void OnUpdate(Player* player, uint32 diff);
 };
 
 #endif

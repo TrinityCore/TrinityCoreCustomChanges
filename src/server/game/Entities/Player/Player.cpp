@@ -246,6 +246,7 @@ Player::Player(WorldSession* session): Unit(true)
     m_bHasDelayedTeleport = false;
     m_teleport_options = 0;
     m_canTeleport = false;
+    m_canKnockback = false;
     m_trade = nullptr;
 
     m_cinematic = 0;
@@ -1229,6 +1230,8 @@ void Player::Update(uint32 p_time)
         else
             m_zoneUpdateTimer -= p_time;
     }
+
+    sScriptMgr->OnPlayerUpdate(this, p_time);
 
     if (IsAlive())
     {

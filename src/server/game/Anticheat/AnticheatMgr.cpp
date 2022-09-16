@@ -936,108 +936,108 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
 
     switch (player->GetMapId())
     {
-    case 30: // Alterac Valley
-    {
-        if (Battleground* bg = player->GetBattleground())
+        case 30: // Alterac Valley
         {
-            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            if (Battleground* bg = player->GetBattleground())
             {
-                // Outside of starting area before BG has started.
-                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 770.0f)
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
-                    sAnticheatMgr->BGreport(player);
-                }
-                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -536.0f)
-                {
-                    sAnticheatMgr->BGreport(player);
+                    // Outside of starting area before BG has started.
+                    if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 770.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
+                    if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -536.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    case 489: // Warsong Gulch
-    {
-        // Only way to get this high is with engineering items malfunction.
-        if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
+        case 489: // Warsong Gulch
         {
-            sAnticheatMgr->BGreport(player);
-        }
+            // Only way to get this high is with engineering items malfunction.
+            if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
+            {
+                sAnticheatMgr->BGreport(player);
+            }
 
-        if (Battleground* bg = player->GetBattleground())
-        {
-            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            if (Battleground* bg = player->GetBattleground())
             {
-                // Outside of starting area before BG has started.
-                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1490.0f)
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
-                    sAnticheatMgr->BGreport(player);
-                }
-                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f)
-                {
-                    sAnticheatMgr->BGreport(player);
+                    // Outside of starting area before BG has started.
+                    if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1490.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
+                    if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    case 529: // Arathi Basin
-    {
-        if (Battleground* bg = player->GetBattleground())
+        case 529: // Arathi Basin
         {
-            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            if (Battleground* bg = player->GetBattleground())
             {
-                // Outside of starting area before BG has started.
-                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1270.0f)
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
-                    sAnticheatMgr->BGreport(player);
-                }
-                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f)
-                {
-                    sAnticheatMgr->BGreport(player);
+                    // Outside of starting area before BG has started.
+                    if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 1270.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
+                    if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    case 566: // Eye of the Storm
-    {
-        if (Battleground* bg = player->GetBattleground())
+        case 566: // Eye of the Storm
         {
-            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            if (Battleground* bg = player->GetBattleground())
             {
-                // Outside of starting area before BG has started.
-                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 2512.0f)
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
-                    sAnticheatMgr->BGreport(player);
-                }
-                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f)
-                {
-                    sAnticheatMgr->BGreport(player);
+                    // Outside of starting area before BG has started.
+                    if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() < 2512.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
+                    if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    case 628: // Island Of Conquest
-    {
-        if (Battleground* bg = player->GetBattleground())
+        case 628: // Island Of Conquest
         {
-            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            if (Battleground* bg = player->GetBattleground())
             {
-                // Outside of starting area before BG has started.
-                if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() > 412.0f)
+                if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
-                    sAnticheatMgr->BGreport(player);
-                }
-                if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f)
-                {
-                    sAnticheatMgr->BGreport(player);
+                    // Outside of starting area before BG has started.
+                    if (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionX() > 412.0f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
+                    if (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f)
+                    {
+                        sAnticheatMgr->BGreport(player);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    return;
+        return;
     }
 }
 

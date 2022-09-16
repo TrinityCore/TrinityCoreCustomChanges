@@ -3393,6 +3393,13 @@ Anticheat.OpAckOrderHack = 0
 
 Anticheat.StricterFlyHackCheck = 0
 
+#     Anticheat.StricterDetectJumpHack
+#       Description: Checks moveflag for advance stricter jump hacks (may give false positives)
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+
+Anticheat.StricterDetectJumpHack = 0
+
 #     Automatic Moderation Features
 #
 #     Anticheat.KickPlayer

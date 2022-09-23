@@ -232,7 +232,7 @@ public:
             // character ban info
             QueryResult resultCDB = CharacterDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             //                                                           0      1      2     3
-            QueryResult resultLDB = CharacterDatabase.PQuery("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountID='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultLDB = CharacterDatabase.PQuery("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
 
             handler->PSendSysMessage("|cFFFFA500-----------------------------------------------------------------");
             handler->PSendSysMessage("|cFF20B2AAInformation about player: |cffffff00%s", player->GetName().c_str());
@@ -298,7 +298,7 @@ public:
             // character ban info
             QueryResult resultCDB = CharacterDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = '%u' ORDER BY bandate ASC", player->GetConnectedPlayer()->GetSession()->GetAccountId());
             //                                                           0      1      2     3
-            QueryResult resultLDB = CharacterDatabase.PQuery("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountID='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
+            QueryResult resultLDB = CharacterDatabase.PQuery("SELECT accountId, type, time, data FROM account_data WHERE `data` LIKE '%%CastSpellByName%%' AND accountId ='%u'", player->GetConnectedPlayer()->GetSession()->GetAccountId());
 
             handler->PSendSysMessage("-----------------------------------------------------------------");
             handler->PSendSysMessage("Information about player %s", player->GetName().c_str());

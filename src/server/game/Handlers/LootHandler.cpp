@@ -83,18 +83,18 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         Creature* creature = GetPlayer()->GetMap()->GetCreature(lguid);
         if (!player->GetGroup() && creature && sConfigMgr->GetBoolDefault("AOE.LOOT.enable", true))
         {
-            int i = 0;
+            std::map<uint32, std::map<int32, uint32>> items;
+
             float range = 30.0f;
-            Creature* c = nullptr;
             std::vector<Creature*> creaturedie;
             player->GetDeadCreatureListInGrid(creaturedie, range);
             for (std::vector<Creature*>::iterator itr = creaturedie.begin(); itr != creaturedie.end(); ++itr)
             {
-                c = *itr;
+                Creature* c = *itr;
                 loot = &c->loot;
 
                 uint8 maxSlot = loot->GetMaxSlotInLootFor(player);
-                for (i = 0; i < maxSlot; ++i)
+                for (int i = 0; i < maxSlot; ++i)
                 {
                     if (LootItem* item = loot->LootItemInSlot(i, player))
                     {
@@ -105,8 +105,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
                         }
                         else
                         {
-                            player->SendItemRetrievalMail(item->itemid, item->count);
-                            player->GetSession()->SendAreaTriggerMessage("Your items has been mailed to you.");
+                            items[item->itemid][item->randomPropertyId] += item->count;
                         }
                     }
                 }
@@ -124,6 +123,33 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
                     c->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     c->AllLootRemovedFromCorpse();
                 }
+            }
+
+            if (!items.empty())
+            {
+                std::vector<std::tuple<uint32, uint32, int32>> itemsStacked;
+                for (auto& entryToData : items)
+                {
+                    for (auto& randomPropToCount : entryToData.second)
+                    {
+                        uint32 entry = entryToData.first;
+                        int32 randomPropertyId = randomPropToCount.first;
+                        uint32 count = randomPropToCount.second;
+                        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(entry);
+                        uint32 maxStack = itemTemplate->GetMaxStackSize();
+                        while (count > maxStack)
+                        {
+                            itemsStacked.push_back({ entry, maxStack, randomPropertyId });
+                            count -= maxStack;
+                        }
+                        if (count > 0)
+                        {
+                            itemsStacked.push_back({ entry, count, randomPropertyId });
+                        }
+                    }
+                }
+                player->SendItemRetrievalMail(itemsStacked);
+                player->GetSession()->SendAreaTriggerMessage("Your items have been mailed to you.");
             }
         }
         else

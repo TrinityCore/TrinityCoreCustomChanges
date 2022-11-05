@@ -4788,6 +4788,11 @@ void Spell::EffectTransmitted()
 
         ExecuteLogEffectSummonObject(effectInfo->EffectIndex, linkedTrap);
     }
+
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
 }
 
 void Spell::EffectProspecting()

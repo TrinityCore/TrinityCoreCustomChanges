@@ -1518,6 +1518,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN] = sConfigMgr->GetIntDefault("Anticheat.ReportinChat.Min", 70);
     m_int_configs[CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX] = sConfigMgr->GetIntDefault("Anticheat.ReportinChat.Max", 80);
 
+    m_int_configs[CONFIG_ANTICHEAT_SPEED_LIMIT_TOLERANCE] = sConfigMgr->GetIntDefault("Anticheat.SpeedLimitTolerance", 4);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_BANS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_KICKS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForJail", 70);

@@ -237,22 +237,32 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
-    // We did the (uint32) cast to accept a margin of tolerance
+    // we create a diff speed in uint32 for further precision checking to avoid legit fall and slide
+    uint32 diffspeed = clientSpeedRate - speedRate;
+
+    // create a conf to establish a speed limit tolerance over server rate set speed
+    // this is done so we can ignore minor violations that are not false positives such as going 1 or 2 over the speed limit
+    _assignedspeeddiff = sWorld->getIntConfig(CONFIG_ANTICHEAT_SPEED_LIMIT_TOLERANCE);
+
+    // We did the (uint32) cast to accept a margin of tolerance for seasonal spells and buffs such as sugar rush
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
-    if ((clientSpeedRate > speedRate * 1.05f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if ((diffspeed >= _assignedspeeddiff) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
-        if (!player->CanTeleport())
+        if ((clientSpeedRate > speedRate * 1.05f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
         {
-            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+            if (!player->CanTeleport())
             {
-                uint32 latency = 0;
-                latency = player->GetSession()->GetLatency();
-                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack (Speed Movement at %u above allowed Server Set rate %u.) detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", clientSpeedRate, speedRate, player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+                {
+                    uint32 latency = 0;
+                    latency = player->GetSession()->GetLatency();
+                    std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack (Speed Movement at %u above allowed Server Set rate %u.) detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", clientSpeedRate, speedRate, player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+                }
+                BuildReport(player, SPEED_HACK_REPORT);
             }
-            BuildReport(player, SPEED_HACK_REPORT);
+            return;
         }
-        return;
     }
 }
 

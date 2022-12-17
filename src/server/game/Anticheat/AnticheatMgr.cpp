@@ -228,11 +228,21 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
             TC_LOG_INFO("anticheat.module", "AnticheatMgr:: Time Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
         }
         BuildReport(player, SPEED_HACK_REPORT);
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        {
+            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Out of Order Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+        }
         timeDiff = 1;
     }
 
     if (!timeDiff)
+    {
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        {
+            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+        }
         timeDiff = 1;
+    }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1

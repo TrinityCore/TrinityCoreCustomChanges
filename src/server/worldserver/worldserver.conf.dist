@@ -3460,6 +3460,19 @@ Anticheat.AnnounceKick = 0
 Anticheat.AnnounceBan = 0
 Anticheat.AnnounceJail = 0
 
+
+#     Anticheat Counter Measures
+#
+#     Anticheat.BG.StartAreaTeleport
+#
+#       Description: Sends player back to start position if player cheats and teleports out of start spot
+#                    before the BG begins.
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#
+
+Anticheat.BG.StartAreaTeleport = 0
+
 # Anticheat Logging\Appenders
 # Currently spams into its own file
 # If you want world console spam just use Logger.anticheat=3,Console Server Anticheat

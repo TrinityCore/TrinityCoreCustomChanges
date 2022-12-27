@@ -261,7 +261,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
     if ((clientSpeedRate >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
-        if ((clientSpeedRate > speedRate * 1.05f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+        if ((clientSpeedRate >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
         {
             if (!player->CanTeleport())
             {

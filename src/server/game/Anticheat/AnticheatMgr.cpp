@@ -107,6 +107,10 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 
     // Dear future me. Please forgive me.
     // I can't even begin to express how sorry I am for this order
+    // If you bought this you have been scammed.
+    // Visit TC: https://discord.com/invite/HPP3wNh for help on the Open Source Anticheat
+    // The project compromised of various developers of the open source scene and we hang out there.
+    // We would never charge for modules or "lessons"
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
@@ -248,7 +252,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
     // we create a diff speed in uint32 for further precision checking to avoid legit fall and slide
-    uint32 diffspeed = clientSpeedRate - speedRate;
+    uint32 diffspeed = clientSpeedRate + speedRate;
 
     // create a conf to establish a speed limit tolerance over server rate set speed
     // this is done so we can ignore minor violations that are not false positives such as going 1 or 2 over the speed limit
@@ -256,7 +260,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 
     // We did the (uint32) cast to accept a margin of tolerance for seasonal spells and buffs such as sugar rush
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
-    if ((diffspeed >= _assignedspeeddiff) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if ((diffspeed >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
         if ((clientSpeedRate > speedRate * 1.05f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
         {

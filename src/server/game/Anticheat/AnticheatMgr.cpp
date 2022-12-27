@@ -252,7 +252,6 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
     // we create a diff speed in uint32 for further precision checking to avoid legit fall and slide
-    uint32 diffspeed = clientSpeedRate + speedRate;
 
     // create a conf to establish a speed limit tolerance over server rate set speed
     // this is done so we can ignore minor violations that are not false positives such as going 1 or 2 over the speed limit

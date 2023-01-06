@@ -520,7 +520,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     /* Dueling exploit detection*/
     if (player->duel)
     {
-        if ((xDiff >= 50.0f || yDiff >= 50.0f || (zDiff >= 10.0f && !player->IsFlying() && !player->IsFalling())) && !player->CanTeleport())
+        if (xDiff >= 50.0f || yDiff >= 50.0f)
         {
             Player* opponent = player->duel->Opponent;
 

@@ -512,7 +512,6 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
 
     float xDiff = fabs(lastX - newX);
     float yDiff = fabs(lastY - newY);
-    float zDiff = fabs(lastZ - newZ);
 
     if (player->IsFalling() || (player->IsFalling() && player->IsMounted()))
         return;

@@ -12882,7 +12882,10 @@ void Unit::SendTeleportPacket(Position const& pos, bool teleportingTransport /*=
             transportPos.Relocate(x, y, z, o);
         }
     }
-    ToPlayer()->SetCanTeleport(true);
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        ToPlayer()->SetCanTeleport(true);
+    }
     WorldPacket moveUpdateTeleport(MSG_MOVE_TELEPORT, 38);
     moveUpdateTeleport << GetPackGUID();
     Unit* broadcastSource = this;

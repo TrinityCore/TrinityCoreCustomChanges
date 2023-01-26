@@ -129,7 +129,7 @@ class TC_GAME_API AnticheatMgr
         uint32 _alertFrequency = 0;
         uint32 _assignedspeeddiff = 0;
         uint32 _updateCheckTimer = 4000;
-        uint32 m_MapId;
+        uint32 m_MapId = uint32(-1);
         std::array<Position, PVP_TEAMS_COUNT> _startPosition;
         Position const* GetTeamStartPosition(TeamId teamId) const;
         AnticheatPlayersDataMap m_Players;                        ///< Player data

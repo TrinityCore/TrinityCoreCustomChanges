@@ -261,21 +261,19 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
     if ((clientSpeedRate >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
-        if ((clientSpeedRate >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+
+        if (!player->CanTeleport())
         {
-            if (!player->CanTeleport())
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
             {
-                if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
-                {
-                    uint32 latency = 0;
-                    latency = player->GetSession()->GetLatency();
-                    std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                    TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack (Speed Movement at %u above allowed Server Set rate %u.) detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", clientSpeedRate, speedRate, player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
-                }
-                BuildReport(player, SPEED_HACK_REPORT);
+                uint32 latency = 0;
+                latency = player->GetSession()->GetLatency();
+                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack (Speed Movement at %u above allowed Server Set rate %u.) detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", clientSpeedRate, speedRate, player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
             }
-            return;
+            BuildReport(player, SPEED_HACK_REPORT);
         }
+        return;
     }
 }
 

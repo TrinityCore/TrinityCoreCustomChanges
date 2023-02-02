@@ -102,6 +102,9 @@ class TC_GAME_API AnticheatMgr
         void AnticheatDeleteCommand(uint32 guid);
         void AnticheatPurgeCommand(ChatHandler* handler);
         void ResetDailyReportStates();
+        void SetMapId(uint32 MapID) { m_MapId = MapID; }
+        [[nodiscard]] uint32 GetMapId() const { return m_MapId; }
+
     private:
         void SpeedHackDetection(Player* player, MovementInfo movementInfo);
         void FlyHackDetection(Player* player, MovementInfo movementInfo);
@@ -117,13 +120,18 @@ class TC_GAME_API AnticheatMgr
         void GravityHackDetection(Player* player, MovementInfo movementInfo);
         void NoFallDamageDetection(Player* player, MovementInfo movementInfo);
         void BGreport(Player* player);
+        void CheckStartPositions(Player* player);
         void BGStartExploit(Player* player, MovementInfo movementInfo);
         void BuildReport(Player* player,uint8 reportType);
 
         bool MustCheckTempReports(uint8 type);
         uint32 _counter = 0;
         uint32 _alertFrequency = 0;
+        uint32 _assignedspeeddiff = 0;
         uint32 _updateCheckTimer = 4000;
+        uint32 m_MapId = uint32(-1);
+        std::array<Position, PVP_TEAMS_COUNT> _startPosition;
+        Position const* GetTeamStartPosition(TeamId teamId) const;
         AnticheatPlayersDataMap m_Players;                        ///< Player data
 };
 

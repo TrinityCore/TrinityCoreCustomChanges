@@ -3400,6 +3400,17 @@ Anticheat.StricterFlyHackCheck = 0
 
 Anticheat.StricterDetectJumpHack = 0
 
+#     Anticheat.SpeedLimitTolerance
+#       Description: Speed Limit Tolerance allows a certain whole percentage of tolerance to speed 
+#       hack logging and detection.
+#
+#       Example: AnticheatMgr:: Speed-Hack (Speed Movement at 12% above allowed Server Set rate 8%.)
+#       will be detected since its 4 (default) and higher, but anything 3 and lower will not be flagged.
+#       Default:    4 - (Default)
+#
+
+Anticheat.SpeedLimitTolerance = 4
+
 #     Automatic Moderation Features
 #
 #     Anticheat.KickPlayer
@@ -3448,6 +3459,19 @@ Anticheat.ReportsForJail = 70
 Anticheat.AnnounceKick = 0
 Anticheat.AnnounceBan = 0
 Anticheat.AnnounceJail = 0
+
+
+#     Anticheat Counter Measures
+#
+#     Anticheat.BG.StartAreaTeleport
+#
+#       Description: Sends player back to start position if player cheats and teleports out of start spot
+#                    before the BG begins.
+#       Default:    0 - (Disabled)
+#                   1 - (Enabled)
+#
+
+Anticheat.BG.StartAreaTeleport = 0
 
 # Anticheat Logging\Appenders
 # Currently spams into its own file

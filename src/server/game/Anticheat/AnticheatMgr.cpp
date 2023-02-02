@@ -107,6 +107,10 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 
     // Dear future me. Please forgive me.
     // I can't even begin to express how sorry I am for this order
+    // If you bought this you have been scammed.
+    // Visit TC: https://discord.com/invite/HPP3wNh for help on the Open Source Anticheat
+    // The project compromised of various developers of the open source scene and we hang out there.
+    // We would never charge for modules or "lessons"
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
@@ -228,19 +232,36 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
             TC_LOG_INFO("anticheat.module", "AnticheatMgr:: Time Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
         }
         BuildReport(player, SPEED_HACK_REPORT);
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        {
+            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Out of Order Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+        }
         timeDiff = 1;
     }
 
     if (!timeDiff)
+    {
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        {
+            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+        }
         timeDiff = 1;
+    }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
     uint32 clientSpeedRate = distance2D * 1000 / timeDiff; // Only Chuck Norris can divide by zero so we divide by 1
 
-    // We did the (uint32) cast to accept a margin of tolerance
+    // we create a diff speed in uint32 for further precision checking to avoid legit fall and slide
+
+    // create a conf to establish a speed limit tolerance over server rate set speed
+    // this is done so we can ignore minor violations that are not false positives such as going 1 or 2 over the speed limit
+    _assignedspeeddiff = sWorld->getIntConfig(CONFIG_ANTICHEAT_SPEED_LIMIT_TOLERANCE);
+
+    // We did the (uint32) cast to accept a margin of tolerance for seasonal spells and buffs such as sugar rush
     // We check the last MovementInfo for the falling flag since falling down a hill and sliding a bit triggered a false positive
-    if ((clientSpeedRate > speedRate * 1.05f) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if ((clientSpeedRate >= _assignedspeeddiff + speedRate) && !m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
+
         if (!player->CanTeleport())
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
@@ -330,6 +351,10 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
     else if (no_fly_auras && no_fly_flags && no_swim_water)
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ADV_JUMPHACK_ENABLE))
+            return;
+
+        //Celestial Planetarium Observer Battle has a narrow path that false flags
+        if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
             return;
 
         if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && !player->IsFalling())
@@ -480,12 +505,8 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
     float newY = movementInfo.pos.GetPositionY();
 
-    float lastZ = m_Players[key].GetLastMovementInfo().pos.GetPositionZ();
-    float newZ = movementInfo.pos.GetPositionZ();
-
     float xDiff = fabs(lastX - newX);
     float yDiff = fabs(lastY - newY);
-    float zDiff = fabs(lastZ - newZ);
 
     if (player->IsFalling() || (player->IsFalling() && player->IsMounted()))
         return;
@@ -493,7 +514,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     /* Dueling exploit detection*/
     if (player->duel)
     {
-        if ((xDiff >= 50.0f || yDiff >= 50.0f || (zDiff >= 10.0f && !player->IsFlying() && !player->IsFalling())) && !player->CanTeleport())
+        if ((xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport() && !player->IsBeingTeleported())
         {
             Player* opponent = player->duel->Opponent;
 
@@ -521,7 +542,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
             player->SetCanTeleport(false);
     }
     /* Please work */
-    if ((xDiff >= 50.0f || yDiff >= 50.0f || (zDiff >= 10.0f && !player->IsFlying() && !player->IsFalling())) && !player->CanTeleport())// teleport helpers in play
+    if ((xDiff >= 50.0f || yDiff >= 50.0f) && !player->CanTeleport() && !player->IsBeingTeleported())// teleport helpers in play
     {
         if (m_Players[key].GetTotalReports() > sWorld->getIntConfig(CONFIG_ANTICHEAT_REPORTS_INGAME_NOTIFICATION))
         {// we do this because we can not get the collumn count being propper when we add more collumns for the report, so we make a indvidual warning for Teleport Hack
@@ -933,6 +954,30 @@ void AnticheatMgr::BGreport(Player* player)
     BuildReport(player, TELEPORT_HACK_REPORT);
 }
 
+Position const* AnticheatMgr::GetTeamStartPosition(TeamId teamId) const
+{
+    return &_startPosition[teamId];
+}
+
+void AnticheatMgr::CheckStartPositions(Player* player)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE))
+        return;
+
+    Position pos = player->GetPosition();
+    Position const* startPos = GetTeamStartPosition(Battleground::GetTeamIndexByTeamId(player->GetBGTeam()));
+
+    if (pos.GetExactDistSq(!startPos))
+    {
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        {
+            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit)", player->GetName().c_str(), player->GetMapId());
+        }
+        player->TeleportTo(player->GetMapId(), startPos->GetPositionX(), startPos->GetPositionY(), startPos->GetPositionZ(), startPos->GetOrientation());
+    }
+
+}
+
 void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_HACK_ENABLE))
@@ -954,12 +999,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < -525.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
-                    if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -536.0f) ||
+                    if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -535.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > -1283.33f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -716.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                 }
             }
@@ -971,6 +1018,7 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
             if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
             {
                 sAnticheatMgr->BGreport(player);
+                sAnticheatMgr->CheckStartPositions(player);
             }
 
             if (Battleground* bg = player->GetBattleground())
@@ -983,12 +1031,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1450.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1416.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1466.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                 }
             }
@@ -1006,11 +1056,13 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 1361.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 724.8f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                 }
             }
@@ -1028,12 +1080,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1584.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1554.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1526.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                 }
             }
@@ -1051,12 +1105,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > -760.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -855.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -676.0f))
                     {
                         sAnticheatMgr->BGreport(player);
+                        sAnticheatMgr->CheckStartPositions(player);
                     }
                 }
             }

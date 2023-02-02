@@ -1505,6 +1505,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ANTICHEAT_ANTIKNOCKBACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AntiKnockBack", false);
     m_bool_configs[CONFIG_ANTICHEAT_NO_FALL_DAMAGE_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.NoFallDamage", false);
     m_bool_configs[CONFIG_ANTICHEAT_BG_START_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectBGStartHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.BG.StartAreaTeleport", false);
     m_bool_configs[CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.OpAckOrderHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_WRITELOG_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false);
     m_bool_configs[CONFIG_ANTICHEAT_AUTOKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", false);
@@ -1518,6 +1519,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTICHEAT_REPORT_IN_CHAT_MIN] = sConfigMgr->GetIntDefault("Anticheat.ReportinChat.Min", 70);
     m_int_configs[CONFIG_ANTICHEAT_REPORT_IN_CHAT_MAX] = sConfigMgr->GetIntDefault("Anticheat.ReportinChat.Max", 80);
 
+    m_int_configs[CONFIG_ANTICHEAT_SPEED_LIMIT_TOLERANCE] = sConfigMgr->GetIntDefault("Anticheat.SpeedLimitTolerance", 4);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_BANS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForBan", 70);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_KICKS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForKick", 70);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_JAILS] = sConfigMgr->GetIntDefault("Anticheat.ReportsForJail", 70);

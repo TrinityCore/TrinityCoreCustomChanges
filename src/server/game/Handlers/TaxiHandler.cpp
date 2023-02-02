@@ -114,6 +114,9 @@ void WorldSession::SendTaxiMenu(Creature* unit)
 
 void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode)
 {
+    // add anticheat helper here to avoid false hits if relog during flight path travel
+    GetPlayer()->SetCanTeleport(true);
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);

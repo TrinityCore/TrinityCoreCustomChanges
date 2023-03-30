@@ -36,6 +36,7 @@ constexpr auto LANG_ANTICHEAT_TELEPORT = 30088;
 constexpr auto LANG_ANTICHEAT_IGNORECONTROL = 30089;
 constexpr auto LANG_ANTICHEAT_DUEL = 30090;
 constexpr auto LANG_ANTICHEAT_BG_EXPLOIT = 30091;
+constexpr auto LANG_ANTICHEAT_COUNTERMEASURE = 30092;
 
 // Time between server sends acknowledgement, and client is actually acknowledged
 constexpr auto ALLOWED_ACK_LAG = 2000;
@@ -223,29 +224,50 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 
     // Ah ah ah! You'll never understand why this one works. Or will you?
     // This covers packet manipulation
-    if (int32(timeDiff) < 0)
+    if (int32(timeDiff) < 0 && sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_TIMEMANIPULATION))
     {
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
         {
             uint32 latency = player->GetSession()->GetLatency();
             std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-            TC_LOG_INFO("anticheat.module", "AnticheatMgr:: Time Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Time Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
         }
-        BuildReport(player, SPEED_HACK_REPORT);
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
+        {   // display warning at the center of the screen, hacky way?
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
+        }
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
         {
-            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Out of Order Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+            std::string str = "|cFFFFFC00 TIME MANIPULATION COUNTER MEASURE ALERT";
+            sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
         }
         timeDiff = 1;
+        BuildReport(player, SPEED_HACK_REPORT);
     }
 
-    if (!timeDiff)
+    if (!timeDiff && sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_TIMEMANIPULATION))
     {
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
         {
-            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+        }
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
+        {   // display warning at the center of the screen, hacky way?
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
+            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+            data << str;
+            sWorld->SendGlobalGMMessage(&data);
+        }
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
+        {
+            std::string str = "|cFFFFFC00 TIME MANIPULATION COUNTER MEASURE ALERT";
+            sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
         }
         timeDiff = 1;
+        BuildReport(player, SPEED_HACK_REPORT);
     }
 
     // this is the distance doable by the player in 1 sec, using the time done to move to this point.
@@ -315,6 +337,35 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
         std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
         TC_LOG_INFO("anticheat", "AnticheatMgr:: Fly-Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
     }
+    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_FLYHACK))
+    {   // display warning at the center of the screen, hacky way?
+        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] FLY HACK COUNTER MEASURE ALERT";
+        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+        data << str;
+        sWorld->SendGlobalGMMessage(&data);
+
+        // Drop them with a op code set if they use a exploit or hack app
+        Player* cheatertarget = player->GetSession()->GetPlayer();
+
+        WorldPacket cheater(12);
+        cheater.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
+
+        cheater << cheatertarget->GetPackGUID();
+        cheater << uint32(0);
+        cheatertarget->SendMessageToSet(&cheater, true);
+
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
+        {
+            std::string str = "|cFFFFFC00 FLY HACK COUNTER MEASURE ALERT";
+            sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
+        }
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
+        {
+            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Fly Hack detected player %s (%s) - SMSG_MOVE_UNSET_CAN_FLY Set ", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+        }
+        BuildReport(player, FLY_HACK_REPORT);
+    }
+
     BuildReport(player, FLY_HACK_REPORT);
 }
 
@@ -505,6 +556,9 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     float lastY = m_Players[key].GetLastMovementInfo().pos.GetPositionY();
     float newY = movementInfo.pos.GetPositionY();
 
+    float lastZ = m_Players[key].GetLastMovementInfo().pos.GetPositionZ();
+    float newZ = movementInfo.pos.GetPositionZ();
+
     float xDiff = fabs(lastX - newX);
     float yDiff = fabs(lastY - newY);
 
@@ -571,8 +625,29 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         {
             uint32 latency = 0;
             latency = player->GetSession()->GetLatency();
-            std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+            std::string goXYZ = ".go xyz " + std::to_string(newX) + " " + std::to_string(newY) + " " + std::to_string(newZ + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
             TC_LOG_INFO("anticheat", "AnticheatMgr:: Teleport-Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+        }
+        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_TELEPORT))
+        {
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
+            {
+                std::string LastgoXYZ = ".go xyz " + std::to_string(lastX) + " " + std::to_string(lastY) + " " + std::to_string(lastZ + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: %s TELEPORT HACK REVERTED PLAYER BACK TO %s", player->GetName().c_str(), LastgoXYZ.c_str());
+            }
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
+            {   // display warning at the center of the screen, hacky way?
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] TELEPORT COUNTER MEASURE ALERT";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+            }
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
+            {
+                std::string str = "|cFFFFFC00 TELEPORT COUNTER MEASURE ALERT";
+                sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
+            }
+            player->TeleportTo(player->GetMapId(), lastX, lastY, lastZ, player->GetOrientation());
         }
         BuildReport(player, TELEPORT_HACK_REPORT);
     }
@@ -863,7 +938,7 @@ void AnticheatMgr::AntiKnockBackHackDetection(Player* player, MovementInfo movem
             uint32 latency = 0;
             latency = player->GetSession()->GetLatency();
             std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-            TC_LOG_INFO("anticheat.module", "AnticheatMgr:: Anti-Knock Back - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+            TC_LOG_INFO("anticheat", "AnticheatMgr:: Anti-Knock Back - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
         }
         BuildReport(player, ANTIKNOCK_BACK_HACK_REPORT);
     }
@@ -910,7 +985,7 @@ void AnticheatMgr::NoFallDamageDetection(Player* player, MovementInfo movementIn
                     uint32 latency = 0;
                     latency = player->GetSession()->GetLatency();
                     std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                    TC_LOG_INFO("anticheat.module", "AnticheatMgr:: No Fall Damage - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+                    TC_LOG_INFO("anticheat", "AnticheatMgr:: No Fall Damage - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
                 }
                 BuildReport(player, NO_FALL_DAMAGE_HACK_REPORT);
             }
@@ -948,7 +1023,7 @@ void AnticheatMgr::BGreport(Player* player)
         uint32 latency = 0;
         latency = player->GetSession()->GetLatency();
         std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-        TC_LOG_INFO("anticheat.module", "AnticheatMgr:: BG Start Spot Exploit-Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: BG Start Spot Exploit-Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
     }
 
     BuildReport(player, TELEPORT_HACK_REPORT);
@@ -967,13 +1042,28 @@ void AnticheatMgr::CheckStartPositions(Player* player)
     Position pos = player->GetPosition();
     Position const* startPos = GetTeamStartPosition(Battleground::GetTeamIndexByTeamId(player->GetBGTeam()));
 
-    if (pos.GetExactDistSq(!startPos))
+    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE))
     {
-        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))
+        if (pos.GetExactDistSq(!startPos))
         {
-            TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit)", player->GetName().c_str(), player->GetMapId());
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
+            {
+                TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit)", player->GetName().c_str(), player->GetMapId());
+            }
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
+            {   // display warning at the center of the screen, hacky way?
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] BG START SPOT COUNTER MEASURE ALERT";
+                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+                data << str;
+                sWorld->SendGlobalGMMessage(&data);
+            }
+            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
+            {
+                std::string str = "|cFFFFFC00 BG START SPOT COUNTER MEASURE ALERT";
+                sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
+            }
+            player->TeleportTo(player->GetMapId(), startPos->GetPositionX(), startPos->GetPositionY(), startPos->GetPositionZ(), startPos->GetOrientation());
         }
-        player->TeleportTo(player->GetMapId(), startPos->GetPositionX(), startPos->GetPositionY(), startPos->GetPositionZ(), startPos->GetOrientation());
     }
 
 }
@@ -1175,7 +1265,7 @@ void AnticheatMgr::DoActions(Player* player)
                 uint32 latency = 0;
                 latency = player->GetSession()->GetLatency();
                 std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                TC_LOG_INFO("anticheat.module", "AnticheatMgr:: OP Ack Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
+                TC_LOG_INFO("anticheat", "AnticheatMgr:: OP Ack Manipulation - Hack detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
                 order.counter = 0;
             }
             BuildReport(player, OP_ACK_HACK_REPORT);
@@ -1439,7 +1529,12 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             data << str;
             sWorld->SendGlobalGMMessage(&data);
             // This is where they end up going shaw shank redemption style
+            // GM Jail Location is uncommit and used as default for the jailing. Feel free to commit it out with double forward slashes (//) and uncommit,
+            // removing the double forward slashes (//) if you wish to use the other locations.
             WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+            //WorldLocation loc = WorldLocation(35, -98.0155, 149.8360,-40.3827, 3.2f);// Alliance Jail Stormwind Stockade Location
+            //WorldLocation loc = WorldLocation(0, -11139.1845, -1742.4421, -29.7365, 3.2f);// Horde Jail The Pit of Criminals Location
+
             player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
             player->SetHomebind(loc, 876);// GM Jail Homebind location
             player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt

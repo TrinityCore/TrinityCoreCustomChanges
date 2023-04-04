@@ -1511,6 +1511,10 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ANTICHEAT_CM_FLYHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.FLYHACK", false);
     m_bool_configs[CONFIG_ANTICHEAT_CM_TELEPORT] = sConfigMgr->GetBoolDefault("Anticheat.CM.Teleport", false);
     m_bool_configs[CONFIG_ANTICHEAT_BG_StartAreaTeleport] = sConfigMgr->GetBoolDefault("Anticheat.BG.StartAreaTeleport", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_SPEEDHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.SPEEDHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_JUMPHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.JUMPHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_ADVJUMPHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.ADVJUMPHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_IGNOREZ] = sConfigMgr->GetBoolDefault("Anticheat.CM.IGNOREZ", false);
     m_bool_configs[CONFIG_ANTICHEAT_CM_WRITELOG] = sConfigMgr->GetBoolDefault("Anticheat.CM.WriteLog", false);
     m_bool_configs[CONFIG_ANTICHEAT_CM_ALERTSCREEN] = sConfigMgr->GetBoolDefault("Anticheat.CM.ALERTSCREEN", false);
     m_bool_configs[CONFIG_ANTICHEAT_CM_ALERTCHAT] = sConfigMgr->GetBoolDefault("Anticheat.CM.ALERTCHAT", false);

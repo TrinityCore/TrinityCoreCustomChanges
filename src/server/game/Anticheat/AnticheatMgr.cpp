@@ -309,7 +309,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
                 BuildReport(player, SPEED_HACK_REPORT);
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
                 {
-                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: {} Speed Hack Countered and has been set to Server Rate.", player->GetName().c_str());
+                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Speed Hack Countered and has been set to Server Rate.", player->GetName().c_str());
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?

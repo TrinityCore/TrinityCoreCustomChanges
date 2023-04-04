@@ -441,7 +441,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
 
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
             {
-                TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: {} JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
+                TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?
@@ -508,7 +508,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
 
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
                 {
-                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: {} ADVANCE JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
+                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s ADVANCE JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?

@@ -21,7 +21,7 @@
 #include "AnticheatMgr.h"
 #include "Player.h"
 
-#define MAX_REPORT_TYPES 14
+#define MAX_REPORT_TYPES 15
 
 class AnticheatData
 {

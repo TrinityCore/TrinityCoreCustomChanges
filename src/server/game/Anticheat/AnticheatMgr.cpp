@@ -461,10 +461,6 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ADV_JUMPHACK_ENABLE))
             return;
 
-        //Celestial Planetarium Observer Battle has a narrow path that false flags
-        if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
-            return;
-
         if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && !player->IsFalling())
             return;
 
@@ -482,6 +478,10 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
         {
             return;
         }
+
+        //Celestial Planetarium Observer Battle has a narrow path that false flags
+        if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
+            return;
 
         if (ground_Z > 5.0f && movementInfo.pos.GetPositionZ() >= player->GetPositionZ())
         {
@@ -541,10 +541,6 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (!distance2D)
         return;
 
-    //Celestial Planetarium Observer Battle has a narrow path that false flags
-    if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
-        return;
-
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP)
         return;
 
@@ -559,6 +555,10 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     // If he is flying we dont need to check
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
+        return;
+
+    //Celestial Planetarium Observer Battle has a narrow path that false flags
+    if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
         return;
 
     float pos_z = player->GetPositionZ();
@@ -888,17 +888,17 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING) || player->IsInWater() || !player->IsAlive())
        return;
 
+   // We want to exclude this LiquidStatus from detection because it leads to false positives on boats, docks etc.
+   // Basically everytime you stand on a game object in water
+   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
+       return;
+
    //Celestial Planetarium Observer Battle has a narrow path that false flags
    if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
        return;
 
    //Ring of Judgement
    if (player && GetWMOAreaTableEntryByTripple(4932, 0, 22984))
-       return;
-
-   // We want to exclude this LiquidStatus from detection because it leads to false positives on boats, docks etc.
-   // Basically everytime you stand on a game object in water
-   if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
        return;
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +2.5 of the ground

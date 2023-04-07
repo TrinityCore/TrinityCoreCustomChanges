@@ -377,14 +377,12 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
         sWorld->SendGlobalGMMessage(&data);
 
         // Drop them with a op code set if they use a exploit or hack app
-        Player* cheatertarget = player->GetSession()->GetPlayer();
-
         WorldPacket cheater(12);
         cheater.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
 
-        cheater << cheatertarget->GetPackGUID();
+        cheater << player->GetPackGUID();
         cheater << uint32(0);
-        cheatertarget->SendMessageToSet(&cheater, true);
+        player->SendMessageToSet(&cheater, true);
 
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
         {
@@ -436,9 +434,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
             data << str;
             sWorld->SendGlobalGMMessage(&data);
 
-            Player* cheatertarget = player->GetSession()->GetPlayer();
-
-            cheatertarget->GetMotionMaster()->MoveFallPlayer();
+            player->GetMotionMaster()->MoveFallPlayer();
 
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
             {
@@ -503,9 +499,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
 
-                Player* cheatertarget = player->GetSession()->GetPlayer();
-
-                cheatertarget->GetMotionMaster()->MoveFallPlayer();
+                player->GetMotionMaster()->MoveFallPlayer();
 
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
                 {
@@ -948,9 +942,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
            data << str;
            sWorld->SendGlobalGMMessage(&data);
 
-           Player* cheatertarget = player->GetSession()->GetPlayer();
-
-           cheatertarget->GetMotionMaster()->MoveFallPlayer();
+           player->GetMotionMaster()->MoveFallPlayer();
 
            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
            {

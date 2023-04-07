@@ -973,7 +973,7 @@ void MotionMaster::MoveFall(uint32 id/* = 0*/)
     Add(movement);
 }
 
-// Created a new method per advise from jackpoz instead of modifying the above
+// Created a new method per advice to avoid any unforseen issue with MoveFall()
 void MotionMaster::MoveFallPlayer(uint32 id/* = 0*/)
 {
     // Use larger distance for vmap height search than in most other cases

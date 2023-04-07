@@ -503,7 +503,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
 
-                Unit* cheatertarget = player->GetSession()->GetPlayer();
+                Player* cheatertarget = player->GetSession()->GetPlayer();
 
                 cheatertarget->GetMotionMaster()->MoveFallPlayer();
 

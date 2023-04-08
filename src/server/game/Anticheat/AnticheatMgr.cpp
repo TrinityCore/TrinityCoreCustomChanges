@@ -296,12 +296,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Speed-Hack (Speed Movement at %u above allowed Server Set rate %u.) detected player %s (%s) - Latency: %u ms - Cheat Flagged at: %s", clientSpeedRate, speedRate, player->GetName().c_str(), player->GetGUID().ToString().c_str(), latency, goXYZ.c_str());
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_SPEEDHACK))
-            {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] SPEED HACK COUNTER MEASURE ALERT";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
-
+            {
                 if (Aura* slowcheater = player->AddAura(SLOWDOWN, player))// SLOWDOWN
                 {
                     slowcheater->SetDuration(1000);

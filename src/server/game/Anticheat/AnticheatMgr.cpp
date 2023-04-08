@@ -254,7 +254,8 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     {
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
         {
-            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation)", player->GetName().c_str(), player->GetMapId());
+            std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: %s Time Diff Corrected(Map: %u) (possible Zero Time Manipulation) - Flagged at: %s", player->GetName().c_str(), player->GetMapId(), goXYZ.c_str());
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
         {   // display warning at the center of the screen, hacky way?
@@ -304,7 +305,8 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
                 BuildReport(player, SPEED_HACK_REPORT);
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
                 {
-                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Speed Hack Countered and has been set to Server Rate.", player->GetName().c_str());
+                    std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s Speed Hack Countered and has been set to Server Rate - Flagged at: %s", player->GetName().c_str(), goXYZ.c_str());
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?
@@ -386,7 +388,8 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
         {
-            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Fly Hack detected player %s (%s) - SMSG_MOVE_UNSET_CAN_FLY Set ", player->GetName().c_str(), player->GetGUID().ToString().c_str());
+            std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+            TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Fly Hack detected player %s (%s) - SMSG_MOVE_UNSET_CAN_FLY Set - Flagged at: %s", player->GetName().c_str(), player->GetGUID().ToString().c_str(), goXYZ.c_str());
         }
         BuildReport(player, COUNTER_MEASURES_REPORT);
     }
@@ -433,7 +436,8 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
 
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
             {
-                TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
+                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s JUMP Hack Countered and has been set to fall - Flagged at: %s", player->GetName().c_str(), goXYZ.c_str());
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?
@@ -498,7 +502,8 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
 
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
                 {
-                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s ADVANCE JUMP Hack Countered and has been set to fall.", player->GetName().c_str());
+                    std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                    TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s ADVANCE JUMP Hack Countered and has been set to fall - Flagged at: %s", player->GetName().c_str(), goXYZ.c_str());
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?
@@ -941,7 +946,8 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
 
            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
            {
-               TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s IGNORE-Z Hack Countered and has been set to fall.", player->GetName().c_str());
+               std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+               TC_LOG_INFO("anticheat.module", "ANTICHEAT COUNTER MEASURE:: %s IGNORE-Z Hack Countered and has been set to fall - Flagged at: %s", player->GetName().c_str(), goXYZ.c_str());
            }
            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
            {   // display warning at the center of the screen, hacky way?
@@ -1158,7 +1164,8 @@ void AnticheatMgr::CheckStartPositions(Player* player)
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
             {
-                TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit)", player->GetName().c_str(), player->GetMapId());
+                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit) - Flagged at: %s", player->GetName().c_str(), player->GetMapId(), goXYZ.c_str());
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?

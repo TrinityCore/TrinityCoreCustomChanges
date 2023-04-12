@@ -656,7 +656,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
         {
             Player* opponent = player->duel->Opponent;
 
-            std::string str = "|cFFFFFC00[DUEL ALERT Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible Teleport Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
+            std::string str = "|cFFFFFC00[DUEL ALERT Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Possible Teleport Hack Detected! While Dueling [|cFF60FF00" + std::string(opponent->GetName().c_str()) + "|cFF00FFFF]";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -1554,7 +1554,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         if (++_counter % _alertFrequency == 0)
         {
             // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName().c_str()) + "|cFF00FFFF] Possible cheater!";
+            std::string str = "|cFFFFFC00[Playername:]|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Possible cheater!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);

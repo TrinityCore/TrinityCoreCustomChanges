@@ -236,7 +236,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
         {   // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -259,7 +259,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
         {   // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] TIME MANIPULATION COUNTER MEASURE ALERT";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -310,7 +310,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?
-                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] SPEED HACK COUNTER MEASURE ALERT";
+                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] SPEED HACK COUNTER MEASURE ALERT";
                     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                     data << str;
                     sWorld->SendGlobalGMMessage(&data);
@@ -368,7 +368,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
     }
     if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_FLYHACK))
     {   // display warning at the center of the screen, hacky way?
-        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] FLY HACK COUNTER MEASURE ALERT";
+        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] FLY HACK COUNTER MEASURE ALERT";
         WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
@@ -427,7 +427,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
         }
         if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_JUMPHACK))
         {   // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] JUMP HACK COUNTER MEASURE ALERT";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] JUMP HACK COUNTER MEASURE ALERT";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -441,7 +441,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] JUMP HACK COUNTER MEASURE ALERT";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] JUMP HACK COUNTER MEASURE ALERT";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -493,7 +493,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ADVJUMPHACK))
             {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] ADVANCE JUMP HACK COUNTER MEASURE ALERT";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] ADVANCE JUMP HACK COUNTER MEASURE ALERT";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -507,7 +507,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
                 }
                 if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
                 {   // display warning at the center of the screen, hacky way?
-                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] ADVANCE JUMP HACK COUNTER MEASURE ALERT";
+                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] ADVANCE JUMP HACK COUNTER MEASURE ALERT";
                     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                     data << str;
                     sWorld->SendGlobalGMMessage(&data);
@@ -691,7 +691,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
             if (++_counter % _alertFrequency == 0)
             {
                 // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Possible Teleport Hack Detected!";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Possible Teleport Hack Detected!";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -721,7 +721,7 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] TELEPORT COUNTER MEASURE ALERT";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] TELEPORT COUNTER MEASURE ALERT";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -780,7 +780,7 @@ void AnticheatMgr::IgnoreControlHackDetection(Player* player, MovementInfo movem
                 if (++_counter % _alertFrequency == 0)
                 {
                     // display warning at the center of the screen, hacky way?
-                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
+                    std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Possible Ignore Control Hack Detected!";
                     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                     data << str;
                     sWorld->SendGlobalGMMessage(&data);
@@ -914,7 +914,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
            if (++_counter % _alertFrequency == 0)
            {
                 // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Possible Ignore Zaxis Hack Detected!";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -937,7 +937,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
        }
        if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_IGNOREZ))
        {   // display warning at the center of the screen, hacky way?
-           std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] IGNORE-Z HACK COUNTER MEASURE ALERT";
+           std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] IGNORE-Z HACK COUNTER MEASURE ALERT";
            WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
            data << str;
            sWorld->SendGlobalGMMessage(&data);
@@ -951,7 +951,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
            }
            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
            {   // display warning at the center of the screen, hacky way?
-               std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] AIGNORE-Z HACK COUNTER MEASURE ALERT";
+               std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] AIGNORE-Z HACK COUNTER MEASURE ALERT";
                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                data << str;
                sWorld->SendGlobalGMMessage(&data);
@@ -1120,7 +1120,7 @@ void AnticheatMgr::BGreport(Player* player)
     if (++_counter % _alertFrequency == 0)
     {
         // display warning at the center of the screen, hacky way?
-        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Player Outside of Starting SPOT before BG has started!";
+        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Player Outside of Starting SPOT before BG has started!";
         WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
@@ -1169,7 +1169,7 @@ void AnticheatMgr::CheckStartPositions(Player* player)
             }
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
             {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] BG START SPOT COUNTER MEASURE ALERT";
+                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] BG START SPOT COUNTER MEASURE ALERT";
                 WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                 data << str;
                 sWorld->SendGlobalGMMessage(&data);
@@ -1579,7 +1579,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by kicking player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Auto Kicked for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Auto Kicked for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -1609,7 +1609,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by banning player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Auto Banned Account for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Auto Banned Account for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
@@ -1641,7 +1641,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
                 TC_LOG_INFO("anticheat", "AnticheatMgr:: Reports reached assigned threshhold and counteracted by jailing player %s (%s)", player->GetName().c_str(), player->GetGUID().ToString().c_str());
             }
             // display warning at the center of the screen, hacky way?
-            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Auto Jailed Account for Reaching Cheat Threshhold!";
+            std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] Auto Jailed Account for Reaching Cheat Threshhold!";
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);

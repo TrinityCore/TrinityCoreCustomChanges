@@ -478,9 +478,16 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
             return;
         }
 
-        //Celestial Planetarium Observer Battle has a narrow path that false flags
-        if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
-            return;
+        // We exempt select areas found in 335 to prevent false hack hits
+        if (player->GetAreaId())
+        {
+            switch (player->GetAreaId())
+            {
+                case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
+                    return;
+            }
+        }
+
 
         if (ground_Z > 5.0f && movementInfo.pos.GetPositionZ() >= player->GetPositionZ())
         {
@@ -557,9 +564,15 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))
         return;
 
-    //Celestial Planetarium Observer Battle has a narrow path that false flags
-    if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
-        return;
+    // We exempt select areas found in 335 to prevent false hack hits
+    if (player->GetAreaId())
+    {
+        switch (player->GetAreaId())
+        {
+            case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
+                return;
+        }
+    }
 
     float pos_z = player->GetPositionZ();
     float ground_Z = player->GetFloorZ();
@@ -932,9 +945,18 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
        return;
 
-   //Celestial Planetarium Observer Battle has a narrow path that false flags
-   if (player && GetWMOAreaTableEntryByTripple(5202, 0, 24083))
-       return;
+   // We exempt select areas found in 335 to prevent false hack hits
+   if (player->GetAreaId())
+   {
+       switch (player->GetAreaId())
+       {
+            case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
+            case 495:  //Ring of Judgement just being in the area false flags
+            case 4161: //Wymrest Temple just being in the area false flags
+                return;
+       }
+   }
+
 
    //Ring of Judgement
    if (player && GetWMOAreaTableEntryByTripple(4932, 0, 22984))

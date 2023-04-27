@@ -957,7 +957,6 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
        }
    }
 
-
    //Ring of Judgement
    if (player && GetWMOAreaTableEntryByTripple(4932, 0, 22984))
        return;

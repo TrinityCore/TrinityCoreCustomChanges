@@ -488,7 +488,6 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
             }
         }
 
-
         if (ground_Z > 5.0f && movementInfo.pos.GetPositionZ() >= player->GetPositionZ())
         {
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_WRITELOG_ENABLE))

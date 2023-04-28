@@ -12780,7 +12780,10 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     GetMotionMaster()->LaunchMoveSpline(std::move(initializer), EVENT_VEHICLE_EXIT, MOTION_PRIORITY_HIGHEST);
 
     if (player)
+    {
+        player->SetCanTeleport(true);
         player->ResummonPetTemporaryUnSummonedIfAny();
+    }
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION) && vehicle->GetBase()->GetTypeId() == TYPEID_UNIT)
         if (((Minion*)vehicle->GetBase())->GetOwner() == this)

@@ -952,6 +952,9 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
             case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
             case 495:  //Ring of Judgement just being in the area false flags
             case 4161: //Wymrest Temple just being in the area false flags
+            case 10: // Duskwood bridge
+            case 40: // Westfall bridge
+            case 321: // Hammerfall wooden balcony
                 return;
        }
    }

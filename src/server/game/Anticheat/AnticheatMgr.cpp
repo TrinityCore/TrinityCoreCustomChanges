@@ -114,9 +114,9 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     // Visit TC: https://discord.com/invite/HPP3wNh for help on the Open Source Anticheat
     // The project compromised of various developers of the open source scene and we hang out there.
     // We would never charge for modules or "lessons"
-    TeleportHackDetection(player, movementInfo);
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
+    TeleportHackDetection(player, movementInfo);
     JumpHackDetection(player, movementInfo, opcode);
     TeleportPlaneHackDetection(player, movementInfo, opcode);
     ClimbHackDetection(player, movementInfo, opcode);

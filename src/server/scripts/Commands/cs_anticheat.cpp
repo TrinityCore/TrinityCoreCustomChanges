@@ -221,6 +221,7 @@ public:
         uint32 antiknockback_reports = sAnticheatMgr->GetTypeReports(guid, 11);
         uint32 no_fall_damage_reports = sAnticheatMgr->GetTypeReports(guid, 12);
         uint32 op_ack_reports = sAnticheatMgr->GetTypeReports(guid, 13);
+        uint32 counter_measures_reports = sAnticheatMgr->GetTypeReports(guid, 14);
 
         uint32 latency = 0;
         latency = player->GetConnectedPlayer()->GetSession()->GetLatency();
@@ -282,6 +283,7 @@ public:
             {
                 handler->PSendSysMessage("|cffff0000Macro Requiring Lua unlock Detected: |cffffff00No");
             }
+            handler->PSendSysMessage("|cffff0000Counter Measures Deployed: |cffffff00%u", counter_measures_reports);
             handler->PSendSysMessage("|cffff0000Average: |cffffff00%f |cffff0000Total Reports: |cffffff00%u ", average, total_reports);
             handler->PSendSysMessage("|cffff0000Speed Reports: |cffffff00%u |cffff0000Fly Reports: |cffffff00%u |cffff0000Jump Reports: |cffffff00%u ", speed_reports, fly_reports, jump_reports);
             handler->PSendSysMessage("|cffff0000Walk On Water Reports:|cffffff00 %u |cffff0000Teleport To Plane Reports: |cffffff00%u", waterwalk_reports, teleportplane_reports);
@@ -348,6 +350,7 @@ public:
             {
                 handler->PSendSysMessage("Macro Requiring Lua unlock Detected: No");
             }
+            handler->PSendSysMessage("Counter Measures Deployed: %u", counter_measures_reports);
             handler->PSendSysMessage("Average: %f || Total Reports: %u ", average, total_reports);
             handler->PSendSysMessage("Speed Reports: %u || Fly Reports: %u || Jump Reports: %u ", speed_reports, fly_reports, jump_reports);
             handler->PSendSysMessage("Walk On Water Reports: %u  || Teleport To Plane Reports: %u", waterwalk_reports, teleportplane_reports);

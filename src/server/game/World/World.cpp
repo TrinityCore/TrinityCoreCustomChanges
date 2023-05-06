@@ -1507,6 +1507,17 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ANTICHEAT_BG_START_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectBGStartHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.BG.StartAreaTeleport", false);
     m_bool_configs[CONFIG_ANTICHEAT_OP_ACK_HACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.OpAckOrderHack", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_TIMEMANIPULATION] = sConfigMgr->GetBoolDefault("Anticheat.CM.TIMEMANIPULATION", true);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_FLYHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.FLYHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_TELEPORT] = sConfigMgr->GetBoolDefault("Anticheat.CM.Teleport", false);
+    m_bool_configs[CONFIG_ANTICHEAT_BG_StartAreaTeleport] = sConfigMgr->GetBoolDefault("Anticheat.BG.StartAreaTeleport", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_SPEEDHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.SPEEDHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_JUMPHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.JUMPHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_ADVJUMPHACK] = sConfigMgr->GetBoolDefault("Anticheat.CM.ADVJUMPHACK", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_IGNOREZ] = sConfigMgr->GetBoolDefault("Anticheat.CM.IGNOREZ", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_WRITELOG] = sConfigMgr->GetBoolDefault("Anticheat.CM.WriteLog", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_ALERTSCREEN] = sConfigMgr->GetBoolDefault("Anticheat.CM.ALERTSCREEN", false);
+    m_bool_configs[CONFIG_ANTICHEAT_CM_ALERTCHAT] = sConfigMgr->GetBoolDefault("Anticheat.CM.ALERTCHAT", false);
     m_bool_configs[CONFIG_ANTICHEAT_WRITELOG_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.WriteLog", false);
     m_bool_configs[CONFIG_ANTICHEAT_AUTOKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.KickPlayer", false);
     m_bool_configs[CONFIG_ANTICHEAT_ANNOUNCEKICK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.AnnounceKick", false);

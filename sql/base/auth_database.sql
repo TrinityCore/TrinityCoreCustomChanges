@@ -1605,7 +1605,7 @@ INSERT INTO `rbac_permissions` VALUES
 (642,'Command: reload disenchant_loot_template'),
 (643,'Command: reload event_scripts'),
 (644,'Command: reload fishing_loot_template'),
-(645,'Command: reload game_graveyard_zone'),
+(645,'Command: reload graveyard_zone'),
 (646,'Command: reload game_tele'),
 (647,'Command: reload gameobject_questender'),
 (648,'Command: reload gameobject_loot_template'),
@@ -2006,7 +2006,8 @@ INSERT INTO `updates` VALUES
 ('2022_10_17_00_auth.sql','EB711C5B9B3272A05DDF47CA998F87E5DE6DE238','ARCHIVED','2022-10-17 09:02:28',0),
 ('2023_01_16_00_auth.sql','8431F03DE6A036BEED6682C21F4B67F384390905','ARCHIVED','2023-01-16 11:06:30',0),
 ('2023_02_05_00_auth.sql','DC8A2046EB4201D55342C541A0E9C398499E12B1','RELEASED','2023-02-05 14:50:30',0),
-('2023_02_05_01_auth.sql','336E62A8850A3E78A1D0BD3E81FFD5769184BDF8','RELEASED','2023-02-05 15:58:32',0);
+('2023_02_05_01_auth.sql','336E62A8850A3E78A1D0BD3E81FFD5769184BDF8','RELEASED','2023-02-05 15:58:32',0),
+('2023_05_05_00_auth.sql','DEEB1D5533658E3479FC3C988EF4B9816C511BC3','RELEASED','2023-05-07 11:52:00',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 

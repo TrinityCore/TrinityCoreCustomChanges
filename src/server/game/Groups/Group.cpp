@@ -1537,7 +1537,17 @@ void Group::CountTheRoll(Rolls::iterator rollI, Map* allowedMap)
                     continue;
                 }
 
-                uint8 randomN = urand(1, 100);
+                uint8 min = 1;
+                uint8 max = 100;
+                if (itr->second == GREED)
+                {
+                    min = 34;
+                }
+                else
+                {
+                    max = 33;
+                }
+                uint8 randomN = urand(min, max);
                 SendLootRoll(ObjectGuid::Empty, itr->first, randomN, itr->second, *roll);
                 if (maxresul < randomN)
                 {

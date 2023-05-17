@@ -108,7 +108,7 @@ void AnticheatMgr::LoadBlockedLuaFunctions()
         ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Anticheat loaded %u LUA blocked private functions", count, GetMSTimeDiffToNow(oldmsTime));
+    TC_LOG_INFO("server.loading", ">> Anticheat loaded %u LUA blocked private functions in %u ms", count, GetMSTimeDiffToNow(oldmsTime));
 }
 
 void AnticheatMgr::SaveLuaCheater(uint32 guid, uint32 accountId, std::string macro)

@@ -26,3 +26,13 @@ INSERT INTO `command` (`name`, `help`) VALUES
 ('anticheat purge', 'Syntax: .anticheat purge\r\n\r\nDeletes stored statistics of daily_players_reports table.'),
 ('anticheat warn', 'Syntax: .anticheat warn [$charactername]\r\n\r\nSends individual player they are being monitored for possible cheating.'),
 ('anticheat handle', 'Syntax: .anticheat handle 0 or 1\r\n\r\n0 Turns off and 1 Turns On Anticheat');
+
+DROP TABLE IF EXISTS `lua_private_functions`;
+CREATE TABLE IF NOT EXISTS `lua_private_functions` (
+  `function_name` varchar(255) NOT NULL DEFAULT '0',
+  `enabled` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`function_name`,`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `lua_private_functions` VALUES ('CastSpellByName', '1');
+INSERT INTO `lua_private_functions` VALUES ('RunMacroText', '1');

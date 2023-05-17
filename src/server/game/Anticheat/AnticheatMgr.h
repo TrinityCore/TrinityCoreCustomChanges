@@ -24,6 +24,8 @@
 #include "AnticheatData.h"
 #include "Chat.h"
 #include "Player.h"
+#include <unordered_map>
+#include "WorldSession.h"
 
 class Player;
 class AnticheatData;
@@ -105,6 +107,10 @@ class TC_GAME_API AnticheatMgr
         void ResetDailyReportStates();
         void SetMapId(uint32 MapID) { m_MapId = MapID; }
         [[nodiscard]] uint32 GetMapId() const { return m_MapId; }
+        void LoadBlockedLuaFunctions();
+        void SaveLuaCheater(uint32 guid, uint32 accountId, std::string macro);
+        bool CheckIsLuaCheater(uint32 accountId);
+        bool CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_DATA_TYPES], Player* player = nullptr);
 
     private:
         void SpeedHackDetection(Player* player, MovementInfo movementInfo);
@@ -131,6 +137,7 @@ class TC_GAME_API AnticheatMgr
         uint32 _assignedspeeddiff = 0;
         uint32 _updateCheckTimer = 4000;
         uint32 m_MapId = uint32(-1);
+        std::unordered_map<std::string, bool> _luaBlockedFunctions;
         std::array<Position, PVP_TEAMS_COUNT> _startPosition;
         Position const* GetTeamStartPosition(TeamId teamId) const;
         AnticheatPlayersDataMap m_Players;                        ///< Player data

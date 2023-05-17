@@ -90,6 +90,72 @@ AnticheatMgr::~AnticheatMgr()
     m_Players.clear();
 }
 
+void AnticheatMgr::LoadBlockedLuaFunctions()
+{
+    uint32 oldmsTime = getMSTime();
+    auto pstmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_ANTICHEAT_FUNCTIONS);
+    auto result = WorldDatabase.Query(pstmt);
+    if (!result)
+    {
+        TC_LOG_INFO("server.loading", "Anticheat load 0 lua private functions");
+        return;
+    }
+
+    do
+    {
+        auto fields = result->Fetch();
+        _luaBlockedFunctions[fields[0].GetString()] = fields[1].GetBool();
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u LUA Blocked private functions", _luaBlockedFunctions.size(), GetMSTimeDiffToNow(oldmsTime));
+}
+
+void AnticheatMgr::SaveLuaCheater(uint32 guid, uint32 accountId, std::string macro)
+{
+    auto pstmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ANTICHEAT_LUA_CHEATERS);
+    pstmt->setUInt32(0, guid);
+    pstmt->setUInt32(1, accountId);
+    pstmt->setString(2, macro);
+    CharacterDatabase.Execute(pstmt);
+}
+
+bool AnticheatMgr::CheckIsLuaCheater(uint32 accountId)
+{
+    auto pstmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ANTICHEAT_LUA_CHEATERS);
+    pstmt->setUInt32(0, accountId);
+    auto result = CharacterDatabase.Query(pstmt);
+    if (result)
+        return true;
+
+    return false;
+}
+
+bool AnticheatMgr::CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_DATA_TYPES], Player* player)
+{
+    for (auto& kv : _luaBlockedFunctions)
+    {
+        for (uint8 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+        {
+            std::string currentData = accountData[i].Data;
+            std::size_t pos = currentData.find(kv.first);
+            if (pos != std::string::npos)
+            {
+                const static std::size_t defaultLength = 200;
+                std::size_t minPos = int64(int(pos) - 50) < 0 ? 0 : pos - 50;
+                std::size_t length = defaultLength + minPos > currentData.length() - 1 ? currentData.length() - minPos : defaultLength;
+                std::string macro = currentData.substr(minPos, length);
+
+                if (player)
+                    SaveLuaCheater(player->GetGUID(), player->GetSession()->GetAccountId(), macro);
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))

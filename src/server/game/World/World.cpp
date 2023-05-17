@@ -89,6 +89,7 @@
 #include "WeatherMgr.h"
 #include "WhoListStorage.h"
 #include "WorldSession.h"
+#include "AnticheatMgr.h"
 
 #include <boost/asio/ip/address.hpp>
 
@@ -2256,6 +2257,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Calculate random battleground reset time...");
     InitRandomBGResetTime();
+
+    TC_LOG_INFO("server.loading", "Loading anticheat LUA blocked data...");
+    sAnticheatMgr->LoadBlockedLuaFunctions();
 
     TC_LOG_INFO("server.loading", "Calculate deletion of old calendar events time...");
     InitCalendarOldEventsDeletionTime();

@@ -97,17 +97,18 @@ void AnticheatMgr::LoadBlockedLuaFunctions()
     auto result = WorldDatabase.Query(pstmt);
     if (!result)
     {
-        TC_LOG_INFO("server.loading", "Anticheat load 0 lua private functions");
+        TC_LOG_INFO("server.loading", "Anticheat loaded 0 LUA blocked private functions");
         return;
     }
-
+    uint32 count = 0;
     do
     {
         auto fields = result->Fetch();
         _luaBlockedFunctions[fields[0].GetString()] = fields[1].GetBool();
+        ++count;
     } while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u LUA Blocked private functions", _luaBlockedFunctions.size(), GetMSTimeDiffToNow(oldmsTime));
+    TC_LOG_INFO("server.loading", ">> Anticheat loaded %u LUA blocked private functions", count, GetMSTimeDiffToNow(oldmsTime));
 }
 
 void AnticheatMgr::SaveLuaCheater(uint32 guid, uint32 accountId, std::string macro)

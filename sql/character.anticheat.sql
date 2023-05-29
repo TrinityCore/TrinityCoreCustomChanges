@@ -48,9 +48,9 @@ CREATE TABLE IF NOT EXISTS `players_reports_status` (
 -- Dumping structure for table characters.lua_cheaters
 DROP TABLE IF EXISTS `lua_cheaters`;
 CREATE TABLE IF NOT EXISTS `lua_cheaters` (
-  `guid` int(11) NOT NULL,
-  `account` int(11) NOT NULL,
-  `macro` varchar(255) DEFAULT NULL,
+  `guid` int NOT NULL,
+  `account` int NOT NULL,
+  `macro` varchar DEFAULT NULL,
     PRIMARY KEY (`guid`,`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

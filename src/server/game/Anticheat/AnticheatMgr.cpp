@@ -1212,39 +1212,31 @@ Position const* AnticheatMgr::GetTeamStartPosition(TeamId teamId) const
     return &_startPosition[teamId];
 }
 
-void AnticheatMgr::CheckStartPositions(Player* player)
+void AnticheatMgr::CheckBGOriginPositions(Player* player)
 {
     if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE))
         return;
 
-    Position pos = player->GetPosition();
     Position const* startPos = GetTeamStartPosition(Battleground::GetTeamIndexByTeamId(player->GetBGTeam()));
 
-    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_BG_START_COUNTERHACK_ENABLE))
+    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
     {
-        if (pos.GetExactDistSq(!startPos))
-        {
-            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_WRITELOG))
-            {
-                std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit) - Flagged at: %s", player->GetName().c_str(), player->GetMapId(), goXYZ.c_str());
-            }
-            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
-            {   // display warning at the center of the screen, hacky way?
-                std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] BG START SPOT COUNTER MEASURE ALERT";
-                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
-                data << str;
-                sWorld->SendGlobalGMMessage(&data);
-            }
-            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
-            {
-                std::string str = "|cFFFFFC00 BG START SPOT COUNTER MEASURE ALERT";
-                sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
-            }
-            player->TeleportTo(player->GetMapId(), startPos->GetPositionX(), startPos->GetPositionY(), startPos->GetPositionZ(), startPos->GetOrientation());
-        }
+        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+        TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE:: Sending %s back to start location (BG Map: %u) (possible exploit) - Flagged at: %s", player->GetName().c_str(), player->GetMapId(), goXYZ.c_str());
     }
-
+    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
+    {   // display warning at the center of the screen, hacky way?
+        std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] BG START SPOT COUNTER MEASURE ALERT";
+        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
+        data << str;
+        sWorld->SendGlobalGMMessage(&data);
+    }
+    if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTCHAT))
+    {
+        std::string str = "|cFFFFFC00 BG START SPOT COUNTER MEASURE ALERT";
+        sWorld->SendGMText(LANG_ANTICHEAT_COUNTERMEASURE, str.c_str(), player->GetName().c_str(), player->GetName().c_str());
+    }
+    player->TeleportTo(player->GetMapId(), startPos->GetPositionX(), startPos->GetPositionY(), startPos->GetPositionZ(), startPos->GetOrientation());
 }
 
 void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
@@ -1268,14 +1260,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < -525.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -535.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > -1283.33f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -716.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                 }
             }
@@ -1287,7 +1279,7 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
             if (!(movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING_FAR) || m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP) && movementInfo.pos.GetPositionZ() > 380.0f)
             {
                 sAnticheatMgr->BGreport(player);
-                sAnticheatMgr->CheckStartPositions(player);
+                sAnticheatMgr->CheckBGOriginPositions(player);
             }
 
             if (Battleground* bg = player->GetBattleground())
@@ -1300,14 +1292,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1450.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 957.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1416.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1466.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                 }
             }
@@ -1325,13 +1317,13 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > 1361.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 730.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 724.8f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                 }
             }
@@ -1349,14 +1341,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() < 1584.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() > 1816.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > 1554.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < 1526.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                 }
             }
@@ -1374,14 +1366,14 @@ void AnticheatMgr::BGStartExploit(Player* player, MovementInfo movementInfo)
                         (player->GetTeamId() == TEAM_ALLIANCE && movementInfo.pos.GetPositionY() > -760.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                     if ((player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionX() < 1147.8f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() < -855.0f) ||
                         (player->GetTeamId() == TEAM_HORDE && movementInfo.pos.GetPositionY() > -676.0f))
                     {
                         sAnticheatMgr->BGreport(player);
-                        sAnticheatMgr->CheckStartPositions(player);
+                        sAnticheatMgr->CheckBGOriginPositions(player);
                     }
                 }
             }

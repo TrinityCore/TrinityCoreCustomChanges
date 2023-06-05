@@ -3358,7 +3358,11 @@ void Spell::EffectInterruptCast()
                 if (player->GetSession()->IsLuaCheater())
                 {
                     if (spell->GetCastTime() - spell->GetTimer() < 600)
+                    {
+                        std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
+                        TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played %s attempted repeat LUA spell Casting - Flagged at: %s", player->GetName().c_str(), goXYZ.c_str());
                         return;
+                    }
                 }
             }
 

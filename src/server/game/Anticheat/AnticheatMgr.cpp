@@ -95,6 +95,11 @@ void AnticheatMgr::LoadBlockedLuaFunctions()
     uint32 oldmsTime = getMSTime();
     auto pstmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_ANTICHEAT_FUNCTIONS);
     auto result = WorldDatabase.Query(pstmt);
+    if (!sWorld->getBoolConfig(CONFIG_LUABLOCKER_ENABLE))
+    {
+        TC_LOG_INFO("server.loading", "Anticheat.LUAblocker conf is set to 0");
+        return;
+    }
     if (!result)
     {
         TC_LOG_INFO("server.loading", "Anticheat loaded 0 LUA blocked private functions");
@@ -147,7 +152,10 @@ bool AnticheatMgr::CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_
                 std::string macro = currentData.substr(minPos, length);
 
                 if (player)
+                {
+                    TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played %s has inaccessible LUA MACRO, placing on watch list", player->GetName().c_str());
                     SaveLuaCheater(player->GetGUID(), player->GetSession()->GetAccountId(), macro);
+                }
 
                 return true;
             }

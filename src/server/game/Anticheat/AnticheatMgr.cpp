@@ -97,12 +97,12 @@ void AnticheatMgr::LoadBlockedLuaFunctions()
     auto result = WorldDatabase.Query(pstmt);
     if (!sWorld->getBoolConfig(CONFIG_LUABLOCKER_ENABLE))
     {
-        TC_LOG_INFO("server.loading", "Anticheat.LUAblocker conf is set to 0");
+        TC_LOG_INFO("server.loading", ">> Anticheat.LUAblocker conf is set to 0");
         return;
     }
     if (!result)
     {
-        TC_LOG_INFO("server.loading", "Anticheat loaded 0 LUA blocked private functions");
+        TC_LOG_INFO("server.loading", ">> Anticheat loaded 0 LUA blocked private functions");
         return;
     }
     uint32 count = 0;

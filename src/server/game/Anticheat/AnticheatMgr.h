@@ -121,7 +121,7 @@ class TC_GAME_API AnticheatMgr
         void GravityHackDetection(Player* player, MovementInfo movementInfo);
         void NoFallDamageDetection(Player* player, MovementInfo movementInfo);
         void BGreport(Player* player);
-        void CheckStartPositions(Player* player);
+        void CheckBGOriginPositions(Player* player);
         void BGStartExploit(Player* player, MovementInfo movementInfo);
         void BuildReport(Player* player,uint8 reportType);
 

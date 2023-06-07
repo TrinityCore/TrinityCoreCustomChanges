@@ -1056,6 +1056,11 @@ void Spell::EffectTeleportUnits()
         return;
     }
 
+    if (Player* player = m_caster->ToPlayer())
+    {
+        player->SetCanTeleport(true);
+    }
+
     // Init dest coordinates
     WorldLocation targetDest(*destTarget);
     if (targetDest.GetMapId() == MAPID_INVALID)

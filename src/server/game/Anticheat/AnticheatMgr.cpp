@@ -153,7 +153,7 @@ bool AnticheatMgr::CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_
 
                 if (player)
                 {
-                    TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played %s has inaccessible LUA MACRO, placing on watch list", player->GetName().c_str());
+                    TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Player %s has inaccessible LUA MACRO, placing on watch list", player->GetName().c_str());
                     SaveLuaCheater(player->GetGUID(), player->GetSession()->GetAccountId(), macro);
                 }
 

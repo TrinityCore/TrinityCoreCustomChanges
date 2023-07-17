@@ -146,15 +146,37 @@ bool AnticheatMgr::CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_
             std::size_t pos = currentData.find(kv.first);
             if (pos != std::string::npos)
             {
+                // Code inside this if statement block will only execute if the variable 'pos' is not equal to std::string::npos.
+                // std::string::npos is a special value indicating the absence of a valid position.
+
                 const static std::size_t defaultLength = 200;
+                // Declares a constant variable 'defaultLength' with a value of 200.
+                // This variable represents the default length of a substring to be extracted.
+
                 std::size_t minPos = int64(int(pos) - 50) < 0 ? 0 : pos - 50;
+                // Calculates the minimum position from where the substring will be extracted.
+                // It subtracts 50 from the 'pos' value, casts it to int64, and checks if it's less than 0.
+                // If it is less than 0, sets 'minPos' to 0, otherwise sets 'minPos' to 'pos - 50'.
+                // With out the - 50 we will get a crash on certain substrings
+
                 std::size_t length = defaultLength + minPos > currentData.length() - 1 ? currentData.length() - minPos : defaultLength;
+                // Calculates the length of the substring to be extracted.
+                // It adds 'defaultLength' to 'minPos' and checks if it's greater than the length of 'currentData' minus 1.
+                // If it is greater, sets 'length' to 'currentData.length() - minPos', otherwise sets it to 'defaultLength'.
+
                 std::string macro = currentData.substr(minPos, length);
+                // Extracts a substring from 'currentData' starting at 'minPos' with a length of 'length' and assigns it to the variable 'macro'.
 
                 if (player)
                 {
+                    // Checks if the 'player' pointer is not null (i.e., it points to a valid object, aka The NULL CHECK).
+
                     TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Player %s has inaccessible LUA MACRO, placing on watch list", player->GetName().c_str());
+                    // Outputs a log message indicating that the player has an inaccessible Lua macro and is being placed on a watch list.
+
                     SaveLuaCheater(player->GetGUID(), player->GetSession()->GetAccountId(), macro);
+                    // Calls the 'SaveLuaCheater' function, passing in the player's GUID, session account ID, and the 'macro' string.
+                    // This function saves information about the Lua cheater, such as the id of the player account, character, and macro used, for further analysis or enforcement actions.
                 }
 
                 return true;

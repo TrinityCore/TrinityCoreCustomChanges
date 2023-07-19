@@ -148,6 +148,7 @@ bool AnticheatMgr::CheckBlockedLuaFunctions(AccountData accountData[NUM_ACCOUNT_
             {
                 // Code inside this if statement block will only execute if the variable 'pos' is not equal to std::string::npos.
                 // std::string::npos is a special value indicating the absence of a valid position.
+                // The following below is all done to capture the macro used and stored it in the SaveLuaCheater
 
                 const static std::size_t defaultLength = 200;
                 // Declares a constant variable 'defaultLength' with a value of 200.

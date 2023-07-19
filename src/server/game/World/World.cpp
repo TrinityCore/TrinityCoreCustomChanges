@@ -89,6 +89,7 @@
 #include "WeatherMgr.h"
 #include "WhoListStorage.h"
 #include "WorldSession.h"
+#include "AnticheatMgr.h"
 
 #include <boost/asio/ip/address.hpp>
 
@@ -1489,6 +1490,7 @@ void World::LoadConfigSettings(bool reload)
     // ANTICHEAT
     m_bool_configs[CONFIG_ANTICHEAT_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.Enable", false);
     m_bool_configs[CONFIG_ANTICHEAT_ENABLE_ON_GM] = sConfigMgr->GetBoolDefault("Anticheat.EnabledOnGmAccounts", false);
+    m_bool_configs[CONFIG_LUABLOCKER_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.LUAblocker", false);
     m_bool_configs[CONFIG_ANTICHEAT_JUMPHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectJumpHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_ADV_JUMPHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.StricterDetectJumpHack", false);
     m_bool_configs[CONFIG_ANTICHEAT_WATERWALKHACK_ENABLE] = sConfigMgr->GetBoolDefault("Anticheat.DetectWaterWalkHack", false);
@@ -2256,6 +2258,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Calculate random battleground reset time...");
     InitRandomBGResetTime();
+
+    TC_LOG_INFO("server.loading", "Loading Anticheat LUA blocked data...");
+    sAnticheatMgr->LoadBlockedLuaFunctions();
 
     TC_LOG_INFO("server.loading", "Calculate deletion of old calendar events time...");
     InitCalendarOldEventsDeletionTime();

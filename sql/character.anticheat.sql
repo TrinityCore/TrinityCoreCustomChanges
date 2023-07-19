@@ -45,6 +45,13 @@ CREATE TABLE IF NOT EXISTS `players_reports_status` (
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `lua_cheaters` (
+  `guid` int unsigned NOT NULL DEFAULT 0,
+  `account` int unsigned NOT NULL DEFAULT 0,
+  `macro` varchar(255) NOT NULL DEFAULT '',
+    PRIMARY KEY (`guid`,`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- run only if updating from previous table versions
 ALTER TABLE `daily_players_reports`
 	ADD COLUMN `teleport_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `climb_reports`,

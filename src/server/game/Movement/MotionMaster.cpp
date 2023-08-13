@@ -1002,7 +1002,7 @@ void MotionMaster::MoveFallPlayer(uint32 id/* = 0*/)
         _owner->ToPlayer()->SetFallInformation(0, _owner->GetPositionZ());
     }
 
-    std::function<void(Movement::MoveSplineInit&)> initializer = [=](Movement::MoveSplineInit& init)
+    std::function<void(Movement::MoveSplineInit&)> initializer = [=, this](Movement::MoveSplineInit& init)
     {
         init.MoveTo(_owner->GetPositionX(), _owner->GetPositionY(), tz + _owner->GetHoverOffset(), false);
         init.SetFall();

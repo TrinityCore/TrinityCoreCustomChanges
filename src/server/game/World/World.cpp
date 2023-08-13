@@ -89,7 +89,6 @@
 #include "WeatherMgr.h"
 #include "WhoListStorage.h"
 #include "WorldSession.h"
-#include "AnticheatMgr.h"
 
 #include <boost/asio/ip/address.hpp>
 

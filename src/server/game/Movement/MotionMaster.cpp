@@ -980,8 +980,8 @@ void MotionMaster::MoveFallPlayer(uint32 id/* = 0*/)
     float tz = _owner->GetMapHeight(_owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
     if (tz <= INVALID_HEIGHT)
     {
-        TC_LOG_DEBUG("movement.motionmaster", "MotionMaster::MoveFallPlayer: '%s', unable to retrieve a proper height at map Id: %u (X: %f, Y: %f, Z: %f)",
-            _owner->GetGUID().ToString().c_str(), _owner->GetMap()->GetId(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ());
+        TC_LOG_DEBUG("movement.motionmaster", "MotionMaster::MoveFall: '{}', unable to retrieve a proper height at map Id: {} (X: {}, Y: {}, Z: {})",
+            _owner->GetGUID().ToString(), _owner->GetMap()->GetId(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ());
         return;
     }
 

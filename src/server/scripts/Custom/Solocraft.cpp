@@ -444,8 +444,6 @@ private:
                     //Current dungeon offset exceeded - Debuff player modified by ClassBalance Adjustment
                     difficulty = (-abs(difficulty)) + ((((float)classBalance / 100) * difficulty) / numInGroup);
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck
-
-                    //sLog->outError("{}: would have this difficulty: {}", player->GetGUID(), tempDiff);
                 }
                 else
                 {
@@ -488,7 +486,6 @@ private:
                     {
                         SpellPowerBonus = static_cast<int>((player->GetLevel() * SoloCraftSpellMult) * difficulty);//Yes, I pulled this calc out of my butt.
                         player->ApplySpellPowerBonus(SpellPowerBonus, true);
-                        //sLog->outError("{}: spellpower Bonus applied: {}", player->GetGUID(), SpellPowerBonus);
                     }
                 }
                 //Announcements
@@ -542,7 +539,6 @@ private:
                         if ((*result)[1].GetFloat() > 0)
                         {
                             GroupDifficulty = GroupDifficulty + (*result)[1].GetFloat();
-                            //sLog->outError("{} : Group member GUID in instance: {}", player->GetGUID(), itr->guid);
                         }
                     }
                 }
@@ -560,7 +556,6 @@ private:
             float difficulty = (*result)[1].GetFloat();
             int SpellPowerBonus = (*result)[3].GetUInt32();
             float StatsMultPct = (*result)[4].GetFloat();
-            //sLog->outError("Map difficulty: {}", difficulty);
             // Inform the player
             std::ostringstream ss;
             ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to {} - Reverting Difficulty Offset: %0.2f. Spellpower Bonus Removed: {}";

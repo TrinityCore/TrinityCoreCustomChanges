@@ -191,120 +191,120 @@ bool nsNpcTel::IsValidData(CatValue catvalue) //  const uint32 &cat, const Flag 
     {
       case FLAG_TEAM:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (catvalue.data0 < MAX_FLAG_TEAM)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (Team) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (Team) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_GUILD:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (catvalue.data0)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (GuildID) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (GuildID) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_GMLEVEL:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (0 < catvalue.data0 && catvalue.data0 < 256)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (GmLevel) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (GmLevel) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_ISGM:
         if (catvalue.data0)
-            TC_LOG_ERROR("misc", "Invalid data0 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data0 (category: {}).", catvalue.catid);
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         return true;
 
       case FLAG_ACCOUNT:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (catvalue.data0)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (AccountID) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (AccountID) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_LEVEL:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (0 < catvalue.data0 && catvalue.data0 < 256)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (Level) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (Level) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_ITEM:
         if (!catvalue.data0)
         {
-            TC_LOG_ERROR("misc", "Invalid data0 (ItemID) (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data0 (ItemID) (category: {}).", catvalue.catid);
             return false;
         }
         if (catvalue.data1)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data1 (Item Count) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data1 (Item Count) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_QUEST:
         if (!catvalue.data0)
         {
-            TC_LOG_ERROR("misc", "Invalid data0 (QuestID) (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data0 (QuestID) (category: {}).", catvalue.catid);
             return false;
         }
         if (catvalue.data1 < MAX_QUEST_STATUS + 1)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data1 (Quest Status) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data1 (Quest Status) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_GENDER:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (catvalue.data0 < GENDER_NONE)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (Gender) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (Gender) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_RACE:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (0 < catvalue.data0 && catvalue.data0 < MAX_RACES)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (Race) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (Race) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_CLASS:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (0 < catvalue.data0 && catvalue.data0 < MAX_CLASSES)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (Class) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (Class) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_REPUTATION:
         if (!catvalue.data0)
         {
-            TC_LOG_ERROR("misc", "Invalid data0 (Faction/Reputation) (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data0 (Faction/Reputation) (category: {}).", catvalue.catid);
             return false;
         }
         if (catvalue.data1 <= REP_EXALTED)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data1 (Faction/Reputation) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data1 (Faction/Reputation) (category: {}).", catvalue.catid);
         return false;
 
       case FLAG_PLAYER:
         if (catvalue.data1)
-            TC_LOG_ERROR("misc", "Invalid data1 (category: %u).", catvalue.catid);
+            TC_LOG_ERROR("misc", "Invalid data1 (category: {}).", catvalue.catid);
         if (catvalue.data0)
             return true;
-        TC_LOG_ERROR("misc", "Invalid data0 (PlayerGuid) (category: %u).", catvalue.catid);
+        TC_LOG_ERROR("misc", "Invalid data0 (PlayerGuid) (category: {}).", catvalue.catid);
         return false;
 
-      default: TC_LOG_ERROR("misc", "Invalid flag (category: %u).", catvalue.catid);
+      default: TC_LOG_ERROR("misc", "Invalid flag (category: {}).", catvalue.catid);
     }
 
-    TC_LOG_ERROR("misc", "Invalid flag (category: %u).", catvalue.catid);
+    TC_LOG_ERROR("misc", "Invalid flag (category: {}).", catvalue.catid);
     return false;
 }
 
@@ -328,7 +328,7 @@ void LoadNpcTele(void)
         //  20             21             22             23             24             25             26             27
         "`pos_X`, `pos_Y`, `pos_Z`, `orientation`, `map`, `level`, `cost` "
         //28       29       30       31             32     33       34
-        "FROM `%s` C, `%s` D, `%s` A "
+        "FROM `{}` C, `{}` D, `{}` A "
         "WHERE C.`id` = `cat_id` AND D.`id` = `dest_id` "
         "ORDER BY `namecat`, `cat_id`, `namedest`", Table[0], Table[1], Table[2]);
 
@@ -336,7 +336,7 @@ void LoadNpcTele(void)
 
     if (result)
     {
-        TC_LOG_INFO("server.loading", "Loading %s, %s and %s...", Table[0], Table[1], Table[2]);
+        TC_LOG_INFO("server.loading", "Loading {}, {} and {}...", Table[0], Table[1], Table[2]);
 
         uint32 catid = 0;
         uint32 nbDest = 0;
@@ -423,7 +423,7 @@ void LoadNpcTele(void)
         } while (result->NextRow());
 
         TC_LOG_INFO("server.loading", " ");
-        TC_LOG_INFO("server.loading", "Loaded %u npc_teleport.", nbDest);
+        TC_LOG_INFO("server.loading", "Loaded {} npc_teleport.", nbDest);
     }
     else
         TC_LOG_ERROR("misc", "WARNING >> Loaded 0 npc_teleport.");

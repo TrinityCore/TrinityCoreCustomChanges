@@ -319,7 +319,7 @@ public:
     void OnLogout(Player* player) override
     {
         //Remove database entry as the player has logged out
-        CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
+        CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID());
     }
 };
 class solocraft_player_instance_handler : public PlayerScript {
@@ -445,7 +445,7 @@ private:
                     difficulty = (-abs(difficulty)) + ((((float)classBalance / 100) * difficulty) / numInGroup);
                     difficulty = roundf(difficulty * 100) / 100; //Float variables suck
 
-                    //sLog->outError("%u: would have this difficulty: %f", player->GetGUID(), tempDiff);
+                    //sLog->outError("{}: would have this difficulty: {}", player->GetGUID(), tempDiff);
                 }
                 else
                 {
@@ -456,7 +456,7 @@ private:
                 }
 
                 //Check Database for a current dungeon entry
-                QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
+                QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID());
 
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
@@ -488,29 +488,29 @@ private:
                     {
                         SpellPowerBonus = static_cast<int>((player->GetLevel() * SoloCraftSpellMult) * difficulty);//Yes, I pulled this calc out of my butt.
                         player->ApplySpellPowerBonus(SpellPowerBonus, true);
-                        //sLog->outError("%u: spellpower Bonus applied: %i", player->GetGUID(), SpellPowerBonus);
+                        //sLog->outError("{}: spellpower Bonus applied: {}", player->GetGUID(), SpellPowerBonus);
                     }
                 }
                 //Announcements
                 if (difficulty > 0)
                 {
                     // Announce to player - Buff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - Difficulty Offset: %0.2f. Spellpower Bonus: %i. Class Balance Weight: %i";
+                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - Difficulty Offset: %0.2f. Spellpower Bonus: {}. Class Balance Weight: {}";
                     ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus, classBalance);
                 }
                 else
                 {
                     // Announce to player - Debuff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f with a Class Balance Weight: %i. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
+                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f with a Class Balance Weight: {}. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
                     ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, classBalance);
                 }
                 // Save Player Dungeon Offsets to Database
-                CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES (%u, %f, %u, %i, %f)", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
+                CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES ({}, {}, {}, {}, {})", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
             }
             else
             {
                 // Announce to player - Over Max Level Threshold
-                ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered %s  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level (%i) threshold for this dungeon.";
+                ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level ({}) threshold for this dungeon.";
                 ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
                 ClearBuffs(player, map); //Check to revert player back to normal
             }
@@ -535,14 +535,14 @@ private:
                 if (itr->guid != player->GetGUID())
                 {
                     //Database query to find difficulty for each group member that is currently in an instance
-                    QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = %u", itr->guid);
+                    QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = {}", itr->guid);
                     if (result)
                     {
                         //Test for debuffs already give to other members - They cannot be used to determine the total offset because negative numbers will skew the total difficulty offset
                         if ((*result)[1].GetFloat() > 0)
                         {
                             GroupDifficulty = GroupDifficulty + (*result)[1].GetFloat();
-                            //sLog->outError("%u : Group member GUID in instance: %u", player->GetGUID(), itr->guid);
+                            //sLog->outError("{} : Group member GUID in instance: {}", player->GetGUID(), itr->guid);
                         }
                     }
                 }
@@ -554,16 +554,16 @@ private:
     void ClearBuffs(Player* player, Map* map)
     {
         //Database query to get offset from the last instance player exited
-        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = %u", player->GetGUID());
+        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID());
         if (result)
         {
             float difficulty = (*result)[1].GetFloat();
             int SpellPowerBonus = (*result)[3].GetUInt32();
             float StatsMultPct = (*result)[4].GetFloat();
-            //sLog->outError("Map difficulty: %f", difficulty);
+            //sLog->outError("Map difficulty: {}", difficulty);
             // Inform the player
             std::ostringstream ss;
-            ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to %s - Reverting Difficulty Offset: %0.2f. Spellpower Bonus Removed: %i";
+            ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to {} - Reverting Difficulty Offset: %0.2f. Spellpower Bonus Removed: {}";
             ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
             // Clear the buffs
             for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -576,7 +576,7 @@ private:
                 player->ApplySpellPowerBonus(SpellPowerBonus, false);
             }
             //Remove database entry as the player is no longer in an instance
-            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = %u", player->GetGUID());
+            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID());
         }
     }
 };

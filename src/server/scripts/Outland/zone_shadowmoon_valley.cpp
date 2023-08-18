@@ -59,6 +59,8 @@ enum InvisInfernalCaster
     MODEL_INVISIBLE            = 20577,
     MODEL_INFERNAL             = 17312,
     SPELL_SUMMON_INFERNAL      = 37277,
+    SPELL_SPAWN_AND_PACIFY     = 37791,
+    SPELL_TRANSFORM_INFERNAL   = 37794,
     TYPE_INFERNAL              = 1,
     DATA_DIED                  = 1
 };
@@ -153,7 +155,8 @@ public:
         void IsSummonedBy(WorldObject* summoner) override
         {
             if (summoner->ToCreature())
-                casterGUID = summoner->ToCreature()->GetGUID();;
+                casterGUID = summoner->ToCreature()->GetGUID();
+            DoCastSelf(SPELL_SPAWN_AND_PACIFY);
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -166,9 +169,12 @@ public:
         {
             if (spellInfo->Id == SPELL_SUMMON_INFERNAL)
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_NOT_SELECTABLE);
+                me->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                 me->SetImmuneToPC(false);
+                me->RemoveAurasDueToSpell(SPELL_SPAWN_AND_PACIFY);
+                // handle by the spell below when such auras will be not removed after evade
                 me->SetDisplayId(MODEL_INFERNAL);
+                // DoCastSelf(SPELL_TRANSFORM_INFERNAL);
             }
         }
 
@@ -442,7 +448,6 @@ public:
 
                                 me->SetCanFly(true);
                                 me->SetDisableGravity(true);
-                                me->SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                                 me->GetMotionMaster()->MoveTakeoff(POINT_MOVE_UP, pos);
                             }
                         }
@@ -464,97 +469,6 @@ public:
     {
         return new npc_enslaved_netherwing_drakeAI(creature);
     }
-};
-
-/*#####
-# npc_dragonmaw_peon
-#####*/
-
-class npc_dragonmaw_peon : public CreatureScript
-{
-public:
-    npc_dragonmaw_peon() : CreatureScript("npc_dragonmaw_peon") { }
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_dragonmaw_peonAI(creature);
-    }
-
-    struct npc_dragonmaw_peonAI : public ScriptedAI
-    {
-        npc_dragonmaw_peonAI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            PlayerGUID.Clear();
-            Tapped = false;
-            PoisonTimer = 0;
-        }
-
-        ObjectGuid PlayerGUID;
-        bool Tapped;
-        uint32 PoisonTimer;
-
-        void Reset() override
-        {
-            Initialize();
-        }
-
-        void SpellHit(WorldObject* caster, SpellInfo const* spellInfo) override
-        {
-            if (!caster)
-                return;
-
-            if (caster->GetTypeId() == TYPEID_PLAYER && spellInfo->Id == 40468 && !Tapped)
-            {
-                PlayerGUID = caster->GetGUID();
-
-                Tapped = true;
-                float x, y, z;
-                caster->GetClosePoint(x, y, z, me->GetCombatReach());
-
-                me->SetWalk(false);
-                me->GetMotionMaster()->MovePoint(1, x, y, z);
-            }
-        }
-
-        void MovementInform(uint32 type, uint32 id) override
-        {
-            if (type != POINT_MOTION_TYPE)
-                return;
-
-            if (id)
-            {
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_EAT);
-                PoisonTimer = 15000;
-            }
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            if (PoisonTimer)
-            {
-                if (PoisonTimer <= diff)
-                {
-                    if (PlayerGUID)
-                    {
-                        Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID);
-                        if (player && player->GetQuestStatus(11020) == QUEST_STATUS_INCOMPLETE)
-                            player->KilledMonsterCredit(23209);
-                    }
-                    PoisonTimer = 0;
-                    me->KillSelf();
-                } else PoisonTimer -= diff;
-            }
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
-        }
-    };
 };
 
 /*####
@@ -715,7 +629,7 @@ public:
             }
         }
 
-        void QuestAccept(Player* player, Quest const* quest) override
+        void OnQuestAccept(Player* player, Quest const* quest) override
         {
             if (quest->GetQuestId() == QUEST_ESCAPE_COILSCAR)
             {
@@ -868,7 +782,7 @@ public:
             Initialize();
 
             me->AddUnitState(UNIT_STATE_ROOT);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             me->SetTarget(ObjectGuid::Empty);
         }
 
@@ -907,7 +821,7 @@ public:
             case 6:
                 if (Player* AggroTarget = ObjectAccessor::GetPlayer(*me, AggroTargetGUID))
                 {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
                     me->ClearUnitState(UNIT_STATE_ROOT);
 
                     float x, y, z;
@@ -1347,7 +1261,7 @@ public:
     {
         go_crystal_prisonAI(GameObject* go) : GameObjectAI(go) { }
 
-        void QuestAccept(Player* player, Quest const* quest) override
+        void OnQuestAccept(Player* player, Quest const* quest) override
         {
             if (quest->GetQuestId() == QUEST_BATTLE_OF_THE_CRIMSON_WATCH)
             {
@@ -1593,6 +1507,7 @@ enum ZuluhedChains
     NPC_KARYNAKU    = 22112,
 };
 
+// 38790 - Unlocking Zuluhed's Chains
 class spell_unlocking_zuluheds_chains : public SpellScriptLoader
 {
     public:
@@ -1678,13 +1593,81 @@ public:
     }
 };
 
+/*######
+## Quest 10769, 10776: Dissension Amongst the Ranks...
+######*/
+
+enum DissensionAmongstTheRanks
+{
+    SPELL_ILLIDARI_DISGUISE_MALE          = 38225,
+    SPELL_ILLIDARI_DISGUISE_FEMALE        = 38227,
+    SPELL_KILL_CREDIT_CRAZED_COLOSSUS     = 38228
+};
+
+// 38224 - Illidari Agent Illusion
+class spell_shadowmoon_illidari_agent_illusion : public AuraScript
+{
+    PrepareAuraScript(spell_shadowmoon_illidari_agent_illusion);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_ILLIDARI_DISGUISE_MALE, SPELL_ILLIDARI_DISGUISE_FEMALE });
+    }
+
+    void AfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Player* target = GetTarget()->ToPlayer())
+            target->CastSpell(target, target->GetNativeGender() == GENDER_MALE ?
+            SPELL_ILLIDARI_DISGUISE_MALE : SPELL_ILLIDARI_DISGUISE_FEMALE);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        target->RemoveAurasDueToSpell(SPELL_ILLIDARI_DISGUISE_MALE);
+        target->RemoveAurasDueToSpell(SPELL_ILLIDARI_DISGUISE_FEMALE);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_shadowmoon_illidari_agent_illusion::AfterApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectApplyFn(spell_shadowmoon_illidari_agent_illusion::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// 38223 - Quest Credit: Crazed Colossus
+class spell_shadowmoon_quest_credit_crazed_colossus : public SpellScript
+{
+    PrepareSpellScript(spell_shadowmoon_quest_credit_crazed_colossus);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo(
+        {
+            uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()),
+            SPELL_KILL_CREDIT_CRAZED_COLOSSUS
+        });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* target = GetHitUnit();
+        if (target->HasAura(uint32(GetEffectValue())))
+            target->CastSpell(target, SPELL_KILL_CREDIT_CRAZED_COLOSSUS);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_shadowmoon_quest_credit_crazed_colossus::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     new npc_invis_infernal_caster();
     new npc_infernal_attacker();
     new npc_mature_netherwing_drake();
     new npc_enslaved_netherwing_drake();
-    new npc_dragonmaw_peon();
     new npc_earthmender_wilda();
     new npc_lord_illidan_stormrage();
     new go_crystal_prison();
@@ -1693,4 +1676,6 @@ void AddSC_shadowmoon_valley()
     new npc_enraged_spirit();
     new spell_unlocking_zuluheds_chains();
     new npc_shadowmoon_tuber_node();
+    RegisterSpellScript(spell_shadowmoon_illidari_agent_illusion);
+    RegisterSpellScript(spell_shadowmoon_quest_credit_crazed_colossus);
 }

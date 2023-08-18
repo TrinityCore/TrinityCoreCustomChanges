@@ -77,9 +77,13 @@ bool TransactionTask::Execute()
 
     if (errorCode == ER_LOCK_DEADLOCK)
     {
-        std::ostringstream threadIdStream;
-        threadIdStream << std::this_thread::get_id();
-        std::string threadId = threadIdStream.str();
+        std::string threadId = []()
+        {
+            // wrapped in lambda to fix false positive analysis warning C26115
+            std::ostringstream threadIdStream;
+            threadIdStream << std::this_thread::get_id();
+            return threadIdStream.str();
+        }();
 
         // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
         std::lock_guard<std::mutex> lock(_deadlockLock);
@@ -89,10 +93,10 @@ bool TransactionTask::Execute()
             if (!TryExecute())
                 return true;
 
-            TC_LOG_WARN("sql.sql", "Deadlocked SQL Transaction, retrying. Loop timer: %u ms, Thread Id: %s", loopDuration, threadId.c_str());
+            TC_LOG_WARN("sql.sql", "Deadlocked SQL Transaction, retrying. Loop timer: {} ms, Thread Id: {}", loopDuration, threadId);
         }
 
-        TC_LOG_ERROR("sql.sql", "Fatal deadlocked SQL Transaction, it will not be retried anymore. Thread Id: %s", threadId.c_str());
+        TC_LOG_ERROR("sql.sql", "Fatal deadlocked SQL Transaction, it will not be retried anymore. Thread Id: {}", threadId);
     }
 
     // Clean up now.
@@ -122,9 +126,13 @@ bool TransactionWithResultTask::Execute()
 
     if (errorCode == ER_LOCK_DEADLOCK)
     {
-        std::ostringstream threadIdStream;
-        threadIdStream << std::this_thread::get_id();
-        std::string threadId = threadIdStream.str();
+        std::string threadId = []()
+        {
+            // wrapped in lambda to fix false positive analysis warning C26115
+            std::ostringstream threadIdStream;
+            threadIdStream << std::this_thread::get_id();
+            return threadIdStream.str();
+        }();
 
         // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
         std::lock_guard<std::mutex> lock(_deadlockLock);
@@ -136,10 +144,10 @@ bool TransactionWithResultTask::Execute()
                 return true;
             }
 
-            TC_LOG_WARN("sql.sql", "Deadlocked SQL Transaction, retrying. Loop timer: %u ms, Thread Id: %s", loopDuration, threadId.c_str());
+            TC_LOG_WARN("sql.sql", "Deadlocked SQL Transaction, retrying. Loop timer: {} ms, Thread Id: {}", loopDuration, threadId);
         }
 
-        TC_LOG_ERROR("sql.sql", "Fatal deadlocked SQL Transaction, it will not be retried anymore. Thread Id: %s", threadId.c_str());
+        TC_LOG_ERROR("sql.sql", "Fatal deadlocked SQL Transaction, it will not be retried anymore. Thread Id: {}", threadId);
     }
 
     // Clean up now.

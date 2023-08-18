@@ -23,6 +23,7 @@ SDCategory: Karazhan
 EndScriptData */
 
 #include "ScriptMgr.h"
+#include "Containers.h"
 #include "karazhan.h"
 #include "InstanceScript.h"
 #include "ObjectAccessor.h"
@@ -124,7 +125,6 @@ public:
         void JustEngagedWith(Unit* /*who*/) override { }
         void MoveInLineOfSight(Unit* /*who*/) override { }
 
-
         void UpdateAI(uint32 diff) override
         {
             if (HellfireTimer)
@@ -159,13 +159,13 @@ public:
             if (spellInfo->Id == SPELL_INFERNAL_RELAY)
             {
                 me->SetDisplayId(me->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                 HellfireTimer = 4000;
                 CleanupTimer = 170000;
             }
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage) override
+        void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
         {
             if (!done_by || done_by->GetGUID() != malchezaar)
                 damage = 0;
@@ -249,6 +249,7 @@ public:
                 positions.push_back(&InfernalPoints[i]);
 
             instance->HandleGameObject(instance->GetGuidData(DATA_GO_NETHER_DOOR), true);
+            instance->SetBossState(DATA_MALCHEZZAR, NOT_STARTED);
         }
 
         void KilledUnit(Unit* /*victim*/) override
@@ -269,6 +270,7 @@ public:
                 positions.push_back(&InfernalPoints[i]);
 
             instance->HandleGameObject(instance->GetGuidData(DATA_GO_NETHER_DOOR), true);
+            instance->SetBossState(DATA_MALCHEZZAR, DONE);
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -276,6 +278,7 @@ public:
             Talk(SAY_AGGRO);
 
             instance->HandleGameObject(instance->GetGuidData(DATA_GO_NETHER_DOOR), false); // Open the door leading further in
+            instance->SetBossState(DATA_MALCHEZZAR, IN_PROGRESS);
         }
 
         void InfernalCleanup()
@@ -450,7 +453,7 @@ public:
                         Creature* axe = me->SummonCreature(MALCHEZARS_AXE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1s);
                         if (axe)
                         {
-                            axe->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            axe->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                             axe->SetFaction(me->GetFaction());
                             axes[i] = axe->GetGUID();
                             if (target)

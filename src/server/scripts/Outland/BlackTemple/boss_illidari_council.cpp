@@ -18,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "black_temple.h"
 #include "CellImpl.h"
+#include "Containers.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceScript.h"
 #include "PassiveAI.h"
@@ -153,10 +154,7 @@ struct boss_illidari_council : public BossAI
             for (uint32 bossData : CouncilData)
             {
                 if (Creature* council = instance->GetCreature(bossData))
-                {
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, council);
                     DoZoneInCombat(council);
-                }
             }
             events.ScheduleEvent(EVENT_EMPYREAL_EQUIVALENCY, 2s);
             events.ScheduleEvent(EVENT_BERSERK, 15min);
@@ -170,10 +168,6 @@ struct boss_illidari_council : public BossAI
         if (!me->IsInEvadeMode())
         {
             _inCombat = false;
-            for (uint32 bossData : CouncilData)
-                if (Creature* council = instance->GetCreature(bossData))
-                    instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, council);
-
             summons.DespawnAll();
             _DespawnAtEvade();
         }
@@ -190,7 +184,6 @@ struct boss_illidari_council : public BossAI
             if (Creature* council = instance->GetCreature(bossData))
             {
                 // Allow loot
-                instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, council);
                 council->LowerPlayerDamageReq(council->GetMaxHealth());
                 council->CastSpell(council, SPELL_QUIET_SUICIDE, true);
             }
@@ -238,7 +231,6 @@ private:
     bool _inCombat;
 };
 
-
 struct IllidariCouncilBossAI : public BossAI
 {
     IllidariCouncilBossAI(Creature* creature, uint32 bossId) : BossAI(creature, bossId), _bossId(bossId)
@@ -275,7 +267,7 @@ struct IllidariCouncilBossAI : public BossAI
             illidari->AI()->EnterEvadeMode(why);
     }
 
-    void DamageTaken(Unit* who, uint32 &damage) override
+    void DamageTaken(Unit* who, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (damage >= me->GetHealth() && (!who || who->GetGUID() != me->GetGUID()))
             damage = me->GetHealth() - 1;
@@ -812,12 +804,12 @@ void AddSC_boss_illidari_council()
     RegisterBlackTempleCreatureAI(npc_veras_vanish_effect);
     RegisterSpellScript(spell_illidari_council_empyreal_balance);
     RegisterSpellScript(spell_illidari_council_empyreal_equivalency);
-    RegisterAuraScript(spell_illidari_council_balance_of_power);
-    RegisterAuraScript(spell_illidari_council_deadly_strike);
-    RegisterAuraScript(spell_illidari_council_deadly_poison);
-    RegisterAuraScript(spell_illidari_council_vanish);
-    RegisterAuraScript(spell_illidari_council_reflective_shield);
+    RegisterSpellScript(spell_illidari_council_balance_of_power);
+    RegisterSpellScript(spell_illidari_council_deadly_strike);
+    RegisterSpellScript(spell_illidari_council_deadly_poison);
+    RegisterSpellScript(spell_illidari_council_vanish);
+    RegisterSpellScript(spell_illidari_council_reflective_shield);
     RegisterSpellScript(spell_illidari_council_judgement);
-    RegisterAuraScript(spell_illidari_council_seal);
-    RegisterAuraScript(spell_illidari_dampen_magic);
+    RegisterSpellScript(spell_illidari_council_seal);
+    RegisterSpellScript(spell_illidari_dampen_magic);
 }

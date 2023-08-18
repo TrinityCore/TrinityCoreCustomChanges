@@ -24,14 +24,14 @@
 #include "Object.h"
 #include "SpellAuraDefines.h"
 
-#include <boost/container/flat_set.hpp>
-
-class Unit;
-class Player;
+class AuraEffect;
 class Item;
+class Player;
 class Spell;
 class SpellMgr;
 class SpellInfo;
+class Unit;
+struct Condition;
 struct SpellChainNode;
 struct SpellTargetPosition;
 struct SpellDurationEntry;
@@ -40,39 +40,6 @@ struct SpellRangeEntry;
 struct SpellRadiusEntry;
 struct SpellEntry;
 struct SpellCastTimesEntry;
-struct Condition;
-
-enum SpellCastTargetFlags : uint32
-{
-    TARGET_FLAG_NONE            = 0x00000000,
-    TARGET_FLAG_UNUSED_1        = 0x00000001,               // not used
-    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
-    TARGET_FLAG_UNIT_RAID       = 0x00000004,               // not sent, used to validate target (if raid member)
-    TARGET_FLAG_UNIT_PARTY      = 0x00000008,               // not sent, used to validate target (if party member)
-    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
-    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid, 3 float
-    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid, 3 float
-    TARGET_FLAG_UNIT_ENEMY      = 0x00000080,               // not sent, used to validate target (if enemy)
-    TARGET_FLAG_UNIT_ALLY       = 0x00000100,               // not sent, used to validate target (if ally)
-    TARGET_FLAG_CORPSE_ENEMY    = 0x00000200,               // pguid
-    TARGET_FLAG_UNIT_DEAD       = 0x00000400,               // not sent, used to validate target (if dead creature)
-    TARGET_FLAG_GAMEOBJECT      = 0x00000800,               // pguid, used with TARGET_GAMEOBJECT_TARGET
-    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid
-    TARGET_FLAG_STRING          = 0x00002000,               // string
-    TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // not sent, used with TARGET_GAMEOBJECT_ITEM_TARGET
-    TARGET_FLAG_CORPSE_ALLY     = 0x00008000,               // pguid
-    TARGET_FLAG_UNIT_MINIPET    = 0x00010000,               // pguid, used to validate target (if non combat pet)
-    TARGET_FLAG_GLYPH_SLOT      = 0x00020000,               // used in glyph spells
-    TARGET_FLAG_DEST_TARGET     = 0x00040000,               // sometimes appears with DEST_TARGET spells (may appear or not for a given spell)
-    TARGET_FLAG_UNUSED20        = 0x00080000,               // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
-    TARGET_FLAG_UNIT_PASSENGER  = 0x00100000,               // guessed, used to validate target (if vehicle passenger)
-
-    TARGET_FLAG_UNIT_MASK = TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY
-        | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER,
-    TARGET_FLAG_GAMEOBJECT_MASK = TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_GAMEOBJECT_ITEM,
-    TARGET_FLAG_CORPSE_MASK = TARGET_FLAG_CORPSE_ALLY | TARGET_FLAG_CORPSE_ENEMY,
-    TARGET_FLAG_ITEM_MASK = TARGET_FLAG_TRADE_ITEM | TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT_ITEM
-};
 
 enum SpellTargetSelectionCategories
 {
@@ -197,7 +164,9 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_NEEDS_AMMO_DATA               = 0x00080000,
     SPELL_ATTR0_CU_BINARY_SPELL                  = 0x00100000,
     SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC  = 0x00200000,
-    SPELL_ATTR0_CU_LIQUID_AURA                   = 0x00400000,
+    SPELL_ATTR0_CU_DEPRECATED_LIQUID_AURA        = 0x00400000, // DO NOT REUSE
+    SPELL_ATTR0_CU_IS_TALENT                     = 0x00800000, // reserved for master branch
+    SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED          = 0x01000000,
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
@@ -232,16 +201,17 @@ private:
         SpellTargetCheckTypes SelectionCheckType; // defines selection criteria
         SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
     };
-    static StaticData _data[TOTAL_SPELL_TARGETS];
+    static std::array<StaticData, TOTAL_SPELL_TARGETS> _data;
 };
 
 class TC_GAME_API SpellEffectInfo
 {
+    friend class SpellInfo;
     SpellInfo const* _spellInfo;
-    uint8 _effIndex;
 public:
-    uint32    Effect;
-    uint32    ApplyAuraName;
+    SpellEffIndex EffectIndex;
+    SpellEffects Effect;
+    AuraType  ApplyAuraName;
     uint32    Amplitude;
     int32     DieSides;
     float     RealPointsPerLevel;
@@ -262,11 +232,13 @@ public:
     flag96    SpellClassMask;
     std::vector<Condition*>* ImplicitTargetConditions;
 
-    SpellEffectInfo() : _spellInfo(nullptr), _effIndex(0), Effect(0), ApplyAuraName(0), Amplitude(0), DieSides(0),
-                        RealPointsPerLevel(0), BasePoints(0), PointsPerComboPoint(0), ValueMultiplier(0), DamageMultiplier(0),
-                        BonusMultiplier(0), MiscValue(0), MiscValueB(0), Mechanic(MECHANIC_NONE), RadiusEntry(nullptr), ChainTarget(0),
-                        ItemType(0), TriggerSpell(0), ImplicitTargetConditions(nullptr) {}
-    SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex);
+    SpellEffectInfo();
+    explicit SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex);
+    SpellEffectInfo(SpellEffectInfo const&);
+    SpellEffectInfo(SpellEffectInfo&&) noexcept;
+    SpellEffectInfo& operator=(SpellEffectInfo const&);
+    SpellEffectInfo& operator=(SpellEffectInfo&&) noexcept;
+    ~SpellEffectInfo();
 
     bool IsEffect() const;
     bool IsEffect(SpellEffects effectName) const;
@@ -290,13 +262,18 @@ public:
     SpellEffectImplicitTargetTypes GetImplicitTargetType() const;
     SpellTargetObjectTypes GetUsedTargetObjectType() const;
 
+    struct ImmunityInfo;
+    ImmunityInfo const* GetImmunityInfo() const { return _immunityInfo; }
+
 private:
     struct StaticData
     {
         SpellEffectImplicitTargetTypes ImplicitTargetType; // defines what target can be added to effect target list if there's no valid target type provided for effect
         SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object type for spell effect
     };
-    static StaticData _data[TOTAL_SPELL_EFFECTS];
+    static std::array<StaticData, TOTAL_SPELL_EFFECTS> _data;
+
+    ImmunityInfo* _immunityInfo;
 };
 
 struct TC_GAME_API SpellDiminishInfo
@@ -305,18 +282,6 @@ struct TC_GAME_API SpellDiminishInfo
     DiminishingReturnsType DiminishReturnType = DRTYPE_NONE;
     DiminishingLevels DiminishMaxLevel = DIMINISHING_LEVEL_IMMUNE;
     int32 DiminishDurationLimit = 0;
-};
-
-struct TC_GAME_API ImmunityInfo
-{
-    uint32 SchoolImmuneMask = 0;
-    uint32 ApplyHarmfulAuraImmuneMask = 0;
-    uint32 MechanicImmuneMask = 0;
-    uint32 DispelImmune = 0;
-    uint32 DamageSchoolMask = 0;
-
-    boost::container::flat_set<AuraType> AuraTypeImmune;
-    boost::container::flat_set<SpellEffects> SpellEffectImmune;
 };
 
 class TC_GAME_API SpellInfo
@@ -376,19 +341,19 @@ class TC_GAME_API SpellInfo
         SpellRangeEntry const* RangeEntry;
         float  Speed;
         uint32 StackAmount;
-        uint32 Totem[2];
-        int32  Reagent[MAX_SPELL_REAGENTS];
-        uint32 ReagentCount[MAX_SPELL_REAGENTS];
+        std::array<uint32, 2> Totem;
+        std::array<int32, MAX_SPELL_REAGENTS>  Reagent;
+        std::array<uint32, MAX_SPELL_REAGENTS> ReagentCount;
         int32  EquippedItemClass;
         int32  EquippedItemSubClassMask;
         int32  EquippedItemInventoryTypeMask;
-        uint32 TotemCategory[2];
-        uint32 SpellVisual[2];
+        std::array<uint32, 2> TotemCategory;
+        std::array<uint32, 2> SpellVisual;
         uint32 SpellIconID;
         uint32 ActiveIconID;
         uint32 Priority;
-        char* SpellName[16];
-        char* Rank[16];
+        std::array<char const*, 16> SpellName;
+        std::array<char const*, 16> Rank;
         uint32 MaxTargetLevel;
         uint32 MaxAffectedTargets;
         uint32 SpellFamilyName;
@@ -397,7 +362,7 @@ class TC_GAME_API SpellInfo
         uint32 PreventionType;
         int32  AreaGroupId;
         uint32 SchoolMask;
-        SpellEffectInfo Effects[MAX_SPELL_EFFECTS];
+        std::array<SpellEffectInfo, MAX_SPELL_EFFECTS> _effects;
         uint32 ExplicitTargetMask;
         SpellChainNode const* ChainEntry;
 
@@ -422,7 +387,6 @@ class TC_GAME_API SpellInfo
 
         bool IsExplicitDiscovery() const;
         bool IsLootCrafting() const;
-        bool IsQuestTame() const;
         bool IsProfessionOrRiding() const;
         bool IsProfession() const;
         bool IsPrimaryProfession() const;
@@ -484,10 +448,9 @@ class TC_GAME_API SpellInfo
 
         SpellSchoolMask GetSchoolMask() const;
         uint32 GetAllEffectsMechanicMask() const;
-        uint32 GetEffectMechanicMask(uint8 effIndex) const;
+        uint32 GetEffectMechanicMask(SpellEffIndex effIndex) const;
         uint32 GetSpellMechanicMaskByEffectMask(uint32 effectMask) const;
-        Mechanics GetEffectMechanic(uint8 effIndex) const;
-        bool HasAnyEffectMechanic() const;
+        Mechanics GetEffectMechanic(SpellEffIndex effIndex) const;
         uint32 GetDispelMask() const;
         static uint32 GetDispelMask(DispelType type);
         uint32 GetExplicitTargetMask() const;
@@ -519,6 +482,9 @@ class TC_GAME_API SpellInfo
         bool IsDifferentRankOf(SpellInfo const* spellInfo) const;
         bool IsHighRankOf(SpellInfo const* spellInfo) const;
 
+        std::array<SpellEffectInfo, MAX_SPELL_EFFECTS> const& GetEffects() const { return _effects; }
+        SpellEffectInfo const& GetEffect(SpellEffIndex index) const { ASSERT(index < _effects.size()); return _effects[index]; }
+
         // spell diminishing returns
         DiminishingGroup GetDiminishingReturnsGroupForSpell(bool triggered) const;
         DiminishingReturnsType GetDiminishingReturnsGroupType(bool triggered) const;
@@ -526,11 +492,13 @@ class TC_GAME_API SpellInfo
         int32 GetDiminishingReturnsLimitDuration(bool triggered) const;
 
         // spell immunities
-        void ApplyAllSpellImmunitiesTo(Unit* target, uint8 effIndex, bool apply) const;
+        void ApplyAllSpellImmunitiesTo(Unit* target, SpellEffectInfo const& spellEffectInfo, bool apply) const;
         bool CanSpellProvideImmunityAgainstAura(SpellInfo const* auraSpellInfo) const;
-        bool SpellCancelsAuraEffect(SpellInfo const* auraSpellInfo, uint8 auraEffIndex) const;
+        bool SpellCancelsAuraEffect(AuraEffect const* aurEff) const;
 
         uint32 GetAllowedMechanicMask() const;
+
+        uint32 GetMechanicImmunityMask(Unit* caster) const;
 
     private:
         // loading helpers
@@ -540,6 +508,9 @@ class TC_GAME_API SpellInfo
         void _LoadAuraState();
         void _LoadSpellDiminishInfo();
         void _LoadImmunityInfo();
+
+        std::array<SpellEffectInfo, MAX_SPELL_EFFECTS>& _GetEffects() { return _effects; }
+        SpellEffectInfo& _GetEffect(SpellEffIndex index) { ASSERT(index < _effects.size()); return _effects[index]; }
 
         // unloading helpers
         void _UnloadImplicitTargetConditionLists();
@@ -551,8 +522,6 @@ class TC_GAME_API SpellInfo
         SpellDiminishInfo _diminishInfoTriggered;
 
         uint32 _allowedMechanicMask;
-
-        ImmunityInfo _immunityInfo[MAX_SPELL_EFFECTS];
 };
 
 #endif // _SPELLINFO_H

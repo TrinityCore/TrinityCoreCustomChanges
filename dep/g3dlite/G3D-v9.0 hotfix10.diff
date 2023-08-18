@@ -1,25 +1,20 @@
-diff --git a/dep/g3dlite/include/G3D/g3dmath.h b/dep/g3dlite/include/G3D/g3dmath.h
-index 54cc6ed370..002cd3858d 100644
---- a/dep/g3dlite/include/G3D/g3dmath.h
-+++ b/dep/g3dlite/include/G3D/g3dmath.h
-@@ -27,6 +27,7 @@
- #include "G3D/platform.h"
- #include <ctype.h>
- #include <float.h>
-+#include <algorithm>
- #include <limits>
- #include <stdlib.h>
- #include <stdint.h>
-diff --git a/dep/g3dlite/source/debugAssert.cpp b/dep/g3dlite/source/debugAssert.cpp
-index cfccf9a0cc..3c3e43a0af 100644
---- a/dep/g3dlite/source/debugAssert.cpp
-+++ b/dep/g3dlite/source/debugAssert.cpp
-@@ -99,7 +99,7 @@ static void createErrorMessage(
-         }
+diff --git a/dep/g3dlite/include/G3D/Array.h b/dep/g3dlite/include/G3D/Array.h
+index c562f5c920f7..c86b20fd7e97 100644
+--- a/dep/g3dlite/include/G3D/Array.h
++++ b/dep/g3dlite/include/G3D/Array.h
+@@ -346,6 +346,7 @@ class Array {
  
-         // Make sure the message got translated into something.
--        LPTSTR realLastErr;
-+        LPCTSTR realLastErr;
-         if (NULL != formatMsg) {
-             realLastErr = formatMsg;
-         } else {
+    /** Resizes this to match the size of \a other and then copies the data from other using memcpy.  This is only safe for POD types */
+    void copyPOD(const Array<T>& other) {
++       static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>, "copyPOD called on non-POD type");
+        if (numAllocated < other.num) {
+            m_memoryManager->free(data);
+            data = NULL;
+@@ -364,6 +365,7 @@ class Array {
+    /** Resizes this to just barely match the size of \a other + itself and then copies the data to the end of the array from other using memcpy.  
+         This is only safe for POD types */
+    void appendPOD(const Array<T>& other) {
++       static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>, "appendPOD called on non-POD type");
+        const size_t oldSize = num;
+        num += other.num;
+        if (numAllocated < num) {

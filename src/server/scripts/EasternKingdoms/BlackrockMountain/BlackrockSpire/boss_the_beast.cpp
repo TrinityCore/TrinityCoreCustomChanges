@@ -87,10 +87,9 @@ struct boss_the_beast : public BossAI
 
     void SpellHit(WorldObject* /*caster*/, SpellInfo const* spellInfo) override
     {
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_SKINNING))
-                if (!me->IsAlive()) // can that even happen?
-                    DoCastAOE(SPELL_FINKLE_IS_EINHORN, true);
+        if (spellInfo->HasEffect(SPELL_EFFECT_SKINNING))
+            if (!me->IsAlive()) // can that even happen?
+                DoCastAOE(SPELL_FINKLE_IS_EINHORN, true);
     }
 
     void SetData(uint32 type, uint32 /*data*/) override
@@ -225,7 +224,6 @@ class at_trigger_the_beast_movement : public AreaTriggerScript
 public:
     at_trigger_the_beast_movement() : AreaTriggerScript("at_trigger_the_beast_movement") { }
 
-
     bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) override
     {
         if (player->IsGameMaster())
@@ -245,7 +243,6 @@ class at_the_beast_room : public AreaTriggerScript
 {
 public:
     at_the_beast_room() : AreaTriggerScript("at_the_beast_room") { }
-
 
     bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/) override
     {

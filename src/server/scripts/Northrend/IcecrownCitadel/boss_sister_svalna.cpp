@@ -17,25 +17,15 @@
 
 #include "icecrown_citadel.h"
 #include "CellImpl.h"
-#include "Creature.h"
-#include "CreatureAI.h"
-#include "CreatureData.h"
-#include "EventProcessor.h"
-#include "InstanceScript.h"
+#include "Containers.h"
 #include "GridNotifiersImpl.h"
-#include "Map.h"
+#include "InstanceScript.h"
 #include "MotionMaster.h"
-#include "MovementDefines.h"
 #include "ObjectAccessor.h"
-#include "PetDefines.h"
-#include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "ScriptMgr.h"
-#include "SpellDefines.h"
-#include "SpellInfo.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
-#include "Unit.h"
 #include "VehicleDefines.h"
 
 enum ICCSisterSvalnaTexts
@@ -467,7 +457,7 @@ struct boss_sister_svalna : public BossAI
                     CastSpellExtraArgs args;
                     args.AddSpellBP0(1);
                     summon->CastSpell(target, VEHICLE_SPELL_RIDE_HARDCODED, args);
-                    summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+                    summon->SetUnitFlag2(UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
                 }
                 break;
             default:
@@ -688,7 +678,7 @@ struct npc_crok_scourgebane : public EscortAI
         }
     }
 
-    void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         // check wipe
         if (!_wipeCheckTimer)
@@ -971,7 +961,8 @@ struct npc_captain_arnath : public npc_argent_captainAI
                 case EVENT_ARNATH_PW_SHIELD:
                 {
                     std::list<Creature*> targets = DoFindFriendlyMissingBuff(40.0f, SPELL_POWER_WORD_SHIELD);
-                    DoCast(Trinity::Containers::SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
+                    if (!targets.empty())
+                        DoCast(Trinity::Containers::SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
                     Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, 15s, 20s);
                     break;
                 }
@@ -1427,6 +1418,7 @@ public:
     }
 };
 
+// 70053 - Revive Champion
 class spell_svalna_revive_champion : public SpellScript
 {
     PrepareSpellScript(spell_svalna_revive_champion);
@@ -1457,6 +1449,7 @@ class spell_svalna_revive_champion : public SpellScript
     }
 };
 
+// 71462 - Remove Spear
 class spell_svalna_remove_spear : public SpellScript
 {
     PrepareSpellScript(spell_svalna_remove_spear);
@@ -1502,7 +1495,7 @@ void AddSC_boss_sister_svalna()
     RegisterIcecrownCitadelCreatureAI(npc_captain_rupert);
     RegisterIcecrownCitadelCreatureAI(npc_frostwing_ymirjar_vrykul);
     RegisterIcecrownCitadelCreatureAI(npc_impaling_spear);
-    new spell_trigger_spell_from_caster("spell_svalna_caress_of_death", SPELL_IMPALING_SPEAR_KILL);
+    RegisterSpellScriptWithArgs(spell_trigger_spell_from_caster, "spell_svalna_caress_of_death", SPELL_IMPALING_SPEAR_KILL);
     RegisterSpellScript(spell_svalna_revive_champion);
     RegisterSpellScript(spell_svalna_remove_spear);
     new at_icc_start_frostwing_gauntlet();

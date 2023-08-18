@@ -47,7 +47,6 @@ enum Netherspite
     SPELL_NETHERSPITE_ROAR      = 38684,
 };
 
-
 const float PortalCoord[3][3] =
 {
     {-11195.353516f, -1613.237183f, 278.237258f}, // Left side
@@ -144,6 +143,8 @@ public:
 
             HandleDoors(true);
             DestroyPortals();
+
+            instance->SetBossState(DATA_NETHERSPITE, NOT_STARTED);
         }
 
         void SummonPortals()
@@ -267,12 +268,16 @@ public:
         {
             HandleDoors(false);
             SwitchToPortalPhase();
+
+            instance->SetBossState(DATA_NETHERSPITE, IN_PROGRESS);
         }
 
         void JustDied(Unit* /*killer*/) override
         {
             HandleDoors(true);
             DestroyPortals();
+
+            instance->SetBossState(DATA_NETHERSPITE, DONE);
         }
 
         void UpdateAI(uint32 diff) override

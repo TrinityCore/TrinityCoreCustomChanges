@@ -56,7 +56,7 @@ class instance_stratholme : public InstanceMapScript
 
         struct instance_stratholme_InstanceMapScript : public InstanceScript
         {
-            instance_stratholme_InstanceMapScript(Map* map) : InstanceScript(map)
+            instance_stratholme_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
             {
                 SetHeaders(DataHeader);
 
@@ -170,7 +170,7 @@ class instance_stratholme : public InstanceMapScript
                         break;
                     case NPC_YSIDA:
                         ysidaGUID = creature->GetGUID();
-                        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        creature->RemoveNpcFlag(UNIT_NPC_FLAG_QUESTGIVER);
                         break;
                 }
             }
@@ -198,7 +198,7 @@ class instance_stratholme : public InstanceMapScript
                         break;
                     case GO_GAUNTLET_GATE1:
                         //weird, but unless flag is set, client will not respond as expected. DB bug?
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+                        go->SetFlag(GO_FLAG_LOCKED);
                         gauntletGate1GUID = go->GetGUID();
                         break;
                     case GO_ZIGGURAT1:
@@ -278,7 +278,7 @@ class instance_stratholme : public InstanceMapScript
                                     ysida->CastSpell(nullptr, SPELL_YSIDA_SAVED, true);
                                     ysida->SetWalk(true);
                                     ysida->AI()->Talk(SAY_YSIDA_SAVED);
-                                    ysida->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                                    ysida->SetNpcFlag(UNIT_NPC_FLAG_QUESTGIVER);
                                     ysida->GetClosePoint(x, y, z, ysida->GetObjectScale() / 3, 4.0f);
                                     ysida->GetMotionMaster()->MovePoint(1, x, y, z);
 
@@ -350,7 +350,7 @@ class instance_stratholme : public InstanceMapScript
                                 TC_LOG_DEBUG("scripts", "Instance Stratholme: Ramstein spawned.");
                             }
                             else
-                                TC_LOG_DEBUG("scripts", "Instance Stratholme: %u Abomnation left to kill.", count);
+                                TC_LOG_DEBUG("scripts", "Instance Stratholme: {} Abomnation left to kill.", count);
                         }
 
                         if (data == NOT_STARTED)
@@ -491,7 +491,7 @@ class instance_stratholme : public InstanceMapScript
                         case EVENT_BARON_RUN:
                             if (GetData(TYPE_BARON_RUN) != DONE)
                                 SetData(TYPE_BARON_RUN, FAIL);
-                            TC_LOG_DEBUG("scripts", "Instance Stratholme: Baron run event reached end. Event has state %u.", GetData(TYPE_BARON_RUN));
+                            TC_LOG_DEBUG("scripts", "Instance Stratholme: Baron run event reached end. Event has state {}.", GetData(TYPE_BARON_RUN));
                             break;
                         case EVENT_SLAUGHTER_SQUARE:
                             if (Creature* baron = instance->GetCreature(baronGUID))

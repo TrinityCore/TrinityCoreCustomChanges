@@ -92,8 +92,8 @@ namespace FactorySelector
         }
         catch (InvalidAIException const& e)
         {
-            TC_LOG_ERROR("entities.unit", "Exception trying to assign script '%s' to Creature (Entry: %u), this Creature will have a default AI. Exception message: %s",
-                creature->GetScriptName().c_str(), creature->GetEntry(), e.what());
+            TC_LOG_ERROR("entities.unit", "Exception trying to assign script '{}' to Creature (Entry: {}), this Creature will have a default AI. Exception message: {}",
+                creature->GetScriptName(), creature->GetEntry(), e.what());
         }
 
         return SelectFactory<CreatureAI>(creature)->Create(creature);
@@ -103,7 +103,7 @@ namespace FactorySelector
     {
         MovementGeneratorType type = unit->GetDefaultMovementType();
         if (Creature* creature = unit->ToCreature())
-            if (!creature->GetPlayerMovingMe())
+            if (!creature->GetCharmerOrSelfPlayer())
                 type = creature->GetDefaultMovementType();
 
         MovementGeneratorCreator const* mv_factory = sMovementGeneratorRegistry->GetRegistryItem(type);

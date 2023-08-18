@@ -202,7 +202,7 @@ struct boss_kalecgos : public BossAI
         }
     }
 
-    void DamageTaken(Unit* who, uint32 &damage) override
+    void DamageTaken(Unit* who, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (damage >= me->GetHealth() && (!who || who->GetGUID() != me->GetGUID()))
             damage = 0;
@@ -370,7 +370,7 @@ struct boss_kalecgos_human : public ScriptedAI
         Talk(SAY_GOOD_DEATH);
     }
 
-    void DamageTaken(Unit* who, uint32 &damage) override
+    void DamageTaken(Unit* who, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (!who || who->GetGUID() != _sathGUID)
             damage = 0;
@@ -487,7 +487,7 @@ struct boss_sathrovarr : public BossAI
         }
     }
 
-    void DamageTaken(Unit* who, uint32 &damage) override
+    void DamageTaken(Unit* who, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
     {
         if (damage >= me->GetHealth() && (!who || who->GetGUID() != me->GetGUID()))
             damage = 0;
@@ -587,7 +587,7 @@ class go_kalecgos_spectral_rift : public GameObjectScript
         {
             go_kalecgos_spectral_riftAI(GameObject* go) : GameObjectAI(go) { }
 
-            bool GossipHello(Player* player) override
+            bool OnGossipHello(Player* player) override
             {
                 if (!player->HasAura(SPELL_SPECTRAL_EXHAUSTION))
                     player->CastSpell(player, SPELL_SPECTRAL_REALM_TRIGGER, true);
@@ -608,12 +608,12 @@ class spell_kalecgos_tap_check : public SpellScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ uint32(spellInfo->Effects[EFFECT_0].CalcValue()) });
+        return ValidateSpellInfo({ uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
     }
 
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
-        GetHitUnit()->CastSpell(GetCaster(), (uint32)GetSpellInfo()->Effects[EFFECT_0].CalcValue(), true);
+        GetHitUnit()->CastSpell(GetCaster(), GetEffectInfo().CalcValue(), true);
     }
 
     void Register() override
@@ -803,6 +803,6 @@ void AddSC_boss_kalecgos()
     RegisterSpellScript(spell_kalecgos_tap_check);
     RegisterSpellScript(spell_kalecgos_spectral_blast);
     RegisterSpellScript(spell_kalecgos_spectral_realm_trigger);
-    RegisterAuraScript(spell_kalecgos_spectral_realm_aura);
-    RegisterAuraScript(spell_kalecgos_curse_of_boundless_agony);
+    RegisterSpellScript(spell_kalecgos_spectral_realm_aura);
+    RegisterSpellScript(spell_kalecgos_curse_of_boundless_agony);
 }

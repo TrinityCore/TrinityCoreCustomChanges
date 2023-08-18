@@ -52,7 +52,7 @@ class instance_shattered_halls : public InstanceMapScript
 
         struct instance_shattered_halls_InstanceMapScript : public InstanceScript
         {
-            instance_shattered_halls_InstanceMapScript(Map* map) : InstanceScript(map)
+            instance_shattered_halls_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
             {
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
@@ -134,6 +134,12 @@ class instance_shattered_halls : public InstanceMapScript
                         victimsGUID[2] = creature->GetGUID();
                         break;
                 }
+            }
+
+            void OnUnitDeath(Unit* unit) override
+            {
+                if (unit->GetEntry() == NPC_BLOOD_GUARD_PORUNG)
+                    SetBossState(DATA_PORUNG, DONE);
             }
 
             bool SetBossState(uint32 type, EncounterState state) override

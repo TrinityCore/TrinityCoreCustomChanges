@@ -67,7 +67,7 @@ class TC_GAME_API ReputationMgr
             _visibleFactionCount(0), _honoredFactionCount(0), _reveredFactionCount(0), _exaltedFactionCount(0), _sendFactionIncreased(false) { }
         ~ReputationMgr() { }
 
-        void SaveToDB(CharacterDatabaseTransaction& trans);
+        void SaveToDB(CharacterDatabaseTransaction trans);
         void LoadFromDB(PreparedQueryResult result);
     public:                                                 // statics
         static const int32 PointsInRank[MAX_REPUTATION_RANK];
@@ -153,10 +153,10 @@ class TC_GAME_API ReputationMgr
         Player* _player;
         FactionStateList _factions;
         ForcedReactions _forcedReactions;
-        uint8 _visibleFactionCount :8;
-        uint8 _honoredFactionCount :8;
-        uint8 _reveredFactionCount :8;
-        uint8 _exaltedFactionCount :8;
+        uint8 _visibleFactionCount;
+        uint8 _honoredFactionCount;
+        uint8 _reveredFactionCount;
+        uint8 _exaltedFactionCount;
         bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
 };
 

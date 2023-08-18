@@ -101,6 +101,12 @@ void PreparedStatementBase::setString(const uint8 index, const std::string& valu
     statement_data[index].data = value;
 }
 
+void PreparedStatementBase::setStringView(const uint8 index, const std::string_view value)
+{
+    ASSERT(index < statement_data.size());
+    statement_data[index].data.emplace<std::string>(value);
+}
+
 void PreparedStatementBase::setBinary(const uint8 index, const std::vector<uint8>& value)
 {
     ASSERT(index < statement_data.size());
@@ -180,7 +186,7 @@ template std::string PreparedStatementData::ToString<double>(double);
 
 std::string PreparedStatementData::ToString(std::string const& value)
 {
-    return fmt::format("'{}'", value);
+    return Trinity::StringFormat("'{}'", value);
 }
 
 std::string PreparedStatementData::ToString(std::vector<uint8> const& /*value*/)

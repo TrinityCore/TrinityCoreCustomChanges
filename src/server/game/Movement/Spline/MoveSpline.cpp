@@ -201,9 +201,9 @@ bool MoveSplineInitArgs::Validate(Unit* unit) const
     if (!(exp))\
     {\
         if (unit)\
-            TC_LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '%s' failed for %s", #exp, unit->GetDebugInfo().c_str());\
+            TC_LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '{}' failed for {}", #exp, unit->GetDebugInfo());\
         else\
-            TC_LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '%s' failed for cyclic spline continuation", #exp); \
+            TC_LOG_ERROR("misc.movesplineinitargs", "MoveSplineInitArgs::Validate: expression '{}' failed for cyclic spline continuation", #exp); \
         return false;\
     }
     CHECK(path.size() > 1);
@@ -220,14 +220,11 @@ bool MoveSplineInitArgs::_checkPathBounds() const
 {
     if (!(flags & MoveSplineFlag::Mask_CatmullRom) && path.size() > 2)
     {
-        enum{
-            MAX_OFFSET = (1 << 11) / 2
-        };
+        constexpr float MAX_OFFSET = float((1 << 11) / 2);
         Vector3 middle = (path.front()+path.back()) / 2;
-        Vector3 offset;
         for (uint32 i = 1; i < path.size()-1; ++i)
         {
-            offset = path[i] - middle;
+            Vector3 offset = path[i] - middle;
             if (std::fabs(offset.x) >= MAX_OFFSET || std::fabs(offset.y) >= MAX_OFFSET || std::fabs(offset.z) >= MAX_OFFSET)
             {
                 TC_LOG_ERROR("misc", "MoveSplineInitArgs::_checkPathBounds check failed");
@@ -335,12 +332,11 @@ std::string MoveSpline::ToString() const
     str << "spline Id: " << GetId() << std::endl;
     str << "flags: " << splineflags.ToString() << std::endl;
     if (splineflags.final_angle)
-        str << "facing  angle: " << facing.angle;
+        str << "facing  angle: " << facing.angle << std::endl;
     else if (splineflags.final_target)
-        str << "facing target: " << facing.target;
+        str << "facing target: " << facing.target << std::endl;
     else if (splineflags.final_point)
-        str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z;
-    str << std::endl;
+        str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z << std::endl;
     str << "time passed: " << time_passed << std::endl;
     str << "total  time: " << Duration() << std::endl;
     str << "spline point Id: " << point_Idx << std::endl;

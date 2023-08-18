@@ -17,6 +17,7 @@
 
 #include "ScriptMgr.h"
 #include "blood_furnace.h"
+#include "Containers.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "InstanceScript.h"
@@ -119,8 +120,7 @@ class boss_broggok : public CreatureScript
                         break;
                     case ACTION_ACTIVATE_BROGGOK:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->SetImmuneToAll(false);
+                        me->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                         DoZoneInCombat();
                         events.ScheduleEvent(EVENT_SLIME_SPRAY, 10s);
                         events.ScheduleEvent(EVENT_POISON_BOLT, 7s);
@@ -128,13 +128,12 @@ class boss_broggok : public CreatureScript
                         break;
                     case ACTION_RESET_BROGGOK:
                         me->SetReactState(REACT_PASSIVE);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->SetImmuneToAll(true);
+                        me->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                         summons.DespawnAll();
                         instance->SetBossState(DATA_BROGGOK, NOT_STARTED);
                         if (GameObject * lever = instance->GetGameObject(DATA_BROGGOK_LEVER))
                         {
-                            lever->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
+                            lever->RemoveFlag(GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
                             lever->SetGoState(GO_STATE_READY);
                         }
                         break;
@@ -150,7 +149,7 @@ class boss_broggok : public CreatureScript
         }
 };
 
-static std::vector<uint32> const PrisionersEmotes =
+static Emote const PrisionersEmotes[] =
 {
     EMOTE_ONESHOT_ROAR,
     EMOTE_ONESHOT_SHOUT,
@@ -254,7 +253,7 @@ class go_broggok_lever : public GameObjectScript
 
             InstanceScript* instance;
 
-            bool GossipHello(Player* /*player*/) override
+            bool OnGossipHello(Player* /*player*/) override
             {
                 if (instance->GetBossState(DATA_BROGGOK) != DONE && instance->GetBossState(DATA_BROGGOK) != IN_PROGRESS)
                 {
@@ -263,7 +262,7 @@ class go_broggok_lever : public GameObjectScript
                         broggok->AI()->DoAction(ACTION_PREPARE_BROGGOK);
                 }
 
-                me->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
+                me->SetFlag(GO_FLAG_NOT_SELECTABLE | GO_FLAG_IN_USE);
                 me->SetGoState(GO_STATE_ACTIVE);
 
                 return true;
@@ -276,7 +275,7 @@ class go_broggok_lever : public GameObjectScript
         }
 };
 
-// 30914, 38462 - Poison (Broggok)
+// 30914, 38462 - Poison
 class spell_broggok_poison_cloud : public SpellScriptLoader
 {
     public:
@@ -288,7 +287,7 @@ class spell_broggok_poison_cloud : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellInfo) override
             {
-                return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
+                return ValidateSpellInfo({ spellInfo->GetEffect(EFFECT_0).TriggerSpell });
             }
 
             void PeriodicTick(AuraEffect const* aurEff)
@@ -297,7 +296,7 @@ class spell_broggok_poison_cloud : public SpellScriptLoader
                 if (!aurEff->GetTotalTicks())
                     return;
 
-                uint32 triggerSpell = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
+                uint32 triggerSpell = aurEff->GetSpellEffectInfo().TriggerSpell;
                 int32 mod = int32(((float(aurEff->GetTickNumber()) / aurEff->GetTotalTicks()) * 0.9f + 0.1f) * 10000 * 2 / 3);
                 GetTarget()->CastSpell(nullptr, triggerSpell, CastSpellExtraArgs(aurEff).AddSpellMod(SPELLVALUE_RADIUS_MOD, mod));
             }

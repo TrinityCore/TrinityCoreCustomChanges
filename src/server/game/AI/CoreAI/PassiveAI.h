@@ -46,7 +46,6 @@ class TC_GAME_API PossessedAI : public CreatureAI
         void EnterEvadeMode(EvadeReason /*why*/) override { }
 
         void JustDied(Unit*) override;
-        void KilledUnit(Unit* victim) override;
 
         static int32 Permissible(Creature const* /*creature*/) { return PERMIT_BASE_NO; }
 };
@@ -76,7 +75,7 @@ class TC_GAME_API CritterAI : public PassiveAI
         void JustEngagedWith(Unit* /*who*/) override;
         void EnterEvadeMode(EvadeReason why) override;
 
-        void OnMovementGeneratorFinalized(MovementGeneratorType type) override;
+        void MovementInform(uint32 type, uint32 id) override;
 
         static int32 Permissible(Creature const* creature);
 };

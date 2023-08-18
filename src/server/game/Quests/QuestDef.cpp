@@ -126,7 +126,7 @@ void Quest::LoadQuestDetails(Field* fields)
     {
         if (!sEmotesStore.LookupEntry(fields[1+i].GetUInt16()))
         {
-            TC_LOG_ERROR("sql.sql", "Table `quest_details` has non-existing Emote%i (%u) set for quest %u. Skipped.", 1+i, fields[1+i].GetUInt16(), fields[0].GetUInt32());
+            TC_LOG_ERROR("sql.sql", "Table `quest_details` has non-existing Emote{} ({}) set for quest {}. Skipped.", 1+i, fields[1+i].GetUInt16(), fields[0].GetUInt32());
             continue;
         }
 
@@ -143,10 +143,10 @@ void Quest::LoadQuestRequestItems(Field* fields)
     _emoteOnIncomplete = fields[2].GetUInt16();
 
     if (!sEmotesStore.LookupEntry(_emoteOnComplete))
-        TC_LOG_ERROR("sql.sql", "Table `quest_request_items` has non-existing EmoteOnComplete (%u) set for quest %u.", _emoteOnComplete, fields[0].GetUInt32());
+        TC_LOG_ERROR("sql.sql", "Table `quest_request_items` has non-existing EmoteOnComplete ({}) set for quest {}.", _emoteOnComplete, fields[0].GetUInt32());
 
     if (!sEmotesStore.LookupEntry(_emoteOnIncomplete))
-        TC_LOG_ERROR("sql.sql", "Table `quest_request_items` has non-existing EmoteOnIncomplete (%u) set for quest %u.", _emoteOnIncomplete, fields[0].GetUInt32());
+        TC_LOG_ERROR("sql.sql", "Table `quest_request_items` has non-existing EmoteOnIncomplete ({}) set for quest {}.", _emoteOnIncomplete, fields[0].GetUInt32());
 
     _requestItemsText = fields[3].GetString();
 }
@@ -157,7 +157,7 @@ void Quest::LoadQuestOfferReward(Field* fields)
     {
         if (!sEmotesStore.LookupEntry(fields[1 + i].GetUInt16()))
         {
-            TC_LOG_ERROR("sql.sql", "Table `quest_offer_reward` has non-existing Emote%i (%u) set for quest %u. Skipped.", 1 + i, fields[1 + i].GetUInt16(), fields[0].GetUInt32());
+            TC_LOG_ERROR("sql.sql", "Table `quest_offer_reward` has non-existing Emote{} ({}) set for quest {}. Skipped.", 1 + i, fields[1 + i].GetUInt16(), fields[0].GetUInt32());
             continue;
         }
 
@@ -233,6 +233,55 @@ uint32 Quest::GetXPReward(Player const* player) const
         return false;
 
     return true;
+}
+
+void Quest::BuildQuestRewards(WorldPackets::Quest::QuestRewards& rewards, Player* player, bool sendHiddenRewards) const
+{
+    if (!HasFlag(QUEST_FLAGS_HIDDEN_REWARDS) || sendHiddenRewards)
+    {
+        for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+        {
+            if (!RewardChoiceItemId[i])
+                continue;
+
+            uint32 displayID = 0;
+            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(RewardChoiceItemId[i]))
+                displayID = itemTemplate->DisplayInfoID;
+
+            rewards.UnfilteredChoiceItems.emplace_back(RewardChoiceItemId[i], RewardChoiceItemCount[i], displayID);
+        }
+
+        for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+        {
+            if (!RewardItemId[i])
+                continue;
+
+            uint32 displayID = 0;
+            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(RewardItemId[i]))
+                displayID = itemTemplate->DisplayInfoID;
+
+            rewards.RewardItems.emplace_back(RewardItemId[i], RewardItemIdCount[i], displayID);
+        }
+
+        rewards.RewardMoney = GetRewOrReqMoney(player);
+        rewards.RewardXPDifficulty = GetXPReward(player) * sWorld->getRate(RATE_XP_QUEST);
+    }
+
+    rewards.RewardHonor = 10 * CalculateHonorGain(player->GetQuestLevel(this)); // rewarded honor points. Multiply with 10 to satisfy client
+    rewards.RewardDisplaySpell = GetRewSpell(); // reward spell, this spell will display (icon) (cast if RewSpellCast == 0)
+    rewards.RewardSpell = GetRewSpellCast();
+    rewards.RewardTitleId = GetCharTitleId();
+    rewards.RewardTalents = GetBonusTalents();
+    rewards.RewardArenaPoints = GetRewArenaPoints();
+
+    for (uint32 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
+        rewards.RewardFactionID[i] = RewardFactionId[i];
+
+    for (uint32 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
+        rewards.RewardFactionValue[i] = RewardFactionValueId[i];
+
+    for (uint32 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
+        rewards.RewardFactionValueOverride[i] = RewardFactionValueIdOverride[i];
 }
 
 int32 Quest::GetRewOrReqMoney(Player const* player) const
@@ -414,9 +463,6 @@ WorldPacket Quest::BuildQueryData(LocaleConstant loc) const
     response.Info.POIx = GetPOIx();
     response.Info.POIy = GetPOIy();
     response.Info.POIPriority = GetPointOpt();
-
-    if (sWorld->getBoolConfig(CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-        Quest::AddQuestLevelToTitle(locQuestTitle, GetQuestLevel());
 
     response.Info.Title = locQuestTitle;
     response.Info.Objectives = locQuestObjectives;

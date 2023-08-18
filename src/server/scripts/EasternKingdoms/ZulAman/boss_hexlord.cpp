@@ -23,6 +23,7 @@ SDCategory: Zul'Aman
 EndScriptData */
 
 #include "ScriptMgr.h"
+#include "Containers.h"
 #include "InstanceScript.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
@@ -429,7 +430,7 @@ class boss_hexlord_malacrass : public CreatureScript
                     else
                     {
                         trigger->SetDisplayId(11686);
-                        trigger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        trigger->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                         trigger->CastSpell(target, SPELL_SIPHON_SOUL, true);
                         trigger->GetMotionMaster()->MoveChase(me);
 
@@ -710,7 +711,7 @@ class boss_gazakroth : public CreatureScript
                 if (firebolt_timer <= diff)
                 {
                     DoCastVictim(SPELL_FIREBOLT, false);
-                    firebolt_timer = 0.7 * IN_MILLISECONDS;
+                    firebolt_timer = 700;
                 }
                 else
                     firebolt_timer -= diff;
@@ -833,7 +834,6 @@ class boss_darkheart : public CreatureScript
             return GetZulAmanAI<boss_darkheartAI>(creature);
         }
 };
-
 
 class boss_slither : public CreatureScript
 {
@@ -1003,6 +1003,7 @@ class boss_koragg : public CreatureScript
         }
 };
 
+// 43522 - Unstable Affliction
 class spell_hexlord_unstable_affliction : public SpellScriptLoader
 {
     public:

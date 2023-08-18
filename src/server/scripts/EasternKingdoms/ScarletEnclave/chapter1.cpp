@@ -224,7 +224,7 @@ public:
                     else
                     {
                         me->GetMotionMaster()->MovePoint(1, anchorX, anchorY, me->GetPositionZ());
-                        //TC_LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
+                        //TC_LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to {} {} {}", anchorX, anchorY, me->GetPositionZ());
                         phase = PHASE_EQUIPING;
                         wait_timer = 0;
                     }
@@ -332,7 +332,7 @@ class go_acherus_soul_prison : public GameObjectScript
         {
             go_acherus_soul_prisonAI(GameObject* go) : GameObjectAI(go) { }
 
-            bool GossipHello(Player* player) override
+            bool OnGossipHello(Player* player) override
             {
                 if (Creature* anchor = me->FindNearestCreature(29521, 15))
                     if (ObjectGuid prisonerGUID = anchor->AI()->GetGUID())
@@ -349,6 +349,7 @@ class go_acherus_soul_prison : public GameObjectScript
         }
 };
 
+// 51519 - Death Knight Initiate Visual
 class spell_death_knight_initiate_visual : public SpellScript
 {
     PrepareSpellScript(spell_death_knight_initiate_visual);
@@ -471,14 +472,16 @@ struct npc_eye_of_acherus : public ScriptedAI
                     break;
                 case EVENT_LAUNCH_TOWARDS_DESTINATION:
                 {
-                    Movement::PointsArray path(EyeOfAcherusPath, EyeOfAcherusPath + EyeOfAcherusPathSize);
-                    Movement::MoveSplineInit init(me);
-                    init.MovebyPath(path);
-                    init.SetFly();
-                    if (Unit* owner = me->GetCharmerOrOwner())
-                        init.SetVelocity(owner->GetSpeed(MOVE_RUN));
+                    std::function<void(Movement::MoveSplineInit&)> initializer = [=, me = me](Movement::MoveSplineInit& init)
+                    {
+                        Movement::PointsArray path(EyeOfAcherusPath, EyeOfAcherusPath + EyeOfAcherusPathSize);
+                        init.MovebyPath(path);
+                        init.SetFly();
+                        if (Unit* owner = me->GetCharmerOrOwner())
+                            init.SetVelocity(owner->GetSpeed(MOVE_RUN));
+                    };
 
-                    me->GetMotionMaster()->LaunchMoveSpline(std::move(init), POINT_NEW_AVALON, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
+                    me->GetMotionMaster()->LaunchMoveSpline(std::move(initializer), POINT_NEW_AVALON, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
                     break;
                 }
                 case EVENT_GRANT_CONTROL:
@@ -568,7 +571,7 @@ public:
 
             me->RestoreFaction();
             CombatAI::Reset();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
+            me->SetUnitFlag(UNIT_FLAG_CAN_SWIM);
         }
 
         void SpellHit(WorldObject* caster, SpellInfo const* spellInfo) override
@@ -581,7 +584,7 @@ public:
             }
         }
 
-       void DamageTaken(Unit* pDoneBy, uint32 &uiDamage) override
+       void DamageTaken(Unit* pDoneBy, uint32 &uiDamage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
         {
             if (m_bIsDuelInProgress && pDoneBy && pDoneBy->IsControlledByPlayer())
             {
@@ -645,7 +648,7 @@ public:
             CombatAI::UpdateAI(uiDiff);
         }
 
-        bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+        bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
         {
             uint32 const action = player->PlayerTalkClass->GetGossipOptionAction(gossipListId);
             ClearGossipMenuFor(player);
@@ -660,7 +663,7 @@ public:
                     return true;
 
                 me->SetImmuneToPC(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SWIMMING);
+                me->RemoveUnitFlag(UNIT_FLAG_CAN_SWIM);
 
                 player->CastSpell(me, SPELL_DUEL, false);
                 player->CastSpell(player, SPELL_DUEL_FLAG, true);
@@ -668,8 +671,10 @@ public:
             return true;
         }
 
-        bool GossipHello(Player* player) override
+        bool OnGossipHello(Player* player) override
         {
+            uint32 gossipMenuId = Player::GetDefaultGossipMenuForSource(me);
+            InitGossipMenuFor(player, gossipMenuId);
             if (player->GetQuestStatus(QUEST_DEATH_CHALLENGE) == QUEST_STATUS_INCOMPLETE && me->IsFullHealth())
             {
                 if (player->HealthBelowPct(10))
@@ -678,7 +683,7 @@ public:
                 if (player->IsInCombat() || me->IsInCombat())
                     return true;
 
-                AddGossipItemFor(player, Player::GetDefaultGossipMenuForSource(me), 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                AddGossipItemFor(player, gossipMenuId, 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
             }
             return true;
@@ -770,11 +775,8 @@ private:
 
 enum SalanarTheHorseman
 {
-    GOSSIP_SALANAR_MENU               = 9739,
-    GOSSIP_SALANAR_OPTION             = 0,
     SALANAR_SAY                       = 0,
     QUEST_INTO_REALM_OF_SHADOWS       = 12687,
-    NPC_SALANAR_IN_REALM_OF_SHADOWS   = 28788,
     SPELL_EFFECT_STOLEN_HORSE         = 52263,
     SPELL_DELIVER_STOLEN_HORSE        = 52264,
     SPELL_CALL_DARK_RIDER             = 52266,
@@ -791,16 +793,6 @@ public:
     {
         npc_salanar_the_horsemanAI(Creature* creature) : ScriptedAI(creature) { }
 
-        bool GossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override
-        {
-            if (menuId == GOSSIP_SALANAR_MENU && gossipListId == GOSSIP_SALANAR_OPTION)
-            {
-                player->CastSpell(player, SPELL_REALM_OF_SHADOWS, true);
-                player->PlayerTalkClass->SendCloseGossip();
-            }
-            return false;
-        }
-
         void MoveInLineOfSight(Unit* who) override
         {
             ScriptedAI::MoveInLineOfSight(who);
@@ -811,8 +803,7 @@ public:
                 {
                     if (Player* player = charmer->ToPlayer())
                     {
-                        // for quest Into the Realm of Shadows(QUEST_INTO_REALM_OF_SHADOWS)
-                        if (me->GetEntry() == NPC_SALANAR_IN_REALM_OF_SHADOWS && player->GetQuestStatus(QUEST_INTO_REALM_OF_SHADOWS) == QUEST_STATUS_INCOMPLETE)
+                        if (player->GetQuestStatus(QUEST_INTO_REALM_OF_SHADOWS) == QUEST_STATUS_INCOMPLETE)
                         {
                             player->GroupEventHappens(QUEST_INTO_REALM_OF_SHADOWS, me);
                             Talk(SALANAR_SAY);
@@ -842,6 +833,7 @@ enum HorseSeats
     SEAT_ID_0   = 0
 };
 
+// 52265 - Repo
 class spell_stable_master_repo : public AuraScript
 {
     PrepareAuraScript(spell_stable_master_repo);
@@ -865,6 +857,7 @@ class spell_stable_master_repo : public AuraScript
     }
 };
 
+// 52264 - Deliver Stolen Horse
 class spell_deliver_stolen_horse : public SpellScript
 {
     PrepareSpellScript(spell_deliver_stolen_horse);
@@ -881,7 +874,7 @@ class spell_deliver_stolen_horse : public SpellScript
 
         Unit* caster = GetCaster();
         caster->RemoveAurasDueToSpell(SPELL_EFFECT_STOLEN_HORSE);
-        caster->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        caster->RemoveNpcFlag(UNIT_NPC_FLAG_SPELLCLICK);
         caster->SetFaction(FACTION_FRIENDLY);
 
         caster->CastSpell(caster, SPELL_CALL_DARK_RIDER, true);
@@ -923,8 +916,8 @@ public:
                 return;
 
             deathcharger->RestoreFaction();
-            deathcharger->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-            deathcharger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            deathcharger->RemoveNpcFlag(UNIT_NPC_FLAG_SPELLCLICK);
+            deathcharger->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
             if (!me->GetVehicle() && deathcharger->IsVehicle() && deathcharger->GetVehicleKit()->HasEmptySeat(0))
                 me->EnterVehicle(deathcharger);
         }
@@ -937,8 +930,8 @@ public:
 
             if (killer->GetTypeId() == TYPEID_PLAYER && deathcharger->GetTypeId() == TYPEID_UNIT && deathcharger->IsVehicle())
             {
-                deathcharger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-                deathcharger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                deathcharger->SetNpcFlag(UNIT_NPC_FLAG_SPELLCLICK);
+                deathcharger->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                 deathcharger->SetFaction(FACTION_SCARLET_CRUSADE_2);
             }
         }
@@ -1078,6 +1071,7 @@ enum GiftOfTheHarvester
     SPELL_GHOST_TRANSFORM   = 52505
 };
 
+// 52479 - Gift of the Harvester
 class spell_gift_of_the_harvester : public SpellScript
 {
     PrepareSpellScript(spell_gift_of_the_harvester);
@@ -1085,10 +1079,10 @@ class spell_gift_of_the_harvester : public SpellScript
     bool Validate(SpellInfo const* /*spell*/) override
     {
         return ValidateSpellInfo(
-                {
-                        SPELL_GHOUL_TRANFORM,
-                        SPELL_GHOST_TRANSFORM
-                });
+        {
+            SPELL_GHOUL_TRANFORM,
+            SPELL_GHOST_TRANSFORM
+        });
     }
 
     void HandleScriptEffect(SpellEffIndex /*effIndex*/)
@@ -1106,6 +1100,49 @@ class spell_gift_of_the_harvester : public SpellScript
     }
 };
 
+/*######
+## Quest 12842: Runeforging: Preparation For Battle
+######*/
+
+enum Runeforging
+{
+    SPELL_RUNEFORGING_CREDIT     = 54586,
+    QUEST_RUNEFORGING            = 12842
+};
+
+/* 53323 - Rune of Swordshattering
+   53331 - Rune of Lichbane
+   53341 - Rune of Cinderglacier
+   53342 - Rune of Spellshattering
+   53343 - Rune of Razorice
+   53344 - Rune of the Fallen Crusader
+   54446 - Rune of Swordbreaking
+   54447 - Rune of Spellbreaking
+   62158 - Rune of the Stoneskin Gargoyle
+   70164 - Rune of the Nerubian Carapace */
+class spell_chapter1_runeforging_credit : public SpellScript
+{
+    PrepareSpellScript(spell_chapter1_runeforging_credit);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_RUNEFORGING_CREDIT }) &&
+            sObjectMgr->GetQuestTemplate(QUEST_RUNEFORGING);
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            if (caster->GetQuestStatus(QUEST_RUNEFORGING) == QUEST_STATUS_INCOMPLETE)
+                caster->CastSpell(caster, SPELL_RUNEFORGING_CREDIT);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_chapter1_runeforging_credit::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_the_scarlet_enclave_c1()
 {
     new npc_unworthy_initiate();
@@ -1116,10 +1153,11 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_death_knight_initiate();
     RegisterCreatureAI(npc_dark_rider_of_acherus);
     new npc_salanar_the_horseman();
-    RegisterAuraScript(spell_stable_master_repo);
+    RegisterSpellScript(spell_stable_master_repo);
     RegisterSpellScript(spell_deliver_stolen_horse);
     new npc_ros_dark_rider();
     new npc_dkc1_gothik();
     RegisterCreatureAI(npc_scarlet_ghoul);
     RegisterSpellScript(spell_gift_of_the_harvester);
+    RegisterSpellScript(spell_chapter1_runeforging_credit);
 }

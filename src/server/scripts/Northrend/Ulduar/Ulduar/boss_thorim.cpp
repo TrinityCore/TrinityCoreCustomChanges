@@ -18,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "AreaBoundary.h"
 #include "CellImpl.h"
+#include "Containers.h"
 #include "GridNotifiersImpl.h"
 #include "InstanceScript.h"
 #include "MotionMaster.h"
@@ -423,7 +424,7 @@ class LightningFieldEvent : public BasicEvent
         {
             if (InstanceScript* instance = _owner->GetInstanceScript())
             {
-                if (instance->GetBossState(BOSS_THORIM) == IN_PROGRESS)
+                if (instance->GetBossState(DATA_THORIM) == IN_PROGRESS)
                 {
                     _owner->CastSpell(nullptr, SPELL_LIGHTNING_FIELD);
                     _owner->m_Events.AddEvent(this, Milliseconds(eventTime) + 1s);
@@ -447,7 +448,7 @@ class boss_thorim : public CreatureScript
 
         struct boss_thorimAI : public BossAI
         {
-            boss_thorimAI(Creature* creature) : BossAI(creature, BOSS_THORIM)
+            boss_thorimAI(Creature* creature) : BossAI(creature, DATA_THORIM)
             {
                 _encounterFinished = false;
                 Initialize();
@@ -488,7 +489,7 @@ class boss_thorim : public CreatureScript
                     me->SummonCreature(s.entry, s.pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3s);
 
                 if (GameObject* lever = instance->GetGameObject(DATA_THORIM_LEVER))
-                    lever->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    lever->SetFlag(GO_FLAG_NOT_SELECTABLE);
 
                 // Remove trigger auras
                 if (Creature* pillar = ObjectAccessor::GetCreature(*me, _activePillarGUID))
@@ -576,7 +577,7 @@ class boss_thorim : public CreatureScript
                 me->RemoveAllAttackers();
                 me->AttackStop();
                 me->SetFaction(FACTION_FRIENDLY);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+                me->SetUnitFlag(UNIT_FLAG_RENAME);
 
                 if (Creature* controller = instance->GetCreature(DATA_THORIM_CONTROLLER))
                     controller->RemoveAllAuras();
@@ -636,7 +637,7 @@ class boss_thorim : public CreatureScript
                 }
 
                 if (GameObject* lever = instance->GetGameObject(DATA_THORIM_LEVER))
-                    lever->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    lever->RemoveFlag(GO_FLAG_NOT_SELECTABLE);
 
                 // Summon Sif
                 me->SummonCreature(NPC_SIF, SifSpawnPosition);
@@ -651,16 +652,18 @@ class boss_thorim : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         summon->CastSpell(summon, SPELL_LIGHTNING_DESTRUCTION, true);
 
-                        Movement::PointsArray path;
-                        path.reserve(LightningOrbPathSize);
-                        std::transform(std::begin(LightningOrbPath), std::end(LightningOrbPath), std::back_inserter(path), [](Position const& pos)
+                        std::function<void(Movement::MoveSplineInit&)> initializer = [](Movement::MoveSplineInit& init)
                         {
-                            return G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-                        });
+                            Movement::PointsArray path;
+                            path.reserve(LightningOrbPathSize);
+                            std::transform(std::begin(LightningOrbPath), std::end(LightningOrbPath), std::back_inserter(path), [](Position const& pos)
+                            {
+                                return G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+                            });
 
-                        Movement::MoveSplineInit init(summon);
-                        init.MovebyPath(path);
-                        summon->GetMotionMaster()->LaunchMoveSpline(std::move(init), 0, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
+                            init.MovebyPath(path);
+                        };
+                        summon->GetMotionMaster()->LaunchMoveSpline(std::move(initializer), 0, MOTION_PRIORITY_NORMAL, POINT_MOTION_TYPE);
                         break;
                     }
                     case NPC_DARK_RUNE_CHAMPION:
@@ -918,7 +921,7 @@ class boss_thorim : public CreatureScript
                 return runicColossus && !runicColossus->IsAlive() && runeGiant && !runeGiant->IsAlive();
             }
 
-            void DamageTaken(Unit* attacker, uint32& damage) override
+            void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
             {
                 if (events.IsInPhase(PHASE_1) && CanStartPhase2(attacker))
                 {
@@ -976,13 +979,13 @@ struct npc_thorim_trashAI : public ScriptedAI
         static uint32 GetTotalHeal(SpellInfo const* spellInfo, Unit const* caster)
         {
             uint32 heal = 0;
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            for (SpellEffectInfo const& spellEffectInfo : spellInfo->GetEffects())
             {
-                if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_HEAL))
-                    heal += spellInfo->Effects[i].CalcValue(caster);
+                if (spellEffectInfo.IsEffect(SPELL_EFFECT_HEAL))
+                    heal += spellEffectInfo.CalcValue(caster);
 
-                if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_APPLY_AURA) && spellInfo->Effects[i].IsAura(SPELL_AURA_PERIODIC_HEAL))
-                    heal += spellInfo->GetMaxTicks() * spellInfo->Effects[i].CalcValue(caster);
+                if (spellEffectInfo.IsEffect(SPELL_EFFECT_APPLY_AURA) && spellEffectInfo.IsAura(SPELL_AURA_PERIODIC_HEAL))
+                    heal += spellInfo->GetMaxTicks() * spellEffectInfo.CalcValue(caster);
             }
             return heal;
         }
@@ -1163,7 +1166,7 @@ class npc_thorim_pre_phase : public CreatureScript
 
             void JustDied(Unit* /*killer*/) override
             {
-                if (Creature* thorim = _instance->GetCreature(BOSS_THORIM))
+                if (Creature* thorim = _instance->GetCreature(DATA_THORIM))
                     thorim->AI()->DoAction(ACTION_INCREASE_PREADDS_COUNT);
             }
 
@@ -1172,7 +1175,7 @@ class npc_thorim_pre_phase : public CreatureScript
                 return !target->GetAffectingPlayer();
             }
 
-            void DamageTaken(Unit* attacker, uint32& damage) override
+            void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType /*damageType*/, SpellInfo const* /*spellInfo = nullptr*/) override
             {
                 // nullify spell damage
                 if (!attacker || !attacker->GetAffectingPlayer())
@@ -1285,7 +1288,7 @@ class npc_thorim_arena_phase : public CreatureScript
                     return;
 
                 // this should only happen if theres no alive player in the arena -> summon orb
-                if (Creature* thorim = _instance->GetCreature(BOSS_THORIM))
+                if (Creature* thorim = _instance->GetCreature(DATA_THORIM))
                     thorim->AI()->DoAction(ACTION_BERSERK);
                 ScriptedAI::EnterEvadeMode(why);
             }
@@ -1430,7 +1433,7 @@ class npc_runic_colossus : public CreatureScript
                 // open the Runic Door
                 _instance->HandleGameObject(_instance->GetGuidData(DATA_RUNIC_DOOR), true);
 
-                if (Creature* thorim = _instance->GetCreature(BOSS_THORIM))
+                if (Creature* thorim = _instance->GetCreature(DATA_THORIM))
                     thorim->AI()->Talk(SAY_SPECIAL);
 
                 if (Creature* giant = _instance->GetCreature(DATA_RUNE_GIANT))
@@ -1934,7 +1937,7 @@ class spell_thorim_stormhammer : public SpellScriptLoader
 
             void LoseHammer()
             {
-                GetCaster()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
+                GetCaster()->SetVirtualItem(0, 0);
             }
 
             void Register() override
@@ -1977,7 +1980,7 @@ class spell_thorim_stormhammer_sif : public SpellScriptLoader
 
             void LoseHammer()
             {
-                GetCaster()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
+                GetCaster()->SetVirtualItem(0, 0);
             }
 
             void Register() override
@@ -2006,7 +2009,7 @@ class spell_thorim_stormhammer_boomerang : public SpellScriptLoader
             void RecoverHammer(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetHitUnit())
-                    target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, THORIM_WEAPON_DISPLAY_ID);
+                    target->SetVirtualItem(0, THORIM_WEAPON_DISPLAY_ID);
             }
 
             void Register() override
@@ -2101,7 +2104,7 @@ class spell_thorim_activate_lightning_orb_periodic : public SpellScriptLoader
                 if (!triggers.empty())
                 {
                     Creature* target = Trinity::Containers::SelectRandomContainerElement(triggers);
-                    if (Creature* thorim = instance->GetCreature(BOSS_THORIM))
+                    if (Creature* thorim = instance->GetCreature(DATA_THORIM))
                         thorim->AI()->SetGUID(target->GetGUID(), DATA_CHARGED_PILLAR);
                 }
             }

@@ -25,7 +25,6 @@ gets instead the deserter debuff.
 #include "ScriptMgr.h"
 #include "Creature.h"
 #include "InstanceScript.h"
-#include "Map.h"
 #include "the_slave_pens.h"
 
 ObjectData const creatureData[] =
@@ -50,10 +49,11 @@ public:
 
     struct instance_the_slave_pens_InstanceMapScript : public InstanceScript
     {
-        instance_the_slave_pens_InstanceMapScript(Map* map) : InstanceScript(map)
+        instance_the_slave_pens_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
         {
             counter = DATA_FLAMECALLER_000;
             LoadObjectData(creatureData, nullptr);
+            SetBossNumber(EncounterCount);
         }
 
         void OnCreatureCreate(Creature* creature) override

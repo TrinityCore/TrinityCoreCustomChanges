@@ -57,6 +57,7 @@ enum ZGCreatureIds
     NPC_NIGHTMARE_ILLUSION  = 15163,
     NPC_SHADE_OF_JINDO      = 14986,
     NPC_SACRIFICED_TROLL    = 14826,
+    NPC_GAHZRANKA           = 15114,
     NPC_MANDOKIR            = 11382, // Mandokir Event
     NPC_OHGAN               = 14988, // Mandokir Event
     NPC_VILEBRANCH_SPEAKER  = 11391, // Mandokir Event
@@ -82,5 +83,8 @@ inline AI* GetZulGurubAI(T* obj)
 {
     return GetInstanceAI<AI>(obj, ZGScriptName);
 }
+
+#define RegisterZulGurubCreatureAI(ai_name) RegisterCreatureAIWithFactory(ai_name, GetZulGurubAI)
+#define RegisterZulGurubGameObjectAI(ai_name) RegisterGameObjectAIWithFactory(ai_name, GetZulGurubAI)
 
 #endif

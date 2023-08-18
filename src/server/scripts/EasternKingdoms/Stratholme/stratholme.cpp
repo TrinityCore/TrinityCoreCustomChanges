@@ -58,7 +58,7 @@ class go_gauntlet_gate : public GameObjectScript
 
             InstanceScript* instance;
 
-            bool GossipHello(Player* player) override
+            bool OnGossipHello(Player* player) override
             {
                 if (instance->GetData(TYPE_BARON_RUN) != NOT_STARTED)
                     return false;
@@ -322,6 +322,7 @@ public:
 
 };
 
+// 31912 - Ysida Saved Credit Trigger
 class spell_ysida_saved_credit : public SpellScript
 {
     PrepareSpellScript(spell_ysida_saved_credit);
@@ -361,6 +362,7 @@ enum HauntingPhantoms
     SPELL_SUMMON_WRATH_PHANTOM    = 16335
 };
 
+// 16336 - Haunting Phantoms
 class spell_stratholme_haunting_phantoms : public AuraScript
 {
     PrepareAuraScript(spell_stratholme_haunting_phantoms);
@@ -398,5 +400,5 @@ void AddSC_stratholme()
     new npc_restless_soul();
     new npc_spectral_ghostly_citizen();
     RegisterSpellScript(spell_ysida_saved_credit);
-    RegisterAuraScript(spell_stratholme_haunting_phantoms);
+    RegisterSpellScript(spell_stratholme_haunting_phantoms);
 }

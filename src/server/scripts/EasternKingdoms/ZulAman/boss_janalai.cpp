@@ -23,12 +23,13 @@ SDCategory: Zul'Aman
 EndScriptData */
 
 #include "ScriptMgr.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
 #include "InstanceScript.h"
+#include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "Player.h"
 #include "ScriptedCreature.h"
+#include "SpellInfo.h"
 #include "TemporarySummon.h"
 #include "zulaman.h"
 
@@ -185,7 +186,7 @@ class boss_janalai : public CreatureScript
                 Talk(SAY_AGGRO);
             }
 
-            void DamageDealt(Unit* target, uint32 &damage, DamageEffectType /*damagetype*/) override
+            void DamageDealt(Unit* target, uint32& damage, DamageEffectType /*damagetype*/) override
             {
                 if (isFlameBreathing)
                 {
@@ -234,14 +235,10 @@ class boss_janalai : public CreatureScript
             bool HatchAllEggs(uint32 action) //1: reset, 2: isHatching all
             {
                 std::list<Creature*> templist;
-                float x, y, z;
-                me->GetPosition(x, y, z);
 
-                Trinity::AllCreaturesOfEntryInRange check(me, NPC_EGG, 100);
-                Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
-                Cell::VisitGridObjects(me, searcher, me->GetGridActivationRange());
+                GetCreatureListWithEntryInGrid(templist, me, NPC_EGG, 100.0f);
 
-                //TC_LOG_ERROR("scripts", "Eggs %d at middle", templist.size());
+                //TC_LOG_ERROR("scripts", "Eggs {} at middle", templist.size());
                 if (templist.empty())
                     return false;
 
@@ -258,12 +255,8 @@ class boss_janalai : public CreatureScript
             void Boom()
             {
                 std::list<Creature*> templist;
-                float x, y, z;
-                me->GetPosition(x, y, z);
 
-                Trinity::AllCreaturesOfEntryInRange check(me, NPC_FIRE_BOMB, 100);
-                Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
-                Cell::VisitGridObjects(me, searcher, me->GetGridActivationRange());
+                GetCreatureListWithEntryInGrid(templist, me, NPC_FIRE_BOMB, 100.0f);
 
                 for (std::list<Creature*>::const_iterator i = templist.begin(); i != templist.end(); ++i)
                 {
@@ -278,9 +271,9 @@ class boss_janalai : public CreatureScript
                 {
                     if (Unit* FireBomb = ObjectAccessor::GetUnit(*me, FireBombGUIDs[BombCount]))
                     {
-                        FireBomb->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        FireBomb->RemoveUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                         DoCast(FireBomb, SPELL_FIRE_BOMB_THROW, true);
-                        FireBomb->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        FireBomb->SetUnitFlag(UNIT_FLAG_UNINTERACTIBLE);
                     }
                     ++BombCount;
                     if (BombCount == 40)
@@ -508,14 +501,10 @@ class npc_janalai_hatcher : public CreatureScript
             bool HatchEggs(uint32 num)
             {
                 std::list<Creature*> templist;
-                float x, y, z;
-                me->GetPosition(x, y, z);
 
-                Trinity::AllCreaturesOfEntryInRange check(me, 23817, 50);
-                Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
-                Cell::VisitGridObjects(me, searcher, me->GetGridActivationRange());
+                GetCreatureListWithEntryInGrid(templist, me, NPC_EGG, 50.0f);
 
-                //TC_LOG_ERROR("scripts", "Eggs %d at %d", templist.size(), side);
+                //TC_LOG_ERROR("scripts", "Eggs {} at {}", templist.size(), side);
 
                 for (std::list<Creature*>::const_iterator i = templist.begin(); i != templist.end() && num > 0; ++i)
                     if ((*i)->GetDisplayId() != 11686)

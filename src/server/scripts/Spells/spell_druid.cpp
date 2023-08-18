@@ -91,7 +91,9 @@ enum DruidSpells
     SPELL_DRUID_BARKSKIN_01                 = 63058,
     SPELL_DRUID_RESTORATION_T10_2P_BONUS    = 70658,
     SPELL_DRUID_FRENZIED_REGENERATION_HEAL  = 22845,
-    SPELL_DRUID_GLYPH_OF_NOURISH            = 62971
+    SPELL_DRUID_GLYPH_OF_NOURISH            = 62971,
+    SPELL_DRUID_NURTURING_INSTINCT_R1       = 47179,
+    SPELL_DRUID_NURTURING_INSTINCT_R2       = 47180
 };
 
 enum MiscSpells
@@ -455,7 +457,7 @@ class spell_dru_frenzied_regeneration : public AuraScript
             return;
 
         int32 const mod = std::min(static_cast<int32>(rage), 100);
-        int32 const regen = CalculatePct(GetTarget()->GetMaxHealth(), GetTarget()->CalculateSpellDamage(GetSpellInfo(), EFFECT_1) * mod / 100.f);
+        int32 const regen = CalculatePct(GetTarget()->GetMaxHealth(), GetTarget()->CalculateSpellDamage(GetEffectInfo(EFFECT_1)) * mod / 100.f);
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(regen);
         GetTarget()->CastSpell(nullptr, SPELL_DRUID_FRENZIED_REGENERATION_HEAL, args);
@@ -710,7 +712,7 @@ class spell_dru_idol_lifebloom : public AuraScript
             spellMod->op = SPELLMOD_DOT;
             spellMod->type = SPELLMOD_FLAT;
             spellMod->spellId = GetId();
-            spellMod->mask = GetSpellInfo()->Effects[aurEff->GetEffIndex()].SpellClassMask;
+            spellMod->mask = aurEff->GetSpellEffectInfo().SpellClassMask;
         }
         spellMod->value = aurEff->GetAmount() / 7;
     }
@@ -808,7 +810,7 @@ class spell_dru_leader_of_the_pack : public AuraScript
         ASSERT(impLotpMana);
 
         CastSpellExtraArgs args2(aurEff);
-        args2.AddSpellBP0(CalculatePct(caster->GetMaxPower(POWER_MANA), impLotpMana->GetSpellInfo()->Effects[EFFECT_1].CalcValue()));
+        args2.AddSpellBP0(CalculatePct(caster->GetMaxPower(POWER_MANA), impLotpMana->GetSpellInfo()->GetEffect(EFFECT_1).CalcValue()));
         caster->CastSpell(nullptr, SPELL_DRUID_IMP_LEADER_OF_THE_PACK_MANA, args2);
     }
 
@@ -943,7 +945,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_0).CalcValue(GetCaster());
         return true;
     }
 
@@ -956,7 +958,7 @@ private:
     void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
     {
         // reduces all damage taken while Stunned in Moonkin Form
-        if (GetTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & (UNIT_FLAG_STUNNED) &&
+        if (GetTarget()->HasUnitFlag(UNIT_FLAG_STUNNED) &&
             GetTarget()->HasAuraWithMechanic(1 << MECHANIC_STUN))
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
     }
@@ -998,6 +1000,36 @@ class spell_dru_nourish : public SpellScript
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_dru_nourish::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+    }
+};
+
+// -33872 - Nurturing Instinct
+class spell_dru_nurturing_instinct : public AuraScript
+{
+    PrepareAuraScript(spell_dru_nurturing_instinct);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_DRUID_NURTURING_INSTINCT_R1, SPELL_DRUID_NURTURING_INSTINCT_R2 });
+    }
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        uint32 spellId = GetSpellInfo()->GetRank() == 1 ? SPELL_DRUID_NURTURING_INSTINCT_R1 : SPELL_DRUID_NURTURING_INSTINCT_R2;
+        target->CastSpell(target, spellId, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        uint32 spellId = GetSpellInfo()->GetRank() == 1 ? SPELL_DRUID_NURTURING_INSTINCT_R1 : SPELL_DRUID_NURTURING_INSTINCT_R2;
+        GetTarget()->RemoveAurasDueToSpell(spellId);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_dru_nurturing_instinct::AfterApply, EFFECT_0, SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_dru_nurturing_instinct::AfterRemove, EFFECT_0, SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -1062,7 +1094,7 @@ class spell_dru_predatory_strikes : public AuraScript
     }
 };
 
-// 33851 - Primal Tenacity
+// -33851 - Primal Tenacity
 class spell_dru_primal_tenacity : public AuraScript
 {
     PrepareAuraScript(spell_dru_primal_tenacity);
@@ -1078,7 +1110,7 @@ private:
 
     bool Load() override
     {
-        absorbPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+        absorbPct = GetEffectInfo(EFFECT_1).CalcValue(GetCaster());
         return true;
     }
 
@@ -1091,7 +1123,7 @@ private:
     void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
     {
         // reduces all damage taken while Stunned in Cat Form
-        if (GetTarget()->GetShapeshiftForm() == FORM_CAT && GetTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) &&
+        if (GetTarget()->GetShapeshiftForm() == FORM_CAT && GetTarget()->HasUnitFlag(UNIT_FLAG_STUNNED) &&
             GetTarget()->HasAuraWithMechanic(1 << MECHANIC_STUN))
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
     }
@@ -1199,7 +1231,7 @@ class spell_dru_savage_defense : public AuraScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
+        return ValidateSpellInfo({ spellInfo->GetEffect(EFFECT_0).TriggerSpell });
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -1208,7 +1240,7 @@ class spell_dru_savage_defense : public AuraScript
         Unit* caster = eventInfo.GetActor();
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(CalculatePct(caster->GetTotalAttackPowerValue(BASE_ATTACK), aurEff->GetAmount()));
-        caster->CastSpell(nullptr, GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell, args);
+        caster->CastSpell(nullptr, aurEff->GetSpellEffectInfo().TriggerSpell, args);
     }
 
     void Register() override
@@ -1819,7 +1851,7 @@ class spell_dru_wild_growth : public SpellScript
 
     bool Validate(SpellInfo const* spellInfo) override
     {
-        if (spellInfo->Effects[EFFECT_2].IsEffect() || spellInfo->Effects[EFFECT_2].CalcValue() <= 0)
+        if (spellInfo->GetEffect(EFFECT_2).IsEffect() || spellInfo->GetEffect(EFFECT_2).CalcValue() <= 0)
             return false;
         return true;
     }
@@ -1828,7 +1860,7 @@ class spell_dru_wild_growth : public SpellScript
     {
         targets.remove_if(RaidCheck(GetCaster()));
 
-        uint32 const maxTargets = uint32(GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster()));
+        uint32 const maxTargets = uint32(GetEffectInfo(EFFECT_2).CalcValue(GetCaster()));
 
         if (targets.size() > maxTargets)
         {
@@ -1894,53 +1926,54 @@ class spell_dru_wild_growth_aura : public AuraScript
 
 void AddSC_druid_spell_scripts()
 {
-    RegisterAuraScript(spell_dru_barkskin);
-    RegisterAuraScript(spell_dru_bear_form_passive);
-    RegisterAuraScript(spell_dru_berserk);
-    RegisterAuraScript(spell_dru_dash);
-    RegisterAuraScript(spell_dru_eclipse);
-    RegisterAuraScript(spell_dru_enrage);
-    RegisterAuraScript(spell_dru_forms_trinket);
+    RegisterSpellScript(spell_dru_barkskin);
+    RegisterSpellScript(spell_dru_bear_form_passive);
+    RegisterSpellScript(spell_dru_berserk);
+    RegisterSpellScript(spell_dru_dash);
+    RegisterSpellScript(spell_dru_eclipse);
+    RegisterSpellScript(spell_dru_enrage);
+    RegisterSpellScript(spell_dru_forms_trinket);
     RegisterSpellScript(spell_dru_flight_form);
-    RegisterAuraScript(spell_dru_frenzied_regeneration);
-    RegisterAuraScript(spell_dru_glyph_of_barkskin);
-    RegisterAuraScript(spell_dru_glyph_of_innervate);
-    RegisterAuraScript(spell_dru_glyph_of_rake);
-    RegisterAuraScript(spell_dru_glyph_of_rejuvenation);
-    RegisterAuraScript(spell_dru_glyph_of_shred);
+    RegisterSpellScript(spell_dru_frenzied_regeneration);
+    RegisterSpellScript(spell_dru_glyph_of_barkskin);
+    RegisterSpellScript(spell_dru_glyph_of_innervate);
+    RegisterSpellScript(spell_dru_glyph_of_rake);
+    RegisterSpellScript(spell_dru_glyph_of_rejuvenation);
+    RegisterSpellScript(spell_dru_glyph_of_shred);
     RegisterSpellScript(spell_dru_glyph_of_starfire);
-    RegisterAuraScript(spell_dru_glyph_of_starfire_dummy);
-    RegisterAuraScript(spell_dru_idol_lifebloom);
-    RegisterAuraScript(spell_dru_innervate);
-    RegisterAuraScript(spell_dru_insect_swarm);
-    RegisterAuraScript(spell_dru_leader_of_the_pack);
-    RegisterAuraScript(spell_dru_lifebloom);
-    RegisterAuraScript(spell_dru_living_seed);
-    RegisterAuraScript(spell_dru_living_seed_proc);
-    RegisterAuraScript(spell_dru_moonkin_form_passive);
+    RegisterSpellScript(spell_dru_glyph_of_starfire_dummy);
+    RegisterSpellScript(spell_dru_idol_lifebloom);
+    RegisterSpellScript(spell_dru_innervate);
+    RegisterSpellScript(spell_dru_insect_swarm);
+    RegisterSpellScript(spell_dru_leader_of_the_pack);
+    RegisterSpellScript(spell_dru_lifebloom);
+    RegisterSpellScript(spell_dru_living_seed);
+    RegisterSpellScript(spell_dru_living_seed_proc);
+    RegisterSpellScript(spell_dru_moonkin_form_passive);
     RegisterSpellScript(spell_dru_nourish);
-    RegisterAuraScript(spell_dru_omen_of_clarity);
-    RegisterAuraScript(spell_dru_owlkin_frenzy);
-    RegisterAuraScript(spell_dru_predatory_strikes);
-    RegisterAuraScript(spell_dru_primal_tenacity);
-    RegisterAuraScript(spell_dru_revitalize);
-    RegisterAuraScript(spell_dru_rip);
-    RegisterAuraScript(spell_dru_savage_defense);
+    RegisterSpellScript(spell_dru_nurturing_instinct);
+    RegisterSpellScript(spell_dru_omen_of_clarity);
+    RegisterSpellScript(spell_dru_owlkin_frenzy);
+    RegisterSpellScript(spell_dru_predatory_strikes);
+    RegisterSpellScript(spell_dru_primal_tenacity);
+    RegisterSpellScript(spell_dru_revitalize);
+    RegisterSpellScript(spell_dru_rip);
+    RegisterSpellScript(spell_dru_savage_defense);
     RegisterSpellAndAuraScriptPair(spell_dru_savage_roar, spell_dru_savage_roar_aura);
     RegisterSpellScript(spell_dru_starfall_aoe);
     RegisterSpellScript(spell_dru_starfall_dummy);
     RegisterSpellAndAuraScriptPair(spell_dru_survival_instincts, spell_dru_survival_instincts_aura);
-    RegisterAuraScript(spell_dru_swift_flight_passive);
+    RegisterSpellScript(spell_dru_swift_flight_passive);
     RegisterSpellScript(spell_dru_tiger_s_fury);
     RegisterSpellScript(spell_dru_typhoon);
-    RegisterAuraScript(spell_dru_t3_2p_bonus);
-    RegisterAuraScript(spell_dru_t3_6p_bonus);
-    RegisterAuraScript(spell_dru_t3_8p_bonus);
-    RegisterAuraScript(spell_dru_t4_2p_bonus);
-    RegisterAuraScript(spell_dru_item_t6_trinket);
-    RegisterAuraScript(spell_dru_t9_feral_relic);
-    RegisterAuraScript(spell_dru_t10_balance_4p_bonus);
+    RegisterSpellScript(spell_dru_t3_2p_bonus);
+    RegisterSpellScript(spell_dru_t3_6p_bonus);
+    RegisterSpellScript(spell_dru_t3_8p_bonus);
+    RegisterSpellScript(spell_dru_t4_2p_bonus);
+    RegisterSpellScript(spell_dru_item_t6_trinket);
+    RegisterSpellScript(spell_dru_t9_feral_relic);
+    RegisterSpellScript(spell_dru_t10_balance_4p_bonus);
     RegisterSpellScript(spell_dru_t10_restoration_4p_bonus);
-    RegisterAuraScript(spell_dru_t10_restoration_4p_bonus_dummy);
+    RegisterSpellScript(spell_dru_t10_restoration_4p_bonus_dummy);
     RegisterSpellAndAuraScriptPair(spell_dru_wild_growth, spell_dru_wild_growth_aura);
 }

@@ -17,8 +17,8 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "Unit.h"
 #include "mana_tombs.h"
-#include "Map.h"
 
 class instance_mana_tombs : public InstanceMapScript
 {
@@ -27,10 +27,16 @@ class instance_mana_tombs : public InstanceMapScript
 
         struct instance_mana_tombs_InstanceMapScript : public InstanceScript
         {
-            instance_mana_tombs_InstanceMapScript(Map* map) : InstanceScript(map)
+            instance_mana_tombs_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
             {
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
+            }
+
+            void OnUnitDeath(Unit* unit) override
+            {
+                if (unit->GetEntry() == NPC_TAVAROK)
+                    SetBossState(DATA_TAVAROK, DONE);
             }
         };
 

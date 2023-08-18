@@ -378,8 +378,8 @@ public:
                         if (Player* playerHandle = playerIteration->GetSource())
                         {
                             ChatHandler chatHandle = ChatHandler(playerHandle->GetSession());
-                            chatHandle.PSendSysMessage("|cffFF0000 [AutoBalance]|r|cffFF8000 %s entered the Instance %s. Auto setting player count to %u (Player Difficulty Offset = %u) |r",
-                                player->GetName().c_str(), map->GetMapName(), mapABInfo->playerCount + PlayerCountDifficultyOffset, PlayerCountDifficultyOffset);
+                            chatHandle.PSendSysMessage("|cffFF0000 [AutoBalance]|r|cffFF8000 {} entered the Instance {}. Auto setting player count to {} (Player Difficulty Offset = {}) |r",
+                                player->GetName(), map->GetMapName(), mapABInfo->playerCount + PlayerCountDifficultyOffset, PlayerCountDifficultyOffset);
                         }
                     }
                 }
@@ -424,8 +424,8 @@ public:
                         if (Player* playerHandle = playerIteration->GetSource())
                         {
                             ChatHandler chatHandle = ChatHandler(playerHandle->GetSession());
-                            chatHandle.PSendSysMessage("|cffFF0000 [-AutoBalance]|r|cffFF8000 %s left the Instance %s. Auto setting player count to %u (Player Difficulty Offset = %u) |r",
-                                player->GetName().c_str(), map->GetMapName(), mapABInfo->playerCount, PlayerCountDifficultyOffset);
+                            chatHandle.PSendSysMessage("|cffFF0000 [-AutoBalance]|r|cffFF8000 {} left the Instance {}. Auto setting player count to {} (Player Difficulty Offset = {}) |r",
+                                player->GetName(), map->GetMapName(), mapABInfo->playerCount, PlayerCountDifficultyOffset);
                         }
                     }
                 }
@@ -830,14 +830,14 @@ public:
 
     static bool HandleABSetOffsetCommand(ChatHandler* handler, uint32 offseti)
     {
-        handler->PSendSysMessage("Changing Player Difficulty Offset to %i.", offseti);
+        handler->PSendSysMessage("Changing Player Difficulty Offset to {}.", offseti);
         PlayerCountDifficultyOffset = offseti;
         return true;
     }
 
     static bool HandleABGetOffsetCommand(ChatHandler* handler)
     {
-        handler->PSendSysMessage("Current Player Difficulty Offset = %i", PlayerCountDifficultyOffset);
+        handler->PSendSysMessage("Current Player Difficulty Offset = {}", PlayerCountDifficultyOffset);
         return true;
     }
 
@@ -893,8 +893,8 @@ public:
         }
 
         AutoBalanceMapInfo* mapABInfo = pl->GetMap()->CustomData.GetDefault<AutoBalanceMapInfo>("AutoBalanceMapInfo");
-        handler->PSendSysMessage("Players on map: %u", mapABInfo->playerCount);
-        handler->PSendSysMessage("Max level of players in this map: %u", mapABInfo->mapLevel);
+        handler->PSendSysMessage("Players on map: {}", mapABInfo->playerCount);
+        handler->PSendSysMessage("Max level of players in this map: {}", mapABInfo->mapLevel);
         return true;
 
     }
@@ -912,8 +912,8 @@ public:
         }
 
         AutoBalanceCreatureInfo* creatureABInfo = target->CustomData.GetDefault<AutoBalanceCreatureInfo>("AutoBalanceCreatureInfo");
-        handler->PSendSysMessage("Instance player Count: %u", creatureABInfo->instancePlayerCount);
-        handler->PSendSysMessage("Selected level: %u", creatureABInfo->selectedLevel);
+        handler->PSendSysMessage("Instance player Count: {}", creatureABInfo->instancePlayerCount);
+        handler->PSendSysMessage("Selected level: {}", creatureABInfo->selectedLevel);
         handler->PSendSysMessage("Damage multiplier: %.6f", creatureABInfo->DamageMultiplier);
         handler->PSendSysMessage("Health multiplier: %.6f", creatureABInfo->HealthMultiplier);
         handler->PSendSysMessage("Mana multiplier: %.6f", creatureABInfo->ManaMultiplier);

@@ -25,6 +25,7 @@
 #include "ScriptedEscortAI.h"
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
@@ -869,6 +870,110 @@ class spell_dragonblight_bombard_the_ballistae_fx_master : public SpellScript
     }
 };
 
+/*######
+## Quest 12060, 12061: Projections and Plans
+######*/
+
+enum ProjectionsAndPlans
+{
+    SPELL_TELE_MOONREST_GARDENS    = 47324,
+    SPELL_TELE_SURGE_NEEDLE        = 47325,
+
+    AREA_SURGE_NEEDLE              = 4156,
+    AREA_MOONREST_GARDENS          = 4157
+};
+
+// 47097 - Surge Needle Teleporter
+class spell_dragonblight_surge_needle_teleporter : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_surge_needle_teleporter);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_TELE_MOONREST_GARDENS, SPELL_TELE_SURGE_NEEDLE });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        switch (caster->GetAreaId())
+        {
+            case AREA_SURGE_NEEDLE:
+                caster->CastSpell(caster, SPELL_TELE_MOONREST_GARDENS);
+                break;
+            case AREA_MOONREST_GARDENS:
+                caster->CastSpell(caster, SPELL_TELE_SURGE_NEEDLE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_surge_needle_teleporter::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 12125, 12126, 12127: In Service of Blood & In Service of the Unholy & In Service of Frost
+######*/
+
+// 47703 - Unholy Union
+// 47724 - Frost Draw
+// 50252 - Blood Draw
+class spell_dragonblight_fill_blood_unholy_frost_gem : public SpellScript
+{
+    PrepareSpellScript(spell_dragonblight_fill_blood_unholy_frost_gem);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo({ uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), uint32(GetEffectValue()));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dragonblight_fill_blood_unholy_frost_gem::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+// 47447 - Corrosive Spit
+class spell_dragonblight_corrosive_spit : public AuraScript
+{
+    PrepareAuraScript(spell_dragonblight_corrosive_spit);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo({ uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
+    }
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetTarget()->HasAura(aurEff->GetSpellInfo()->GetEffect(EFFECT_0).CalcValue()))
+            GetAura()->Remove();
+    }
+
+    void PeriodicTick(AuraEffect const* aurEff)
+    {
+        if (GetTarget()->HasAura(aurEff->GetSpellInfo()->GetEffect(EFFECT_0).CalcValue()))
+        {
+            PreventDefaultAction();
+            GetAura()->Remove();
+        }
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_dragonblight_corrosive_spit::AfterApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_dragonblight_corrosive_spit::PeriodicTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+    }
+};
+
 void AddSC_dragonblight()
 {
     RegisterCreatureAI(npc_commander_eligor_dawnbringer);
@@ -884,4 +989,7 @@ void AddSC_dragonblight()
     RegisterSpellScript(spell_dragonblight_scarlet_raven_priest_image_master);
     RegisterSpellScript(spell_dragonblight_cancel_scarlet_raven_priest_image);
     RegisterSpellScript(spell_dragonblight_bombard_the_ballistae_fx_master);
+    RegisterSpellScript(spell_dragonblight_surge_needle_teleporter);
+    RegisterSpellScript(spell_dragonblight_fill_blood_unholy_frost_gem);
+    RegisterSpellScript(spell_dragonblight_corrosive_spit);
 }

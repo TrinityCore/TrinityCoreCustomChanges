@@ -21,15 +21,12 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "ByteBuffer.h"
+#include "CryptoHash.h"
 #include "GameTime.h"
 #include "World.h"
 #include "Util.h"
 #include "Warden.h"
 #include "AccountMgr.h"
-
-#include <openssl/sha.h>
-#include <openssl/md5.h>
-
 #include <charconv>
 
 Warden::Warden() : _session(nullptr), _checkTimer(10 * IN_MILLISECONDS), _clientResponseTimer(0),
@@ -47,10 +44,7 @@ void Warden::MakeModuleForClient()
     TC_LOG_DEBUG("warden", "Make module for client");
     InitializeModuleForClient(_module.emplace());
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, _module->CompressedData, _module->CompressedSize);
-    MD5_Final(_module->Id.data(), &ctx);
+    _module->Id = Trinity::Crypto::MD5::GetDigestOf(_module->CompressedData, _module->CompressedSize);
 }
 
 void Warden::SendModuleToClient()
@@ -117,8 +111,8 @@ void Warden::Update(uint32 diff)
             // Kick player if client response delays more than set in config
             if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
             {
-                TC_LOG_WARN("warden", "%s (latency: %u, IP: %s) exceeded Warden module response delay (%s) - disconnecting client",
-                                _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, TimeFormat::ShortText).c_str());
+                TC_LOG_WARN("warden", "{} (latency: {}, IP: {}) exceeded Warden module response delay ({}) - disconnecting client",
+                                _session->GetPlayerInfo(), _session->GetLatency(), _session->GetRemoteAddress(), secsToTimeString(maxClientResponseDelay, TimeFormat::ShortText));
                 _session->KickPlayer("Warden::Update Warden module response delay exceeded");
             }
             else
@@ -160,28 +154,19 @@ bool Warden::IsValidCheckSum(uint32 checksum, uint8 const* data, const uint16 le
     }
 }
 
-struct keyData {
-    union
-    {
-        struct
-        {
-            uint8 bytes[20];
-        } bytes;
-
-        struct
-        {
-            uint32 ints[5];
-        } ints;
-    };
+union keyData
+{
+    std::array<uint8, 20> bytes;
+    std::array<uint32, 5> ints;
 };
 
 uint32 Warden::BuildChecksum(uint8 const* data, uint32 length)
 {
     keyData hash;
-    SHA1(data, length, hash.bytes.bytes);
+    hash.bytes = Trinity::Crypto::SHA1::GetDigestOf(data, size_t(length));
     uint32 checkSum = 0;
     for (uint8 i = 0; i < 5; ++i)
-        checkSum = checkSum ^ hash.ints.ints[i];
+        checkSum = checkSum ^ hash.ints[i];
 
     return checkSum;
 }
@@ -226,7 +211,7 @@ void Warden::HandleData(ByteBuffer& buff)
     DecryptData(buff.contents(), buff.size());
     uint8 opcode;
     buff >> opcode;
-    TC_LOG_DEBUG("warden", "Got packet, opcode %02X, size %u", opcode, uint32(buff.size() - 1));
+    TC_LOG_DEBUG("warden", "Got packet, opcode {:02X}, size {}", opcode, uint32(buff.size() - 1));
     buff.hexlike();
 
     switch (opcode)
@@ -251,7 +236,7 @@ void Warden::HandleData(ByteBuffer& buff)
         TC_LOG_DEBUG("warden", "NYI WARDEN_CMSG_MODULE_FAILED received!");
         break;
     default:
-        TC_LOG_WARN("warden", "Got unknown warden opcode %02X of size %u.", opcode, uint32(buff.size() - 1));
+        TC_LOG_WARN("warden", "Got unknown warden opcode {:02X} of size {}.", opcode, uint32(buff.size() - 1));
         break;
     }
 }
@@ -270,13 +255,13 @@ bool Warden::ProcessLuaCheckResponse(std::string const& msg)
         if (check.Type == LUA_EVAL_CHECK)
         {
             char const* penalty = ApplyPenalty(&check);
-            TC_LOG_WARN("warden", "%s failed Warden check %u (%s). Action: %s", _session->GetPlayerInfo().c_str(), id, EnumUtils::ToConstant(check.Type), penalty);
+            TC_LOG_WARN("warden", "{} failed Warden check {} ({}). Action: {}", _session->GetPlayerInfo(), id, EnumUtils::ToConstant(check.Type), penalty);
             return true;
         }
     }
 
     char const* penalty = ApplyPenalty(nullptr);
-    TC_LOG_WARN("warden", "%s sent bogus Lua check response for Warden. Action: %s", _session->GetPlayerInfo().c_str(), penalty);
+    TC_LOG_WARN("warden", "{} sent bogus Lua check response for Warden. Action: {}", _session->GetPlayerInfo(), penalty);
     return true;
 }
 

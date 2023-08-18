@@ -34,12 +34,14 @@
 #include "IPLocation.h"
 #include "GitRevision.h"
 #include "MySQLThreading.h"
+#include "OpenSSLCrypto.h"
 #include "ProcessPriority.h"
 #include "RealmList.h"
 #include "SecretMgr.h"
 #include "SharedDefines.h"
 #include "Util.h"
 #include <boost/asio/signal_set.hpp>
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <openssl/crypto.h>
@@ -116,28 +118,32 @@ int main(int argc, char** argv)
     Trinity::Banner::Show("authserver",
         [](char const* text)
         {
-            TC_LOG_INFO("server.authserver", "%s", text);
+            TC_LOG_INFO("server.authserver", "{}", text);
         },
         []()
         {
-            TC_LOG_INFO("server.authserver", "Using configuration file %s.", sConfigMgr->GetFilename().c_str());
-            TC_LOG_INFO("server.authserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-            TC_LOG_INFO("server.authserver", "Using Boost version: %i.%i.%i", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
+            TC_LOG_INFO("server.authserver", "Using configuration file {}.", sConfigMgr->GetFilename());
+            TC_LOG_INFO("server.authserver", "Using SSL version: {} (library: {})", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
+            TC_LOG_INFO("server.authserver", "Using Boost version: {}.{}.{}", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
         }
     );
 
     for (std::string const& key : overriddenKeys)
-        TC_LOG_INFO("server.authserver", "Configuration field '%s' was overridden with environment variable.", key.c_str());
+        TC_LOG_INFO("server.authserver", "Configuration field '{}' was overridden with environment variable.", key);
+
+    OpenSSLCrypto::threadsSetup(boost::dll::program_location().remove_filename());
+
+    std::shared_ptr<void> opensslHandle(nullptr, [](void*) { OpenSSLCrypto::threadsCleanup(); });
 
     // authserver PID file creation
     std::string pidFile = sConfigMgr->GetStringDefault("PidFile", "");
     if (!pidFile.empty())
     {
         if (uint32 pid = CreatePIDFile(pidFile))
-            TC_LOG_INFO("server.authserver", "Daemon PID: %u\n", pid);
+            TC_LOG_INFO("server.authserver", "Daemon PID: {}\n", pid);
         else
         {
-            TC_LOG_ERROR("server.authserver", "Cannot create PID file %s.\n", pidFile.c_str());
+            TC_LOG_ERROR("server.authserver", "Cannot create PID file {}.\n", pidFile);
             return 1;
         }
     }

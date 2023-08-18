@@ -18,6 +18,7 @@
 #include "WardenMac.h"
 #include "ByteBuffer.h"
 #include "Common.h"
+#include "CryptoHash.h"
 #include "GameTime.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -28,7 +29,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#include <openssl/md5.h>
 #include <array>
 
 WardenMac::WardenMac() : Warden() { }
@@ -54,16 +54,16 @@ void WardenMac::Init(WorldSession* pClient, SessionKey const& K)
 
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
-    TC_LOG_DEBUG("warden", "Server side warden for client %u initializing...", pClient->GetAccountId());
-    TC_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey).c_str());
-    TC_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey).c_str());
-    TC_LOG_DEBUG("warden", "  Seed: %s", ByteArrayToHexStr(_seed).c_str());
+    TC_LOG_DEBUG("warden", "Server side warden for client {} initializing...", pClient->GetAccountId());
+    TC_LOG_DEBUG("warden", "C->S Key: {}", ByteArrayToHexStr(_inputKey));
+    TC_LOG_DEBUG("warden", "S->C Key: {}", ByteArrayToHexStr(_outputKey));
+    TC_LOG_DEBUG("warden", "  Seed: {}", ByteArrayToHexStr(_seed));
     TC_LOG_DEBUG("warden", "Loading Module...");
 
     MakeModuleForClient();
 
-    TC_LOG_DEBUG("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key).c_str());
-    TC_LOG_DEBUG("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id).c_str());
+    TC_LOG_DEBUG("warden", "Module Key: {}", ByteArrayToHexStr(_module->Key));
+    TC_LOG_DEBUG("warden", "Module ID: {}", ByteArrayToHexStr(_module->Id));
     RequestModule();
 }
 
@@ -146,7 +146,7 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     if (result != Trinity::Crypto::SHA1::GetDigestOf(reinterpret_cast<uint8*>(keyIn), 16))
     {
         char const* penalty = ApplyPenalty(nullptr);
-        TC_LOG_WARN("warden", "%s failed hash reply. Action: %s", _session->GetPlayerInfo().c_str(), penalty);
+        TC_LOG_WARN("warden", "{} failed hash reply. Action: {}", _session->GetPlayerInfo(), penalty);
         return;
     }
 
@@ -231,12 +231,7 @@ void WardenMac::HandleCheckResult(ByteBuffer &buff)
         //found = true;
     }
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, str.c_str(), str.size());
-    std::array<uint8, 16> ourMD5Hash;
-    MD5_Final(ourMD5Hash.data(), &ctx);
-
+    std::array<uint8, 16> ourMD5Hash = Trinity::Crypto::MD5::GetDigestOf(str);
     std::array<uint8, 16> theirsMD5Hash;
     buff.read(theirsMD5Hash);
 

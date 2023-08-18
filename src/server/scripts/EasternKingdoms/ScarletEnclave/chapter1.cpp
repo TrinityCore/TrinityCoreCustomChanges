@@ -224,7 +224,7 @@ public:
                     else
                     {
                         me->GetMotionMaster()->MovePoint(1, anchorX, anchorY, me->GetPositionZ());
-                        //TC_LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to %f %f %f", anchorX, anchorY, me->GetPositionZ());
+                        //TC_LOG_DEBUG("scripts", "npc_unworthy_initiateAI: move to {} {} {}", anchorX, anchorY, me->GetPositionZ());
                         phase = PHASE_EQUIPING;
                         wait_timer = 0;
                     }
@@ -472,7 +472,7 @@ struct npc_eye_of_acherus : public ScriptedAI
                     break;
                 case EVENT_LAUNCH_TOWARDS_DESTINATION:
                 {
-                    std::function<void(Movement::MoveSplineInit&)> initializer = [=](Movement::MoveSplineInit& init)
+                    std::function<void(Movement::MoveSplineInit&)> initializer = [=, me = me](Movement::MoveSplineInit& init)
                     {
                         Movement::PointsArray path(EyeOfAcherusPath, EyeOfAcherusPath + EyeOfAcherusPathSize);
                         init.MovebyPath(path);
@@ -673,6 +673,8 @@ public:
 
         bool OnGossipHello(Player* player) override
         {
+            uint32 gossipMenuId = Player::GetDefaultGossipMenuForSource(me);
+            InitGossipMenuFor(player, gossipMenuId);
             if (player->GetQuestStatus(QUEST_DEATH_CHALLENGE) == QUEST_STATUS_INCOMPLETE && me->IsFullHealth())
             {
                 if (player->HealthBelowPct(10))
@@ -681,7 +683,7 @@ public:
                 if (player->IsInCombat() || me->IsInCombat())
                     return true;
 
-                AddGossipItemFor(player, Player::GetDefaultGossipMenuForSource(me), 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                AddGossipItemFor(player, gossipMenuId, 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
                 SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
             }
             return true;
@@ -1098,6 +1100,49 @@ class spell_gift_of_the_harvester : public SpellScript
     }
 };
 
+/*######
+## Quest 12842: Runeforging: Preparation For Battle
+######*/
+
+enum Runeforging
+{
+    SPELL_RUNEFORGING_CREDIT     = 54586,
+    QUEST_RUNEFORGING            = 12842
+};
+
+/* 53323 - Rune of Swordshattering
+   53331 - Rune of Lichbane
+   53341 - Rune of Cinderglacier
+   53342 - Rune of Spellshattering
+   53343 - Rune of Razorice
+   53344 - Rune of the Fallen Crusader
+   54446 - Rune of Swordbreaking
+   54447 - Rune of Spellbreaking
+   62158 - Rune of the Stoneskin Gargoyle
+   70164 - Rune of the Nerubian Carapace */
+class spell_chapter1_runeforging_credit : public SpellScript
+{
+    PrepareSpellScript(spell_chapter1_runeforging_credit);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_RUNEFORGING_CREDIT }) &&
+            sObjectMgr->GetQuestTemplate(QUEST_RUNEFORGING);
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            if (caster->GetQuestStatus(QUEST_RUNEFORGING) == QUEST_STATUS_INCOMPLETE)
+                caster->CastSpell(caster, SPELL_RUNEFORGING_CREDIT);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_chapter1_runeforging_credit::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_the_scarlet_enclave_c1()
 {
     new npc_unworthy_initiate();
@@ -1114,4 +1159,5 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_dkc1_gothik();
     RegisterCreatureAI(npc_scarlet_ghoul);
     RegisterSpellScript(spell_gift_of_the_harvester);
+    RegisterSpellScript(spell_chapter1_runeforging_credit);
 }

@@ -3360,7 +3360,7 @@ void Spell::EffectInterruptCast()
                     if (spell->GetCastTime() - spell->GetTimer() < 600)
                     {
                         std::string goXYZ = ".go xyz " + std::to_string(player->GetPositionX()) + " " + std::to_string(player->GetPositionY()) + " " + std::to_string(player->GetPositionZ() + 1.0f) + " " + std::to_string(player->GetMap()->GetId()) + " " + std::to_string(player->GetOrientation());
-                        TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played %s attempted repeat LUA spell Casting - IP: %s - Flagged at: %s", player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(), goXYZ.c_str());
+                        TC_LOG_INFO("anticheat", "ANTICHEAT COUNTER MEASURE::Played {} attempted repeat LUA spell Casting - IP: {} - Flagged at: {}", player->GetName(), player->GetSession()->GetRemoteAddress(), goXYZ);
                         return;
                     }
                 }

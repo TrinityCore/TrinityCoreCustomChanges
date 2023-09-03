@@ -555,7 +555,7 @@ void AntiCheatMgr::CreateCheatReport(std::string hacktype, std::string descripti
     std::string goXYZ = ".go xyz " + std::to_string(_player->GetPositionX()) + " " + std::to_string(_player->GetPositionY()) + " " + std::to_string(_player->GetPositionZ() + 1.0f) + " " + std::to_string(_player->GetMap()->GetId()) + " " + std::to_string(_player->GetOrientation());
 
     // A message in the worldserver console for logging
-    TC_LOG_INFO("anticheat", "[AntiCheat] Possible %s detected: Player %s at %s - Description: %s", hacktype.c_str(), playerName.c_str(), reportLocation.c_str(), description.c_str());
+    TC_LOG_INFO("anticheat", "[AntiCheat] Possible {} detected: Player {} at {} - Description: {}", hacktype, playerName, reportLocation, description);
 
     // Here we build our SQL Query to insert the cheat report into the table
     // Columns: (id), (timestamp), Account ID, Playername, Description, Area information, go. xyz Command

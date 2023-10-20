@@ -4159,12 +4159,5 @@ Metric.OverallStatusInterval = 1
 
 SoloLFG.Enable = 1
 
-#    SoloLFG.Announce
-#        Description: Announce the module.
-#        Default:     1  - (Enabled)
-#                     0  - (Disabled)
-
-SoloLFG.Announce = 1
-
 #
 ###################################################################################################

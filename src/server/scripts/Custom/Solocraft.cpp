@@ -555,7 +555,7 @@ private:
             float StatsMultPct = (*result)[4].GetFloat();
             // Inform the player
             std::ostringstream ss;
-            ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to {} - Reverting Difficulty Offset: {}. Spellpower Bonus Removed: {}";
+            ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to {} - Reverting Difficulty Offset: %f. Spellpower Bonus Removed: {}";
             ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
             // Clear the buffs
             for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)

@@ -553,7 +553,7 @@ private:
             int SpellPowerBonus = (*result)[3].GetUInt32();
             float StatsMultPct = (*result)[4].GetFloat();
             // Inform the player
-            ChatHandler(player->GetSession()).PSendSysMessage("| cffFF0000[SoloCraft] | cffFF8000 Player %s exited to %s - Reverting Difficulty Offset : %f. Spellpower Bonus Removed : %i", player->GetName(), map->GetMapName(), difficulty, SpellPowerBonus);
+            ChatHandler(player->GetSession()).PSendSysMessage("| cffFF0000[SoloCraft] | cffFF8000 Player %s exited to %s - Reverting Difficulty Offset : %f. Spellpower Bonus Removed : %i", player->GetName().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
             // Clear the buffs
             for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
             {

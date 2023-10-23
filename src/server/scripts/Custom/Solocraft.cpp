@@ -433,7 +433,6 @@ private:
         //Check whether to buff the player or check to debuff back to normal
         if (difficulty != 0)
         {
-            std::ostringstream ss;
             if (player->GetLevel() <= dunLevel + SolocraftLevelDiff) //If a player is too high level for dungeon don't buff but if in a group will count towards the group offset balancing.
             {
                 //Get Current members total difficulty offset and if it exceeds the difficulty offset of the dungeon then debuff new group members coming in until all members leave and re-enter. This happens when a player already inside dungeon invite others to the group but the player already has the full difficulty offset.
@@ -492,14 +491,12 @@ private:
                 if (difficulty > 0)
                 {
                     // Announce to player - Buff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - Difficulty Offset: %0.2f. Spellpower Bonus: {}. Class Balance Weight: {}";
-                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus, classBalance);
+                    ChatHandler(player->GetSession()).PSendSysMessage("|cffFF0000[SoloCraft] |cffFF8000 Player: %s entered %s  - Difficulty Offset: %f. Spellpower Bonus: %i. Class Balance Weight: %i.", player->GetName().c_str(), map->GetMapName(), difficulty, SpellPowerBonus, classBalance);
                 }
                 else
                 {
                     // Announce to player - Debuff
-                    ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - |cffFF0000BE ADVISED - You have been debuffed by offset: %0.2f with a Class Balance Weight: {}. |cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.";
-                    ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, classBalance);
+                    ChatHandler(player->GetSession()).PSendSysMessage("|cffFF0000[SoloCraft] |cffFF8000 Player: %s entered %s - | cffFF0000BE ADVISED - You have been debuffed by offset : %f with a Class Balance Weight : %i. | cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.", player->GetName().c_str(), map->GetMapName(), difficulty, classBalance);
                 }
                 // Save Player Dungeon Offsets to Database
                 CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES ({}, {}, {}, {}, {})", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
@@ -507,8 +504,7 @@ private:
             else
             {
                 // Announce to player - Over Max Level Threshold
-                ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " entered {}  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level ({}) threshold for this dungeon.";
-                ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
+                ChatHandler(player->GetSession()).PSendSysMessage("|cffFF0000[SoloCraft] |cffFF8000 Player: %s entered %s  - |cffFF0000You have not been buffed. |cffFF8000 Your level is higher than the max level (%u) threshold for this dungeon.", player->GetName().c_str(), map->GetMapName(), dunLevel + SolocraftLevelDiff);
                 ClearBuffs(player, map); //Check to revert player back to normal
             }
 
@@ -557,9 +553,7 @@ private:
             int SpellPowerBonus = (*result)[3].GetUInt32();
             float StatsMultPct = (*result)[4].GetFloat();
             // Inform the player
-            std::ostringstream ss;
-            ss << "|cffFF0000[SoloCraft] |cffFF8000" << player->GetName() << " exited to {} - Reverting Difficulty Offset: %0.2f. Spellpower Bonus Removed: {}";
-            ChatHandler(player->GetSession()).PSendSysMessage(ss.str().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
+            ChatHandler(player->GetSession()).PSendSysMessage("| cffFF0000[SoloCraft] | cffFF8000 Player %s exited to %s - Reverting Difficulty Offset : %f. Spellpower Bonus Removed : %i", player->GetName().c_str(), map->GetMapName(), difficulty, SpellPowerBonus);
             // Clear the buffs
             for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
             {

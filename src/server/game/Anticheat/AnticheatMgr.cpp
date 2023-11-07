@@ -741,9 +741,6 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
 
     uint32 key = player->GetGUID().GetCounter();
 
-    if (m_Players[key].GetLastMovementInfo().pos.GetPositionX() == movementInfo.pos.GetPositionX())
-        return;
-
     float lastX = m_Players[key].GetLastMovementInfo().pos.GetPositionX();
     float newX = movementInfo.pos.GetPositionX();
 
@@ -1056,10 +1053,6 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
                 return;
        }
    }
-
-   //Ring of Judgement
-   if (player && GetWMOAreaTableEntryByTripple(4932, 0, 22984))
-       return;
 
    // This is Black Magic. Check only for x and y difference but no z difference that is greater then or equal to z +2.5 of the ground
    if (m_Players[key].GetLastMovementInfo().pos.GetPositionZ() == movementInfo.pos.GetPositionZ()

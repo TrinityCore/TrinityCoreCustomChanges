@@ -537,6 +537,19 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo  movementInfo,
         if (!distance2D)
             return;
 
+        // The anticheat is disabled on transports, so we need to be sure that the player is indeed on a transport.
+        GameObject* transportGobj = player->GetMap()->GetGameObject(movementInfo.transport.guid);
+        if (transportGobj && transportGobj->IsTransport())
+        {
+            return;
+        }
+
+        // The anticheat check is disabled on Elevators, so we need to be sure that the player is indeed on a transport.
+        if (player->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+        {
+            return;
+        }
+
         if (!player->HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && movementInfo.jump.zspeed < -10.0f)
             return;
 
@@ -982,17 +995,31 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
    if (player->GetLiquidStatus() == LIQUID_MAP_ABOVE_WATER)
        return;
 
+   // The anticheat is disabled on transports, so we need to be sure that the player is indeed on a transport.
+   GameObject* transportGobj = player->GetMap()->GetGameObject(movementInfo.transport.guid);
+   if (transportGobj && transportGobj->IsTransport())
+   {
+       return;
+   }
+
+   // The anticheat check is disabled on Elevators, so we need to be sure that the player is indeed on a transport.
+   if (player->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+   {
+       return;
+   }
+
    // We exempt select areas found in 335 to prevent false hack hits
    if (player->GetAreaId())
    {
        switch (player->GetAreaId())
        {
-            case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
-            case 495:  //Ring of Judgement just being in the area false flags
-            case 4161: //Wymrest Temple just being in the area false flags
             case 10: // Duskwood bridge
             case 40: // Westfall bridge
             case 321: // Hammerfall wooden balcony
+            case 369: // Thunder Ridge being on the over hang cliff
+            case 495:  //Ring of Judgement just being in the area false flags
+            case 4273: //Celestial Planetarium Observer Battle has a narrow path that false flags
+            case 4161: //Wymrest Temple just being in the area false flags
                 return;
        }
    }
@@ -1047,7 +1074,7 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
            }
            if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_CM_ALERTSCREEN))
            {   // display warning at the center of the screen, hacky way?
-               std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] AIGNORE-Z HACK COUNTER MEASURE ALERT";
+               std::string str = "|cFFFFFC00[Playername:|cFF00FFFF[|cFF60FF00" + player->GetName() + "|cFF00FFFF] IGNORE-Z HACK COUNTER MEASURE ALERT";
                WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
                data << str;
                sWorld->SendGlobalGMMessage(&data);

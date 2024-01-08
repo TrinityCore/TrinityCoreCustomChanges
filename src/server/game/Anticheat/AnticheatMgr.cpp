@@ -980,6 +980,12 @@ void AnticheatMgr::ZAxisHackDetection(Player* player, MovementInfo movementInfo)
         return;
 
    uint32 key = player->GetGUID().GetCounter();
+   uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+
+   // We don't need to check for a waterwalk hack if the player hasn't moved
+   // This is necessary since MovementHandler fires if you rotate the camera in place
+   if (!distance2D)
+       return;
 
    // If he is flying we dont need to check
    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING))

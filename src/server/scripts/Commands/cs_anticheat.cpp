@@ -16,6 +16,7 @@
  */
 
 #include "Language.h"
+#include "Log.h"
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
@@ -107,6 +108,7 @@ public:
         WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
         pTarget->TeleportTo(loc);
         pTarget->SetHomebind(loc, 876);// GM Jail Homebind location
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Jail Command used on player {} ({})", player->GetName().c_str(), player->GetGUID().ToString());
         pTarget->CastSpell(pTarget, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
         if (Aura* dungdesert = pTarget->AddAura(LFG_SPELL_DUNGEON_DESERTER, pTarget))// LFG_SPELL_DUNGEON_DESERTER
         {

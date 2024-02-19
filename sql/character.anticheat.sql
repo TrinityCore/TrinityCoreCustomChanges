@@ -63,7 +63,7 @@ ALTER TABLE `daily_players_reports`
     ADD COLUMN `no_fall_damage_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `antiknockback_reports`;
 	ADD COLUMN `op_ack_hack_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `no_fall_damage_reports`;
 	ADD COLUMN `counter_measures_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `op_ack_hack_reports`;
-	
+
 ALTER TABLE `players_reports_status`
     ADD COLUMN `teleport_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `climb_reports`,
     ADD COLUMN `ignorecontrol_reports` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `teleport_reports`,

@@ -155,6 +155,7 @@ public:
             pTarget->TeleportTo(1, 1569.59f, -4397.63f, 7.7f, 0.54f);//Orgrimmar
             pTarget->SetHomebind(Hloc, 1653);// Orgrimmar Homebind location
         }
+        TC_LOG_INFO("anticheat", "AnticheatMgr:: Parole Command used on player {} ({})", player->GetName().c_str(), player->GetGUID().ToString());
         pTarget->RemoveAura(SHACKLES);// remove shackles
         pTarget->RemoveAura(LFG_SPELL_DUNGEON_DESERTER);// LFG_SPELL_DUNGEON_DESERTER
         pTarget->RemoveAura(BG_SPELL_DESERTER);// BG_SPELL_DESERTER

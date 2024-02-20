@@ -1775,7 +1775,6 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 
             player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
             player->SetHomebind(loc, 876);// GM Jail Homebind location
-            TC_LOG_INFO("anticheat", "AnticheatMgr:: Jail Command used on player {} ({})", player->GetName(), player->GetGUID().ToString());
             player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
 
             if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player))// LFG_SPELL_DUNGEON_DESERTER

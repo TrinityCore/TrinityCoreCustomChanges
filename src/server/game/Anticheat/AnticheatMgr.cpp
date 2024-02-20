@@ -1766,16 +1766,6 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
             data << str;
             sWorld->SendGlobalGMMessage(&data);
-            // This is where they end up going shaw shank redemption style
-            // GM Jail Location is uncommit and used as default for the jailing. Feel free to commit it out with double forward slashes (//) and uncommit,
-            // removing the double forward slashes (//) if you wish to use the other locations.
-            WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
-            //WorldLocation loc = WorldLocation(35, -98.0155, 149.8360,-40.3827, 3.2f);// Alliance Jail Stormwind Stockade Location
-            //WorldLocation loc = WorldLocation(0, -11139.1845, -1742.4421, -29.7365, 3.2f);// Horde Jail The Pit of Criminals Location
-
-            player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
-            player->SetHomebind(loc, 876);// GM Jail Homebind location
-            player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
 
             if (Aura* dungdesert = player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player))// LFG_SPELL_DUNGEON_DESERTER
             {
@@ -1789,6 +1779,16 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
             {
                 silent->SetDuration(-1);
             }
+            // This is where they end up going shaw shank redemption style
+            // GM Jail Location is uncommit and used as default for the jailing. Feel free to commit it out with double forward slashes (//) and uncommit,
+            // removing the double forward slashes (//) if you wish to use the other locations.
+            WorldLocation loc = WorldLocation(1, 16226.5f, 16403.6f, -64.5f, 3.2f);// GM Jail Location
+            //WorldLocation loc = WorldLocation(35, -98.0155, 149.8360,-40.3827, 3.2f);// Alliance Jail Stormwind Stockade Location
+            //WorldLocation loc = WorldLocation(0, -11139.1845, -1742.4421, -29.7365, 3.2f);// Horde Jail The Pit of Criminals Location
+
+            player->TeleportTo(loc);// we defined loc as the jail location so we tele them there
+            player->SetHomebind(loc, 876);// GM Jail Homebind location
+            player->CastSpell(player, SHACKLES);// shackle him in place to ensure no exploit happens for jail break attempt
 
             // publically shame them with a server message
             if (sWorld->getBoolConfig(CONFIG_ANTICHEAT_ANNOUNCEJAIL_ENABLE))

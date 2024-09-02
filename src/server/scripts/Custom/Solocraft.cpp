@@ -525,7 +525,7 @@ private:
             for (Group::member_citerator itr = groupMembers.begin(); itr != groupMembers.end(); ++itr)
             {
                 //Exclude player from the tally because the player is the one entering the dungeon
-                if (itr->guid != player->GetGUID().GetCounter())
+                if (itr->guid != player->GetGUID())
                 {
                     //Database query to find difficulty for each group member that is currently in an instance
                     QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = {}", itr->guid);

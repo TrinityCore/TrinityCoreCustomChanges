@@ -319,7 +319,7 @@ public:
     void OnLogout(Player* player) override
     {
         //Remove database entry as the player has logged out
-        CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID());
+        CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID().GetCounter());
     }
 };
 class solocraft_player_instance_handler : public PlayerScript {
@@ -453,7 +453,7 @@ private:
                 }
 
                 //Check Database for a current dungeon entry
-                QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID());
+                QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID().GetCounter());
 
                 //Modify Player Stats
                 for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i) //STATS defined/enum in SharedDefines.h
@@ -499,7 +499,7 @@ private:
                     ChatHandler(player->GetSession()).PSendSysMessage("|cffFF0000[SoloCraft] |cffFF8000 Player: %s entered %s - | cffFF0000BE ADVISED - You have been debuffed by offset : %f with a Class Balance Weight : %i. | cffFF8000 A group member already inside has the dungeon's full buff offset.  No Spellpower buff will be applied to spell casters.  ALL group members must exit the dungeon and re-enter to receive a balanced offset.", player->GetName().c_str(), map->GetMapName(), difficulty, classBalance);
                 }
                 // Save Player Dungeon Offsets to Database
-                CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES ({}, {}, {}, {}, {})", player->GetGUID(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
+                CharacterDatabase.PExecute("REPLACE INTO custom_solocraft_character_stats (GUID, Difficulty, GroupSize, SpellPower, Stats) VALUES ({}, {}, {}, {}, {})", player->GetGUID().GetCounter(), difficulty, numInGroup, SpellPowerBonus, SoloCraftStatsMult);
             }
             else
             {
@@ -525,7 +525,7 @@ private:
             for (Group::member_citerator itr = groupMembers.begin(); itr != groupMembers.end(); ++itr)
             {
                 //Exclude player from the tally because the player is the one entering the dungeon
-                if (itr->guid != player->GetGUID())
+                if (itr->guid != player->GetGUID().GetCounter())
                 {
                     //Database query to find difficulty for each group member that is currently in an instance
                     QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize` FROM `custom_solocraft_character_stats` WHERE GUID = {}", itr->guid);
@@ -546,7 +546,7 @@ private:
     void ClearBuffs(Player* player, Map* map)
     {
         //Database query to get offset from the last instance player exited
-        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID());
+        QueryResult result = CharacterDatabase.PQuery("SELECT `GUID`, `Difficulty`, `GroupSize`, `SpellPower`, `Stats` FROM `custom_solocraft_character_stats` WHERE GUID = {}", player->GetGUID().GetCounter());
         if (result)
         {
             float difficulty = (*result)[1].GetFloat();
@@ -565,7 +565,7 @@ private:
                 player->ApplySpellPowerBonus(SpellPowerBonus, false);
             }
             //Remove database entry as the player is no longer in an instance
-            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID());
+            CharacterDatabase.PExecute("DELETE FROM custom_solocraft_character_stats WHERE GUID = {}", player->GetGUID().GetCounter());
         }
     }
 };

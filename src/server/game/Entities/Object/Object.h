@@ -22,6 +22,7 @@
 #include "Duration.h"
 #include "DataMap.h"
 #include "EventProcessor.h"
+#include "MapDefines.h"
 #include "ModelIgnoreFlags.h"
 #include "MovementInfo.h"
 #include "ObjectDefines.h"
@@ -58,9 +59,7 @@ class WorldObject;
 class WorldPacket;
 class ZoneScript;
 struct FactionTemplateEntry;
-struct PositionFullTerrainStatus;
 struct QuaternionData;
-enum ZLiquidStatus : uint32;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 

@@ -2121,6 +2121,7 @@ void Spell::EffectSummonType()
                     // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                 case SUMMON_TYPE_VEHICLE:
                 case SUMMON_TYPE_VEHICLE2:
+                case SUMMON_TYPE_LIGHTWELL:
                 {
                     if (!unitCaster)
                         return;
@@ -2128,7 +2129,6 @@ void Spell::EffectSummonType()
                     summon = unitCaster->GetMap()->SummonCreature(entry, *destTarget, properties, duration, unitCaster, m_spellInfo->Id);
                     break;
                 }
-                case SUMMON_TYPE_LIGHTWELL:
                 case SUMMON_TYPE_TOTEM:
                 {
                     if (!unitCaster)

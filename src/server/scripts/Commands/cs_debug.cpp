@@ -192,7 +192,7 @@ public:
             return false;
         }
 
-        if (player->GetTarget())
+        if (!player->GetTarget().IsEmpty())
             unit->PlayDistanceSound(soundId, player);
         else
             unit->PlayDirectSound(soundId, player);
@@ -421,15 +421,15 @@ public:
                     handler->SetSentErrorMessage(true);
                     return false;
                 }
-                data << uint64(obj->GetGUID());
+                data << obj->GetGUID();
             }
             else if (type == "myguid")
             {
-                data << uint64(player->GetGUID());
+                data << player->GetGUID();
             }
             else if (type == "itsguid")
             {
-                data << uint64(unit->GetGUID());
+                data << unit->GetGUID();
             }
             else if (type == "itspos")
             {
@@ -1328,7 +1328,9 @@ public:
                 target->SetExtraUnitMovementFlags(*moveFlagsExtra);
             }
 
-            if (moveFlagsExtra || unhandledFlag)
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                target->DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
+            else
                 target->SendMovementFlagUpdate();
 
             handler->PSendSysMessage(LANG_MOVEFLAGS_SET, target->GetUnitMovementFlags(), target->GetExtraUnitMovementFlags());

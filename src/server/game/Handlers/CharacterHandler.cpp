@@ -629,6 +629,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;
     recvData >> guid;
+
     // Initiating
     uint32 initAccountId = GetAccountId();
 
@@ -823,7 +824,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder const& holder)
 
     if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar))
     {
-        AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
+        AreaTriggerTeleport const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
             pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation());
         else
@@ -1437,7 +1438,8 @@ void WorldSession::HandleCharCustomizeCallback(std::shared_ptr<CharacterCustomiz
     }
 
     // character with this name already exist
-    if (ObjectGuid newGuid = sCharacterCache->GetCharacterGuidByName(customizeInfo->Name))
+    ObjectGuid newGuid = sCharacterCache->GetCharacterGuidByName(customizeInfo->Name);
+    if (!newGuid.IsEmpty())
     {
         if (newGuid != customizeInfo->Guid)
         {

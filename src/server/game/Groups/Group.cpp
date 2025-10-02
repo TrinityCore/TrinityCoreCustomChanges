@@ -151,9 +151,8 @@ void Group::SelectNewPartyOrRaidLeader()
 bool Group::Create(Player* leader)
 {
     ObjectGuid leaderGuid = leader->GetGUID();
-    ObjectGuid::LowType lowguid = sGroupMgr->GenerateGroupId();
 
-    m_guid = ObjectGuid(HighGuid::Group, lowguid);
+    m_guid = ObjectGuid(HighGuid::Group, sGroupMgr->GenerateGroupId());
     m_leaderGuid = leaderGuid;
     m_leaderName = leader->GetName();
     leader->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
@@ -234,7 +233,7 @@ void Group::LoadGroupFromDB(Field* fields)
     m_lootThreshold = ItemQualities(fields[3].GetUInt8());
 
     for (uint8 i = 0; i < TARGET_ICONS_COUNT; ++i)
-        m_targetIcons[i].Set(fields[4 + i].GetUInt64());
+        m_targetIcons[i].SetRawValue(fields[4 + i].GetUInt64());
 
     m_groupType  = GroupType(fields[12].GetUInt8());
     if (m_groupType & GROUPTYPE_RAID)
@@ -2478,11 +2477,6 @@ ObjectGuid Group::GetLeaderGUID() const
 ObjectGuid Group::GetGUID() const
 {
     return m_guid;
-}
-
-ObjectGuid::LowType Group::GetLowGUID() const
-{
-    return m_guid.GetCounter();
 }
 
 char const* Group::GetLeaderName() const

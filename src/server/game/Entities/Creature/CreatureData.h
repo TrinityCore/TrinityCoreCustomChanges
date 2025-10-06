@@ -403,7 +403,7 @@ struct TC_GAME_API CreatureBaseStats
 
     uint32 GenerateHealth(CreatureTemplate const* info) const
     {
-        return uint32(ceil(BaseHealth[info->expansion] * info->ModHealth));
+        return uint32(std::round(std::max(BaseHealth[info->expansion] * info->ModHealth, 1.0f)));
     }
 
     uint32 GenerateMana(CreatureTemplate const* info) const
@@ -517,7 +517,7 @@ struct VendorItemData
         return &m_items[slot];
     }
     bool Empty() const { return m_items.empty(); }
-    uint8 GetItemCount() const { return m_items.size(); }
+    uint32 GetItemCount() const { return uint32(m_items.size()); }
     void AddItem(uint32 item, int32 maxcount, uint32 ptime, uint32 ExtendedCost)
     {
         m_items.emplace_back(item, maxcount, ptime, ExtendedCost);

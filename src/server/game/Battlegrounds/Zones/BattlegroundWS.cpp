@@ -17,6 +17,7 @@
 
 #include "BattlegroundWS.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
 #include "DBCStores.h"
 #include "GameObject.h"
 #include "Log.h"
@@ -71,11 +72,9 @@ BattlegroundWS::BattlegroundWS()
     _minutesElapsed = 0;
 }
 
-void BattlegroundWGScore::BuildObjectivesBlock(WorldPacket& data)
+void BattlegroundWGScore::BuildObjectivesBlock(WorldPackets::Battleground::PVPLogData_Player& playerData)
 {
-    data << uint32(2); // Objectives Count
-    data << uint32(FlagCaptures);
-    data << uint32(FlagReturns);
+    playerData.Stats = { FlagCaptures, FlagReturns };
 }
 
 BattlegroundWS::~BattlegroundWS() { }
@@ -244,7 +243,7 @@ void BattlegroundWS::AddPlayer(Player* player)
     bool const isInBattleground = IsPlayerInBattleground(player->GetGUID());
     Battleground::AddPlayer(player);
     if (!isInBattleground)
-        PlayerScores[player->GetGUID().GetCounter()] = new BattlegroundWGScore(player->GetGUID());
+        PlayerScores[player->GetGUID()] = new BattlegroundWGScore(player->GetGUID());
 }
 
 void BattlegroundWS::RespawnFlag(uint32 Team, bool captured)

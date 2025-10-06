@@ -351,13 +351,14 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
     if (!grp)
         return;
 
-    if (ObjectGuid guid = grp->GetMemberGUID(membername))
+    ObjectGuid guid = grp->GetMemberGUID(membername);
+    if (!guid.IsEmpty())
     {
         Player::RemoveFromGroup(grp, guid, GROUP_REMOVEMETHOD_KICK, GetPlayer()->GetGUID());
         return;
     }
 
-    if (Player* player = grp->GetInvited(membername))
+    if (Player* player = grp->GetInvited(guid))
     {
         player->UninviteFromGroup();
         return;
@@ -497,7 +498,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recvData)
 
     // everything's fine, do it
     WorldPacket data(MSG_MINIMAP_PING, (8+4+4));
-    data << uint64(GetPlayer()->GetGUID());
+    data << GetPlayer()->GetGUID();
     data << float(x);
     data << float(y);
     GetPlayer()->GetGroup()->BroadcastPacket(&data, true, -1, GetPlayer()->GetGUID());
@@ -525,7 +526,7 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
     if (!group)
         return;
 
-    uint8  x;
+    uint8 x;
     recvData >> x;
 
     /** error handling **/
@@ -533,9 +534,7 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
 
     // everything's fine, do it
     if (x == 0xFF)                                           // target icon request
-    {
         group->SendTargetIconList(this);
-    }
     else                                                    // target icon update
     {
         if (group->isRaidGroup() && !group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
@@ -698,7 +697,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recvData)
 
         // everything's fine, do it
         WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-        data << uint64(GetPlayer()->GetGUID());
+        data << GetPlayer()->GetGUID();
         data << uint8(state);
         group->BroadcastReadyCheck(&data);
     }
@@ -803,7 +802,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             {
                 AuraApplication const* aurApp = player->GetVisibleAura(i);
                 *data << uint32(aurApp ? aurApp->GetBase()->GetId() : 0);
-                *data << uint8(1);
+                *data << uint8(aurApp ? aurApp->GetFlags() : 0);
             }
         }
     }
@@ -812,9 +811,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
     {
         if (pet)
-            *data << (uint64) pet->GetGUID();
+            *data << pet->GetGUID();
         else
-            *data << (uint64) 0;
+            *data << ObjectGuid::Empty;
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_NAME)
@@ -906,15 +905,15 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
-    ObjectGuid Guid;
-    recvData >> Guid;
+    ObjectGuid guid;
+    recvData >> guid;
 
-    Player* player = ObjectAccessor::FindConnectedPlayer(Guid);
+    Player* player = ObjectAccessor::FindConnectedPlayer(guid);
     if (!player || !GetPlayer()->IsInSameRaidWith(player))
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3+4+2);
         data << uint8(0);                                   // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
-        data << Guid.WriteAsPacked();
+        data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
         data << uint16(MEMBER_STATUS_OFFLINE);
         SendPacket(&data);
@@ -994,7 +993,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recvData)
     data.put<uint64>(maskPos, auraMask);                    // GROUP_UPDATE_FLAG_AURAS
 
     if (updateFlags & GROUP_UPDATE_FLAG_PET_GUID)
-        data << uint64(ASSERT_NOTNULL(pet)->GetGUID());
+        data << ASSERT_NOTNULL(pet)->GetGUID();
 
     data << std::string(pet ? pet->GetName() : "");         // GROUP_UPDATE_FLAG_PET_NAME
     data << uint16(pet ? pet->GetDisplayId() : 0);          // GROUP_UPDATE_FLAG_PET_MODEL_ID
@@ -1006,7 +1005,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recvData)
         data << uint32(pet->GetMaxHealth());
 
     if (updateFlags & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
-        data << (uint8)pet->GetPowerType();
+        data << uint8(pet->GetPowerType());
 
     if (updateFlags & GROUP_UPDATE_FLAG_PET_CUR_POWER)
         data << uint16(pet->GetPower(pet->GetPowerType()));
@@ -1038,16 +1037,11 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket &recvData)
     SendPacket(&data);
 }
 
-/*!*/void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket & /*recvData*/)
+void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recvData*/)
 {
     // every time the player checks the character screen
     _player->SendRaidInfo();
 }
-
-/*void WorldSession::HandleGroupCancelOpcode(WorldPacket& recvData)
-{
-    TC_LOG_DEBUG("WORLD: got CMSG_GROUP_CANCEL.");
-}*/
 
 void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recvData)
 {

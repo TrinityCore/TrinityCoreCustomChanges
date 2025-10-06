@@ -123,6 +123,7 @@ DBCStorage <ItemRandomSuffixEntry> sItemRandomSuffixStore(ItemRandomSuffixfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 
 DBCStorage <LFGDungeonEntry> sLFGDungeonStore(LFGDungeonEntryfmt);
+DBCStorage <LFGDungeonExpansionEntry> sLFGDungeonExpansionStore(LFGDungeonExpansionfmt);
 DBCStorage <LightEntry> sLightStore(LightEntryfmt);
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
@@ -346,6 +347,7 @@ void LoadDBCStores(const std::string& dataPath)
     LOAD_DBC(sItemRandomSuffixStore,              "ItemRandomSuffix.dbc");
     LOAD_DBC(sItemSetStore,                       "ItemSet.dbc");
     LOAD_DBC(sLFGDungeonStore,                    "LFGDungeons.dbc");
+    LOAD_DBC(sLFGDungeonExpansionStore,           "LFGDungeonExpansion.dbc");
     LOAD_DBC(sLightStore,                         "Light.dbc");
     LOAD_DBC(sLiquidTypeStore,                    "LiquidType.dbc");
     LOAD_DBC(sLockStore,                          "Lock.dbc");
@@ -616,8 +618,8 @@ void LoadDBCStores(const std::string& dataPath)
             }
 
             // valid taxi network node
-            uint8  field   = (uint8)((node->ID - 1) / 32);
-            uint32 submask = 1  <<  ((node->ID - 1) % 32);
+            uint32 field = uint32((node->ID - 1) / (sizeof(TaxiMask::value_type) * 8));
+            TaxiMask::value_type submask = TaxiMask::value_type(1 << ((node->ID - 1) % (sizeof(TaxiMask::value_type) * 8)));
             sTaxiNodesMask[field] |= submask;
 
             if (node->MountCreatureID[0] && node->MountCreatureID[0] != 32981)

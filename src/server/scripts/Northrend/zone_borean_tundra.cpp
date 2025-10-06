@@ -1729,6 +1729,286 @@ class spell_borean_tundra_arcane_prisoner_rescue : public SpellScript
     }
 };
 
+/*######
+## Quest 11896: Weakness to Lightning
+######*/
+
+enum WeaknessToLightning
+{
+    SPELL_POWER_OF_THE_STORM_ITEM      = 46432,
+    SPELL_POWER_OF_THE_STORM           = 46424
+};
+
+// 46444 - Weakness to Lightning: Cast on Master Script Effect
+class spell_borean_tundra_weakness_to_lightning_cast_on_master : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_weakness_to_lightning_cast_on_master);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo({ uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()) });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetHitUnit()->CastSpell(GetHitUnit(), uint32(GetEffectValue()), true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_borean_tundra_weakness_to_lightning_cast_on_master::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+// 46446 - Weakness to Lightning: Cancel Power of the Storm Aura
+class spell_borean_tundra_weakness_to_lightning_cancel_aura : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_weakness_to_lightning_cancel_aura);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_POWER_OF_THE_STORM_ITEM });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->RemoveAurasDueToSpell(SPELL_POWER_OF_THE_STORM_ITEM);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_borean_tundra_weakness_to_lightning_cancel_aura::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+// 46550 - Weakness to Lightning: On Quest Complete
+class spell_borean_tundra_weakness_to_lightning_on_quest_complete : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_weakness_to_lightning_on_quest_complete);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_POWER_OF_THE_STORM });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetHitUnit()->RemoveAurasDueToSpell(SPELL_POWER_OF_THE_STORM);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_borean_tundra_weakness_to_lightning_on_quest_complete::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 11711: Coward Delivery... Under 30 Minutes or it's Free
+######*/
+
+// 45958 - Signal Alliance
+class spell_borean_tundra_signal_alliance : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_signal_alliance);
+
+    bool Validate(SpellInfo const* spellInfo) override
+    {
+        return ValidateSpellInfo(
+        {
+            uint32(spellInfo->GetEffect(EFFECT_0).CalcValue()),
+            uint32(spellInfo->GetEffect(EFFECT_1).CalcValue())
+        });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        if (caster->HasAura(uint32(GetEffectInfo(EFFECT_0).CalcValue())))
+            caster->CastSpell(caster, uint32(GetEffectValue()));
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_borean_tundra_signal_alliance::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+    }
+};
+
+/*######
+## Quest 11730: Master and Servant
+######*/
+
+enum MasterAndServant
+{
+    SPELL_SUMMON_SCAVENGEBOT_004A8  = 46063,
+    SPELL_SUMMON_SENTRYBOT_57K      = 46068,
+    SPELL_SUMMON_DEFENDOTANK_66D    = 46058,
+    SPELL_SUMMON_SCAVENGEBOT_005B6  = 46066,
+    SPELL_SUMMON_55D_COLLECTATRON   = 46034,
+    SPELL_ROBOT_KILL_CREDIT         = 46027,
+    NPC_SCAVENGEBOT_004A8           = 25752,
+    NPC_SENTRYBOT_57K               = 25753,
+    NPC_DEFENDOTANK_66D             = 25758,
+    NPC_SCAVENGEBOT_005B6           = 25792,
+    NPC_55D_COLLECTATRON            = 25793
+};
+
+// 46023 - The Ultrasonic Screwdriver
+class spell_borean_tundra_ultrasonic_screwdriver : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_ultrasonic_screwdriver);
+
+    bool Load() override
+    {
+        return GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCastItem();
+    }
+
+    bool Validate(SpellInfo const* /*spellEntry*/) override
+    {
+        return ValidateSpellInfo(
+        {
+            SPELL_SUMMON_SCAVENGEBOT_004A8,
+            SPELL_SUMMON_SENTRYBOT_57K,
+            SPELL_SUMMON_DEFENDOTANK_66D,
+            SPELL_SUMMON_SCAVENGEBOT_005B6,
+            SPELL_SUMMON_55D_COLLECTATRON,
+            SPELL_ROBOT_KILL_CREDIT
+        });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Item* castItem = GetCastItem();
+        Unit* caster = GetCaster();
+        if (Creature* target = GetHitCreature())
+        {
+            uint32 spellId = 0;
+            switch (target->GetEntry())
+            {
+                case NPC_SCAVENGEBOT_004A8: spellId = SPELL_SUMMON_SCAVENGEBOT_004A8;    break;
+                case NPC_SENTRYBOT_57K:     spellId = SPELL_SUMMON_SENTRYBOT_57K;        break;
+                case NPC_DEFENDOTANK_66D:   spellId = SPELL_SUMMON_DEFENDOTANK_66D;      break;
+                case NPC_SCAVENGEBOT_005B6: spellId = SPELL_SUMMON_SCAVENGEBOT_005B6;    break;
+                case NPC_55D_COLLECTATRON:  spellId = SPELL_SUMMON_55D_COLLECTATRON;     break;
+                default:
+                    return;
+            }
+            caster->CastSpell(caster, spellId, castItem);
+            caster->CastSpell(caster, SPELL_ROBOT_KILL_CREDIT, true);
+            target->DespawnOrUnsummon();
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_borean_tundra_ultrasonic_screwdriver::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+/*######
+## Quest 11652: The Plains of Nasam
+######*/
+
+enum ThePlainsOfNasam
+{
+    SPELL_DROP_WARSONG_LAND_MINE_1     = 45751,
+    SPELL_DROP_WARSONG_LAND_MINE_2     = 45752,
+    SPELL_DROP_WARSONG_LAND_MINE_3     = 45753,
+    SPELL_DROP_WARSONG_LAND_MINE_4     = 45754,
+    SPELL_DROP_WARSONG_LAND_MINE_5     = 45755,
+    SPELL_DROP_WARSONG_LAND_MINE_6     = 45756,
+    SPELL_DROP_WARSONG_LAND_MINE_7     = 47839,
+    SPELL_DROP_WARSONG_LAND_MINE_8     = 45749
+};
+
+static constexpr std::array<uint32, 8> DropLandMineSpells =
+{
+    SPELL_DROP_WARSONG_LAND_MINE_1, SPELL_DROP_WARSONG_LAND_MINE_2, SPELL_DROP_WARSONG_LAND_MINE_3, SPELL_DROP_WARSONG_LAND_MINE_4,
+    SPELL_DROP_WARSONG_LAND_MINE_5, SPELL_DROP_WARSONG_LAND_MINE_6, SPELL_DROP_WARSONG_LAND_MINE_7, SPELL_DROP_WARSONG_LAND_MINE_8
+};
+
+// 45750 - Land Mine Barrier
+class spell_borean_tundra_land_mine_barrier : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_land_mine_barrier);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(DropLandMineSpells);
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        for (uint32 spells : DropLandMineSpells)
+            caster->CastSpell(caster, spells);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_borean_tundra_land_mine_barrier::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/*######
+## Quest 11681: Rescuing Evanor
+######*/
+
+enum RescuingEvanor
+{
+    SPELL_AMBER_LEDGE_TO_BERYL_POINT     = 45883
+};
+
+// 45992 - Taxi - Amber Ledge to Beryl Point Platform
+class spell_borean_tundra_taxi_amber_ledge_to_beryl_point_platform : public AuraScript
+{
+    PrepareAuraScript(spell_borean_tundra_taxi_amber_ledge_to_beryl_point_platform);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_AMBER_LEDGE_TO_BERYL_POINT });
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_AMBER_LEDGE_TO_BERYL_POINT);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_borean_tundra_taxi_amber_ledge_to_beryl_point_platform::AfterRemove, EFFECT_0, SPELL_AURA_MECHANIC_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+/*######
+## Quest 11969: Springing the Trap
+######*/
+
+enum SpringingTheTrap
+{
+    SPELL_COLDARRA_TO_TRANSITUS     = 46814
+};
+
+// 46813 - Taxi - Coldarra Ledge to Transitus Shield
+class spell_borean_tundra_taxi_coldarra_ledge_to_transitus_shield : public AuraScript
+{
+    PrepareAuraScript(spell_borean_tundra_taxi_coldarra_ledge_to_transitus_shield);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_COLDARRA_TO_TRANSITUS });
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_COLDARRA_TO_TRANSITUS);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_borean_tundra_taxi_coldarra_ledge_to_transitus_shield::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_borean_tundra()
 {
     RegisterCreatureAI(npc_beryl_sorcerer);
@@ -1756,4 +2036,12 @@ void AddSC_borean_tundra()
     RegisterSpellScript(spell_borean_tundra_neural_needle);
     RegisterSpellScript(spell_borean_tundra_prototype_neural_needle);
     RegisterSpellScript(spell_borean_tundra_arcane_prisoner_rescue);
+    RegisterSpellScript(spell_borean_tundra_weakness_to_lightning_cast_on_master);
+    RegisterSpellScript(spell_borean_tundra_weakness_to_lightning_cancel_aura);
+    RegisterSpellScript(spell_borean_tundra_weakness_to_lightning_on_quest_complete);
+    RegisterSpellScript(spell_borean_tundra_signal_alliance);
+    RegisterSpellScript(spell_borean_tundra_ultrasonic_screwdriver);
+    RegisterSpellScript(spell_borean_tundra_land_mine_barrier);
+    RegisterSpellScript(spell_borean_tundra_taxi_amber_ledge_to_beryl_point_platform);
+    RegisterSpellScript(spell_borean_tundra_taxi_coldarra_ledge_to_transitus_shield);
 }

@@ -31,7 +31,7 @@ WorldPacket const* WorldPackets::Query::QueryCreatureResponse::Write()
     {
         _worldPacket << Stats.Name;
         _worldPacket << uint8(0) << uint8(0) << uint8(0);                   // name2, name3, name4, always empty
-        _worldPacket << Stats.NameAlt;
+        _worldPacket << Stats.Title;
         _worldPacket << Stats.CursorName;                                   // "Directions" for guard, string for Icons 2.3.0
         _worldPacket << uint32(Stats.Flags);                                // flags
         _worldPacket << uint32(Stats.CreatureType);                         // CreatureType.dbc
@@ -72,6 +72,34 @@ WorldPacket const* WorldPackets::Query::QueryGameObjectResponse::Write()
         _worldPacket << float(Stats.Size);                          // go size
         _worldPacket.append(Stats.QuestItems, MAX_GAMEOBJECT_QUEST_ITEMS);
     }
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Query::CorpseLocation::Write()
+{
+    _worldPacket << uint8(Valid);
+
+    if (Valid)
+    {
+        _worldPacket << int32(MapID);
+        _worldPacket << Position;
+        _worldPacket << int32(ActualMapID);
+        _worldPacket << uint32(Transport);
+    }
+
+    return &_worldPacket;
+}
+
+void WorldPackets::Query::QueryCorpseTransport::Read()
+{
+    _worldPacket >> Transport;
+}
+
+WorldPacket const* WorldPackets::Query::CorpseTransportQuery::Write()
+{
+    _worldPacket << Position;
+    _worldPacket << float(Facing);
 
     return &_worldPacket;
 }
@@ -145,7 +173,7 @@ WorldPacket const* WorldPackets::Query::QueryItemSingleResponse::Write()
             {
                 _worldPacket << Stats.Spells[s].SpellId;
                 _worldPacket << Stats.Spells[s].SpellTrigger;
-                _worldPacket << uint32(-abs(Stats.Spells[s].SpellCharges));
+                _worldPacket << int32(Stats.Spells[s].SpellCharges);
                 _worldPacket << uint32(Stats.Spells[s].SpellCooldown);
                 _worldPacket << uint32(Stats.Spells[s].SpellCategory);
                 _worldPacket << uint32(Stats.Spells[s].SpellCategoryCooldown);

@@ -17,6 +17,7 @@
 
 #include "BattlegroundAB.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "GameObject.h"
@@ -25,15 +26,12 @@
 #include "Player.h"
 #include "Random.h"
 #include "Util.h"
-#include "WorldPacket.h"
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
 
-void BattlegroundABScore::BuildObjectivesBlock(WorldPacket& data)
+void BattlegroundABScore::BuildObjectivesBlock(WorldPackets::Battleground::PVPLogData_Player& playerData)
 {
-    data << uint32(2);
-    data << uint32(BasesAssaulted);
-    data << uint32(BasesDefended);
+    playerData.Stats = { BasesAssaulted, BasesDefended };
 }
 
 BattlegroundAB::BattlegroundAB()
@@ -233,7 +231,7 @@ void BattlegroundAB::AddPlayer(Player* player)
     bool const isInBattleground = IsPlayerInBattleground(player->GetGUID());
     Battleground::AddPlayer(player);
     if (!isInBattleground)
-        PlayerScores[player->GetGUID().GetCounter()] = new BattlegroundABScore(player->GetGUID());
+        PlayerScores[player->GetGUID()] = new BattlegroundABScore(player->GetGUID());
 }
 
 void BattlegroundAB::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/, uint32 /*team*/)
@@ -624,7 +622,7 @@ void BattlegroundAB::Reset()
     }
 
     for (uint8 i = 0; i < BG_AB_ALL_NODES_COUNT + 5; ++i)//+5 for aura triggers
-        if (BgCreatures[i])
+        if (!BgCreatures[i].IsEmpty())
             DelCreature(i);
 }
 

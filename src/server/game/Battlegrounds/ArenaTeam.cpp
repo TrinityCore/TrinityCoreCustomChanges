@@ -18,6 +18,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
 #include "CalendarPackets.h"
 #include "CharacterCache.h"
 #include "DatabaseEnv.h"
@@ -194,7 +195,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult result)
 
     TeamId            = fields[0].GetUInt32();
     TeamName          = fields[1].GetString();
-    CaptainGuid       = ObjectGuid(HighGuid::Player, fields[2].GetUInt32());
+    CaptainGuid       = ObjectGuid::Create<HighGuid::Player>(fields[2].GetUInt32());
     Type              = fields[3].GetUInt8();
     BackgroundColor   = fields[4].GetUInt32();
     EmblemStyle       = fields[5].GetUInt8();
@@ -233,7 +234,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult result)
             break;
 
         ArenaTeamMember newMember;
-        newMember.Guid             = ObjectGuid(HighGuid::Player, fields[1].GetUInt32());
+        newMember.Guid             = ObjectGuid::Create<HighGuid::Player>(fields[1].GetUInt32());
         newMember.WeekGames        = fields[2].GetUInt16();
         newMember.WeekWins         = fields[3].GetUInt16();
         newMember.SeasonGames      = fields[4].GetUInt16();
@@ -326,18 +327,22 @@ void ArenaTeam::DelMember(ObjectGuid guid, bool cleanDb)
         {
             if (group && playerMember->GetGroup() && group->GetGUID() == playerMember->GetGroup()->GetGUID())
             {
-                if (BattlegroundQueueTypeId bgQueue = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_AA, GetType()))
+                for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 {
+                    BattlegroundQueueTypeId bgQueue = playerMember->GetBattlegroundQueueTypeId(i);
+                    if (bgQueue.BattlemasterListId != BATTLEGROUND_AA || bgQueue.TeamSize != GetType())
+                        continue;
+
                     GroupQueueInfo ginfo;
                     BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(bgQueue);
                     if (queue.GetPlayerGroupInfoData(playerMember->GetGUID(), &ginfo))
                         if (!ginfo.IsInvitedToBGInstanceGUID)
                         {
-                            WorldPacket data;
                             playerMember->RemoveBattlegroundQueueId(bgQueue);
-                            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, nullptr, playerMember->GetBattlegroundQueueIndex(bgQueue), STATUS_NONE, 0, 0, 0, 0);
+                            WorldPackets::Battleground::BattlefieldStatusNone battlefieldStatus;
+                            BattlegroundMgr::BuildBattlegroundStatusNone(&battlefieldStatus, i);
                             queue.RemovePlayer(playerMember->GetGUID(), true);
-                            playerMember->GetSession()->SendPacket(&data);
+                            playerMember->SendDirectMessage(battlefieldStatus.Write());
                         }
                 }
             }
@@ -442,7 +447,7 @@ void ArenaTeam::Roster(WorldSession* session)
     {
         player = ObjectAccessor::FindConnectedPlayer(itr->Guid);
 
-        data << uint64(itr->Guid);                              // guid
+        data << itr->Guid;                                      // guid
         data << uint8((player ? 1 : 0));                        // online flag
         data << itr->Name;                                      // member name
         data << uint32((itr->Guid == GetCaptain() ? 0 : 1));    // captain flag 0 captain 1 member
@@ -508,7 +513,7 @@ void ArenaTeam::Inspect(WorldSession* session, ObjectGuid guid)
         return;
 
     WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8+1+4*6);
-    data << uint64(guid);                                   // player guid
+    data << guid;                                           // player guid
     data << uint8(GetSlot());                               // slot (0...2)
     data << uint32(GetId());                                // arena team id
     data << uint32(Stats.Rating);                           // rating
@@ -571,8 +576,8 @@ void ArenaTeam::BroadcastEvent(ArenaTeamEvents event, ObjectGuid guid, uint8 str
             return;
     }
 
-    if (guid)
-        data << uint64(guid);
+    if (!guid.IsEmpty())
+        data << guid;
 
     BroadcastPacket(&data);
 
@@ -601,6 +606,20 @@ uint8 ArenaTeam::GetSlotByType(uint32 type)
             break;
     }
     TC_LOG_ERROR("bg.arena", "FATAL: Unknown arena team type {} for some arena team", type);
+    return 0xFF;
+}
+
+uint8 ArenaTeam::GetTypeBySlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case 0: return ARENA_TEAM_2v2;
+        case 1: return ARENA_TEAM_3v3;
+        case 2: return ARENA_TEAM_5v5;
+        default:
+            break;
+    }
+    TC_LOG_ERROR("bg.arena", "FATAL: Unknown arena team slot {} for some arena team", slot);
     return 0xFF;
 }
 
@@ -871,7 +890,7 @@ void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 
     }
 }
 
-void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& playerPoints)
+void ArenaTeam::UpdateArenaPointsHelper(std::map<ObjectGuid, uint32>& playerPoints)
 {
     // Called after a match has ended and the stats are already modified
     // Helper function for arena point distribution (this way, when distributing, no actual calculation is required, just a few comparisons)
@@ -889,15 +908,15 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& playerPoints)
         if (itr->WeekGames >= requiredGames)
             pointsToAdd = GetPoints(itr->PersonalRating);
 
-        std::map<uint32, uint32>::iterator plr_itr = playerPoints.find(itr->Guid.GetCounter());
+        std::map<ObjectGuid, uint32>::iterator plr_itr = playerPoints.find(itr->Guid);
         if (plr_itr != playerPoints.end())
         {
             // Check if there is already more points
             if (plr_itr->second < pointsToAdd)
-                playerPoints[itr->Guid.GetCounter()] = pointsToAdd;
+                playerPoints[itr->Guid] = pointsToAdd;
         }
         else
-            playerPoints[itr->Guid.GetCounter()] = pointsToAdd;
+            playerPoints[itr->Guid] = pointsToAdd;
     }
 }
 

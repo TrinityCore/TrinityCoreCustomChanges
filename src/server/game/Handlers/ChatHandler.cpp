@@ -128,8 +128,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 }
                 break;
             default:
-                TC_LOG_ERROR("network", "Player {}{} sent a chatmessage with an invalid language/message type combination",
-                                                     GetPlayer()->GetName(), GetPlayer()->GetGUID().ToString());
+                TC_LOG_ERROR("network", "Player {} {} sent a chatmessage with an invalid language/message type combination",
+                    GetPlayer()->GetName(), GetPlayer()->GetGUID().ToString());
 
                 recvData.rfinish();
                 return;
@@ -366,7 +366,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID())))
                 sender->AddWhisperWhiteList(receiver->GetGUID());
 
-            GetPlayer()->Whisper(msg, Language(lang), receiver);
+            if (lang == LANG_ADDON)
+                GetPlayer()->WhisperAddon(msg, receiver);
+            else
+                GetPlayer()->Whisper(msg, Language(lang), receiver);
             break;
         }
         case CHAT_MSG_PARTY:

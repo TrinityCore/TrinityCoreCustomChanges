@@ -157,7 +157,7 @@ public:
         pTarget->RemoveAura(LFG_SPELL_DUNGEON_DESERTER);// LFG_SPELL_DUNGEON_DESERTER
         pTarget->RemoveAura(BG_SPELL_DESERTER);// BG_SPELL_DESERTER
         pTarget->RemoveAura(SILENCED);// SILENCED
-        sAnticheatMgr->AnticheatDeleteCommand(pTarget->GetGUID());// deletes auto reports on player
+        sAnticheatMgr->AnticheatDeleteCommand(pTarget->GetGUID().GetCounter());// deletes auto reports on player
         return true;
     }
 
@@ -174,7 +174,7 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        sAnticheatMgr->AnticheatDeleteCommand(player->GetGUID());
+        sAnticheatMgr->AnticheatDeleteCommand(player->GetGUID().GetCounter());
         handler->PSendSysMessage("Anticheat players_reports_status deleted for player %s", player->GetName().c_str());
         return true;
     }

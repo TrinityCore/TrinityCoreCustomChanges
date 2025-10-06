@@ -534,7 +534,7 @@ void AntiCheatMgr::CreateCheatReport(std::string hacktype, std::string descripti
     std::string playerName = _player->GetName();
     uint32 accountId = _player->GetSession()->GetAccountId();
     std::string accountName = _player->GetSession()->GetAccountName();
-    uint32 playerGUID = _player->GetGUID();
+    ObjectGuid playerGUID = _player->GetGUID();
     std::string playerClass = (std::string)GetClassName(_player->GetClass(), 0);
     std::string reportLocation = _player->GetMapAreaAndZoneString();
 
@@ -564,7 +564,7 @@ void AntiCheatMgr::CreateCheatReport(std::string hacktype, std::string descripti
     stmt->setUInt32(0, realm.Id.Realm); // realm_id
     stmt->setUInt32(1, accountId); // account_id
     stmt->setString(2, accountName); // account_name
-    stmt->setUInt32(3, playerGUID); // character_guid
+    stmt->setUInt32(3, playerGUID.GetCounter()); // character_guid
     stmt->setString(4, playerName); // character_name
     stmt->setString(5, playerClass); // character_class
     stmt->setString(6, hacktype); // detected_hack

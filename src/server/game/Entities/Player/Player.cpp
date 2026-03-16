@@ -1645,6 +1645,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SetCanTeleport(true);
             SendTeleportPacket(m_teleport_dest, (options & TELE_TO_TRANSPORT_TELEPORT) != 0);
         }
+
+        if (!IsBeingTeleportedNear()) // update position immediately if we will not be waiting for client ACK
+            UpdatePosition(m_teleport_dest, true);
     }
     else
     {

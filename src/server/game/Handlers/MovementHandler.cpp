@@ -423,6 +423,23 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
         }
         else
             plrMover->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_IS_OUT_OF_BOUNDS);
+
+        // Whenever a player stops a movement action, an indoor/outdoor check is being performed
+        switch (opcode)
+        {
+            case CMSG_MOVE_SET_FLY:
+            case MSG_MOVE_FALL_LAND:
+            case MSG_MOVE_STOP:
+            case MSG_MOVE_STOP_STRAFE:
+            case MSG_MOVE_STOP_TURN:
+            case MSG_MOVE_STOP_SWIM:
+            case MSG_MOVE_STOP_PITCH:
+            case MSG_MOVE_STOP_ASCEND:
+                plrMover->CheckOutdoorsAuraRequirements();
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -535,13 +552,15 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recvData)
 
     /* the client data has been verified. let's do the actual change now */
     movementInfo.time = AdjustClientMovementTime(movementInfo.time);
-
     mover->m_movementInfo = movementInfo;
-    mover->UpdatePosition(movementInfo.pos);
 
     float newSpeedRate = speedSent / (mover->IsControlledByPlayer() ? playerBaseMoveSpeed[move_type] : baseMoveSpeed[move_type]);
     mover->SetSpeedRateReal(move_type, newSpeedRate);
     MovementPacketSender::SendSpeedChangeToObservers(mover, move_type, speedSent);
+
+    // Update position after updating known serverside speed
+    // this can interrupt aura granting us the speed boost so it needs see updated value in Unit::m_speed_rate
+    mover->UpdatePosition(movementInfo.pos);
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recvData)

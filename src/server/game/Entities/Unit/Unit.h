@@ -827,6 +827,8 @@ class TC_GAME_API Unit : public WorldObject
 
         virtual void Update(uint32 time) override;
 
+        void Heartbeat() override;
+
         void setAttackTimer(WeaponAttackType type, uint32 time) { m_attackTimer[type] = time; }
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
         uint32 getAttackTimer(WeaponAttackType type) const { return m_attackTimer[type]; }
@@ -1227,8 +1229,8 @@ class TC_GAME_API Unit : public WorldObject
         bool SetHover(bool enable, bool updateAnimTier = true);
 
         void SetInFront(WorldObject const* target);
-        void SetFacingTo(float const ori, bool force = true);
-        void SetFacingToObject(WorldObject const* object, bool force = true);
+        void SetFacingTo(float ori, bool force = true, uint32 movementId = EVENT_FACE);
+        void SetFacingToObject(WorldObject const* object, bool force = true, uint32 movementId = EVENT_FACE);
 
         void BuildHeartBeatMsg(WorldPacket* data) const;
 
@@ -1363,7 +1365,7 @@ class TC_GAME_API Unit : public WorldObject
         void RemoveNotOwnSingleTargetAuras(uint32 newPhase = 0x0);
         void RemoveAurasWithInterruptFlags(uint32 flag, uint32 except = 0);
         void RemoveAurasWithAttribute(uint32 flags);
-        void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, ObjectGuid casterGUID);
+        void RemoveAurasWithFamily(SpellFamilyNames family, flag96 const& familyFlag, ObjectGuid casterGUID);
         void RemoveAurasWithMechanic(uint32 mechanicMaskToRemove, AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT, uint32 exceptSpellId = 0, bool withEffectMechanics = false);
         void RemoveMovementImpairingAuras(bool withRoot);
         void RemoveAurasByShapeShift();
@@ -1918,9 +1920,10 @@ class TC_GAME_API Unit : public WorldObject
         virtual void AtDisengage() {}
 
     private:
-
+        friend class ImmediateMovementGenerator; // for UpdateSplineMovement
         void UpdateSplineMovement(uint32 t_diff);
         void UpdateSplinePosition();
+        void SendFlightSplineSyncUpdate();
         void InterruptMovementBasedAuras();
         void CheckPendingMovementAcks();
 
@@ -1940,7 +1943,6 @@ class TC_GAME_API Unit : public WorldObject
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_lastManaUse;                               // msecs
-        TimeTracker m_splineSyncTimer;
 
         Diminishing m_Diminishing;
 

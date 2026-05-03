@@ -18,15 +18,15 @@ efsw (Entropia File System Watcher - crossplatform file system watcher)
 
 fmt (a small, safe and fast formatting library)
   https://github.com/fmtlib/fmt
-  Version: 9.1.0 https://github.com/fmtlib/fmt/releases/tag/9.1.0
+  Version: 10.2.1 https://github.com/fmtlib/fmt/releases/tag/10.2.1
 
 G3D (a commercial-grade C++ 3D engine available as Open Source (BSD License)
   http://g3d.sourceforge.net/
   Version: 9.0-Release r4036
 
 jemalloc (a general-purpose scalable concurrent malloc-implementation)
-  http://www.canonware.com/jemalloc/
-  Version: 5.2.1
+  https://github.com/jemalloc/jemalloc
+  Version: 5.3.0
 
 libMPQ (a library for reading MPQ files)
   https://github.com/mbroemme/libmpq/

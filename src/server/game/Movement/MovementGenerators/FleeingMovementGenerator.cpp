@@ -32,7 +32,6 @@
 template<class T>
 FleeingMovementGenerator<T>::FleeingMovementGenerator(ObjectGuid fleeTargetGUID) : _fleeTargetGUID(fleeTargetGUID), _timer(0)
 {
-    this->Mode = MOTION_MODE_DEFAULT;
     this->Priority = MOTION_PRIORITY_HIGHEST;
     this->Flags = MOVEMENTGENERATOR_FLAG_INITIALIZATION_PENDING;
     this->BaseUnitState = UNIT_STATE_FLEEING;
@@ -253,20 +252,10 @@ bool TimedFleeingMovementGenerator::Update(Unit* owner, uint32 diff)
 
 void TimedFleeingMovementGenerator::Finalize(Unit* owner, bool active, bool movementInform)
 {
-    AddFlag(MOVEMENTGENERATOR_FLAG_FINALIZED);
-    if (!active)
-        return;
+    FleeingMovementGenerator<Creature>::DoFinalize(static_cast<Creature*>(owner), active, movementInform);
 
-    owner->RemoveUnitFlag(UNIT_FLAG_FLEEING);
-    owner->StopMoving();
-    if (Unit* victim = owner->GetVictim())
-    {
-        if (owner->IsAlive())
-        {
-            owner->AttackStop();
-            owner->ToCreature()->AI()->AttackStart(victim);
-        }
-    }
+    if (active)
+        owner->StopMoving();
 
     if (movementInform)
     {

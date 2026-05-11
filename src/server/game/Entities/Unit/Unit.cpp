@@ -10309,19 +10309,19 @@ MovementGeneratorType Unit::GetDefaultMovementType() const
     return IDLE_MOTION_TYPE;
 }
 
-void Unit::StopMoving()
+void Unit::StopMoving(bool force /*= false*/)
 {
     ClearUnitState(UNIT_STATE_MOVING);
 
     // not need send any packets if not in world or not moving
-    if (!IsInWorld() || movespline->Finalized())
+    if (!IsInWorld() || (!force && movespline->Finalized()))
         return;
 
     // Update position now since Stop does not start a new movement that can be updated later
     if (movespline->HasStarted())
         UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
-    init.Stop();
+    init.Stop(force);
 }
 
 void Unit::PauseMovement(uint32 timer/* = 0*/, uint8 slot/* = 0*/, bool forced/* = true*/)
@@ -10343,13 +10343,6 @@ void Unit::ResumeMovement(uint32 timer/* = 0*/, uint8 slot/* = 0*/)
 
     if (MovementGenerator* movementGenerator = GetMotionMaster()->GetCurrentMovementGenerator(MovementSlot(slot)))
         movementGenerator->Resume(timer);
-}
-
-void Unit::SendMovementFlagUpdate(bool self /* = false */)
-{
-    WorldPacket data;
-    BuildHeartBeatMsg(&data);
-    SendMessageToSet(&data, self);
 }
 
 bool Unit::IsSitState() const
@@ -11701,6 +11694,14 @@ void Unit::RemoveCharmedBy(Unit* charmer)
     else
         RestoreFaction();
 
+    if (type != CHARM_TYPE_CHARM && !IsPlayer())
+    {
+        StopMoving(true);
+
+        // Purge flags left over by client control
+        m_movementInfo.RemoveMovementFlag(MOVEMENTFLAG_MASK_MOVING | MOVEMENTFLAG_MASK_TURNING);
+    }
+
     ///@todo Handle SLOT_IDLE motion resume
     GetMotionMaster()->InitializeDefault();
 
@@ -12843,13 +12844,6 @@ void Unit::NearTeleportTo(Position const& pos, bool casting /*= false*/)
         UpdatePosition(pos, true);
         UpdateObjectVisibility();
     }
-}
-
-void Unit::BuildHeartBeatMsg(WorldPacket* data) const
-{
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
-    *data << GetPackGUID();
-    BuildMovementPacket(data);
 }
 
 void Unit::SendTeleportPacket(Position const& pos, bool teleportingTransport /*= false*/)

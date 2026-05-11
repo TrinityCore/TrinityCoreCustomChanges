@@ -39,6 +39,67 @@ void PetCancelAura::Read()
     _worldPacket >> SpellID;
 }
 
+WorldPacket const* UpdateActionButtons::Write()
+{
+    _worldPacket << Reason;
+    if (Reason == 0 || Reason == 1)
+        _worldPacket.append(ActionButtons.data(), ActionButtons.size());
+
+    return &_worldPacket;
+}
+
+WorldPacket const* SendUnlearnSpells::Write()
+{
+    _worldPacket << uint32(Spells.size());
+    for (uint32 spellId : Spells)
+        _worldPacket << uint32(spellId);
+
+    return &_worldPacket;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, InitialSpell const& initialSpell)
+{
+    data << uint32(initialSpell.SpellID);
+    data << uint16(initialSpell.ActionBarSlot);
+
+    return data;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, SpellHistoryEntry const& historyEntry)
+{
+    data << uint32(historyEntry.SpellID);
+    data << uint16(historyEntry.ItemID);
+    data << uint16(historyEntry.Category);
+
+    // send infinity cooldown in special format
+    if (historyEntry.OnHold)
+    {
+        data << uint32(1);
+        data << uint32(0x80000000);
+    }
+    else
+    {
+        data << int32(historyEntry.RecoveryTime);
+        data << int32(historyEntry.CategoryRecoveryTime);
+    }
+
+    return data;
+}
+
+WorldPacket const* InitialSpells::Write()
+{
+    _worldPacket << uint8(InitialLogin);
+    _worldPacket << uint16(Spells.size());
+    for (InitialSpell const& spell : Spells)
+        _worldPacket << spell;
+
+    _worldPacket << uint16(SpellHistory.size());
+    for (SpellHistoryEntry const& historyEntry : SpellHistory)
+        _worldPacket << historyEntry;
+
+    return &_worldPacket;
+}
+
 ByteBuffer& operator<<(ByteBuffer& data, TargetLocation const& targetLocation)
 {
     data << targetLocation.Transport.WriteAsPacked(); // relative position guid here - transport for example

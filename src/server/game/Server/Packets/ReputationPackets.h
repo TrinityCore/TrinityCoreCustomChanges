@@ -15,15 +15,33 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ITEM_ENCHANTMENT_MGR_H
-#define _ITEM_ENCHANTMENT_MGR_H
+#ifndef TRINITYCORE_REPUTATION_PACKETS_H
+#define TRINITYCORE_REPUTATION_PACKETS_H
 
-#include "Common.h"
+#include "Packet.h"
 
-TC_GAME_API void LoadRandomEnchantmentsTable();
-TC_GAME_API int32 GenerateItemRandomPropertyId(uint32 item_id);
-TC_GAME_API uint32 GetItemEnchantMod(int32 entry);
-TC_GAME_API uint32 GenerateEnchSuffixFactor(uint32 item_id);
-TC_GAME_API uint32 GetRandomPropertyPoints(uint32 itemLevel, uint32 quality, uint32 inventoryType);
+namespace WorldPackets
+{
+    namespace Reputation
+    {
+        struct FactionData
+        {
+            uint8 Flags = 0;
+            int32 Standing = 0;
+        };
 
-#endif
+        class InitializeFactions final : public ServerPacket
+        {
+            static constexpr uint32 FactionCount = 128;
+
+        public:
+            explicit InitializeFactions() : ServerPacket(SMSG_INITIALIZE_FACTIONS, 4 + (1 + 4) * FactionCount) { }
+
+            WorldPacket const* Write() override;
+
+            std::array<FactionData, FactionCount> Factions = { };
+        };
+    }
+}
+
+#endif // TRINITYCORE_REPUTATION_PACKETS_H

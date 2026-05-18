@@ -15,15 +15,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ITEM_ENCHANTMENT_MGR_H
-#define _ITEM_ENCHANTMENT_MGR_H
+#ifndef TRINITYCORE_ITEM_PACKETS_H
+#define TRINITYCORE_ITEM_PACKETS_H
 
-#include "Common.h"
+#include "Packet.h"
 
-TC_GAME_API void LoadRandomEnchantmentsTable();
-TC_GAME_API int32 GenerateItemRandomPropertyId(uint32 item_id);
-TC_GAME_API uint32 GetItemEnchantMod(int32 entry);
-TC_GAME_API uint32 GenerateEnchSuffixFactor(uint32 item_id);
-TC_GAME_API uint32 GetRandomPropertyPoints(uint32 itemLevel, uint32 quality, uint32 inventoryType);
+namespace WorldPackets
+{
+    namespace Item
+    {
+        class SetProficiency final : public ServerPacket
+        {
+        public:
+            explicit SetProficiency() : ServerPacket(SMSG_SET_PROFICIENCY, 1 + 4) { }
 
-#endif
+            WorldPacket const* Write() override;
+
+            uint32 ProficiencyMask = 0;
+            uint8 ProficiencyClass = 0;
+        };
+    }
+}
+
+#endif // TRINITYCORE_ITEM_PACKETS_H

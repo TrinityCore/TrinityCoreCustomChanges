@@ -15,15 +15,25 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ITEM_ENCHANTMENT_MGR_H
-#define _ITEM_ENCHANTMENT_MGR_H
+#include "ReputationPackets.h"
 
-#include "Common.h"
+namespace WorldPackets::Reputation
+{
+ByteBuffer& operator<<(ByteBuffer& data, FactionData const& factionData)
+{
+    data << uint8(factionData.Flags);
+    data << int32(factionData.Standing);
 
-TC_GAME_API void LoadRandomEnchantmentsTable();
-TC_GAME_API int32 GenerateItemRandomPropertyId(uint32 item_id);
-TC_GAME_API uint32 GetItemEnchantMod(int32 entry);
-TC_GAME_API uint32 GenerateEnchSuffixFactor(uint32 item_id);
-TC_GAME_API uint32 GetRandomPropertyPoints(uint32 itemLevel, uint32 quality, uint32 inventoryType);
+    return data;
+}
 
-#endif
+WorldPacket const* InitializeFactions::Write()
+{
+    _worldPacket << uint32(Factions.size());
+
+    for (FactionData const& faction : Factions)
+        _worldPacket << faction;
+
+    return &_worldPacket;
+}
+}

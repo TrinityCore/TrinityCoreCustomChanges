@@ -18,6 +18,7 @@
 #ifndef TRINITYCORE_ALL_PACKETS_H
 #define TRINITYCORE_ALL_PACKETS_H
 
+#include "AchievementPackets.h"
 #include "AuthenticationPackets.h"
 #include "BankPackets.h"
 #include "BattlegroundPackets.h"
@@ -29,13 +30,16 @@
 #include "CombatLogPackets.h"
 #include "CombatPackets.h"
 #include "EquipmentSetPackets.h"
+#include "GameObjectPackets.h"
 #include "GuildPackets.h"
 #include "InspectPackets.h"
+#include "ItemPackets.h"
 #include "LFGPackets.h"
 #include "MailPackets.h"
 #include "MiscPackets.h"
 #include "MovementPackets.h"
 #include "NPCPackets.h"
+#include "PacketUtilities.h"
 #include "PartyPackets.h"
 #include "PetPackets.h"
 #include "QueryPackets.h"

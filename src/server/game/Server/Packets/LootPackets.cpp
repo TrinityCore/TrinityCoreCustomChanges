@@ -15,22 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
-#include "Log.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
+#include "LootPackets.h"
 
-void WorldSession::HandleVoiceSessionEnableOpcode(WorldPacket& recvData)
+namespace WorldPackets::Loot
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_VOICE_SESSION_ENABLE");
-    // uint8 isVoiceEnabled, uint8 isMicrophoneEnabled
-    recvData.read_skip<uint8>();
-    recvData.read_skip<uint8>();
+void LootUnit::Read()
+{
+    _worldPacket >> Unit;
 }
-
-void WorldSession::HandleSetActiveVoiceChannel(WorldPacket& recvData)
-{
-    TC_LOG_DEBUG("network", "WORLD: CMSG_SET_ACTIVE_VOICE_CHANNEL");
-    recvData.read_skip<uint32>();
-    recvData.read_skip<char*>();
 }

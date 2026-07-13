@@ -1,5 +1,5 @@
 /*
- * This file is part of the TrinityCore Project. See AUTHORS file for Copyright information
+ * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,33 +15,26 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_AREA_TRIGGER_PACKETS_H
-#define TRINITYCORE_AREA_TRIGGER_PACKETS_H
+#ifndef TRINITYCORE_DUEL_PACKETS_H
+#define TRINITYCORE_DUEL_PACKETS_H
 
 #include "Packet.h"
+#include "ObjectGuid.h"
 
 namespace WorldPackets
 {
-    namespace AreaTrigger
+    namespace Duel
     {
-        class AreaTrigger final : public ClientPacket
+        class DuelResponse final : public ClientPacket
         {
         public:
-            explicit AreaTrigger(WorldPacket&& packet) : ClientPacket(CMSG_AREATRIGGER, std::move(packet)) { }
+            explicit DuelResponse(WorldPacket&& packet);
 
             void Read() override;
 
-            int32 AreaTriggerID = 0;
-        };
-
-        class AreaTriggerNoCorpse final : public ServerPacket
-        {
-        public:
-            explicit AreaTriggerNoCorpse() : ServerPacket(SMSG_CORPSE_NOT_IN_INSTANCE, 0) { }
-
-            WorldPacket const* Write() override { return &_worldPacket; }
+            ObjectGuid ArbiterGUID;
         };
     }
 }
 
-#endif // TRINITYCORE_AREA_TRIGGER_PACKETS_H
+#endif // TRINITYCORE_DUEL_PACKETS_H

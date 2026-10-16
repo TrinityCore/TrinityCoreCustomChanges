@@ -360,19 +360,13 @@ void SpellHistory::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /
         auto categoryItr = _categoryCooldowns.find(category);
         if (categoryItr != _categoryCooldowns.end() && categoryItr->second->SpellId != spellInfo->Id)
         {
-            WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
-            data << uint32(categoryItr->second->SpellId);
-            data << _owner->GetGUID();
-            player->SendDirectMessage(&data);
+            player->SendDirectMessage(WorldPackets::Spells::CooldownEvent(_owner->GetGUID(), categoryItr->second->SpellId).Write());
 
             if (startCooldown)
                 StartCooldown(sSpellMgr->AssertSpellInfo(categoryItr->second->SpellId), itemId, spell);
         }
 
-        WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
-        data << uint32(spellInfo->Id);
-        data << _owner->GetGUID();
-        player->SendDirectMessage(&data);
+        player->SendDirectMessage(WorldPackets::Spells::CooldownEvent(_owner->GetGUID(), spellInfo->Id).Write());
     }
 
     // start cooldowns at server side, if any
@@ -477,6 +471,13 @@ bool SpellHistory::HasCooldown(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
 bool SpellHistory::HasCooldown(uint32 spellId, uint32 itemId /*= 0*/, bool ignoreCategoryCooldown /*= false*/) const
 {
     return HasCooldown(sSpellMgr->AssertSpellInfo(spellId), itemId, ignoreCategoryCooldown);
+}
+
+bool SpellHistory::HasCooldownOnHold(uint32 spellId) const
+{
+    // TODO: Delete this function and make SpellHistory::IsReady return enum with reason instead of bool
+    auto itr = _spellCooldowns.find(spellId);
+    return itr != _spellCooldowns.end() && itr->second.OnHold;
 }
 
 uint32 SpellHistory::GetRemainingCooldown(SpellInfo const* spellInfo) const

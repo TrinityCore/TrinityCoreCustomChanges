@@ -45,6 +45,7 @@
 #include "Item.h"
 #include "Log.h"
 #include "LootMgr.h"
+#include "MiscPackets.h"
 #include "MotionMaster.h"
 #include "MovementGenerator.h"
 #include "MovementPackets.h"
@@ -945,17 +946,20 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
 
         if (damagetype != NODAMAGE && damagetype != DOT && damage)
         {
-            if (victim != attacker && victim->GetTypeId() == TYPEID_PLAYER && (!spellProto || !(spellProto->HasAttribute(SPELL_ATTR7_NO_PUSHBACK_ON_DAMAGE) || spellProto->HasAttribute(SPELL_ATTR3_TREAT_AS_PERIODIC))))
+            if (victim != attacker && victim->IsPlayer() && (!spellProto || !(spellProto->HasAttribute(SPELL_ATTR7_NO_PUSHBACK_ON_DAMAGE) || spellProto->HasAttribute(SPELL_ATTR3_TREAT_AS_PERIODIC))))
             {
-                if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
+                for (uint32 i = CURRENT_GENERIC_SPELL; i <= CURRENT_CHANNELED_SPELL; ++i)
                 {
-                    if (spell->getState() == SPELL_STATE_PREPARING)
+                    if (Spell* spell = victim->m_currentSpells[i])
                     {
-                        uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
-                        if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
-                            victim->InterruptNonMeleeSpells(false);
-                        else
-                            spell->Delayed();
+                        if (spell->getState() == SPELL_STATE_PREPARING)
+                        {
+                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
+                            if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
+                                victim->InterruptNonMeleeSpells(false);
+                            else
+                                spell->Delayed();
+                        }
                     }
                 }
 
@@ -5127,21 +5131,13 @@ void Unit::AddGameObject(GameObject* gameObj)
     }
 }
 
-void Unit::RemoveGameObject(GameObject* gameObj, bool del)
+void Unit::RemoveGameObjectImpl(GameObject* gameObj, bool del)
 {
-    if (!gameObj || gameObj->GetOwnerGUID() != GetGUID())
-        return;
-
     gameObj->SetOwnerGUID(ObjectGuid::Empty);
 
-    for (uint8 i = 0; i < MAX_GAMEOBJECT_SLOT; ++i)
-    {
-        if (m_ObjectSlot[i] == gameObj->GetGUID())
-        {
-            m_ObjectSlot[i].Clear();
-            break;
-        }
-    }
+    auto objectSlotItr = std::ranges::find(m_ObjectSlot, gameObj->GetGUID());
+    if (objectSlotItr != std::ranges::end(m_ObjectSlot))
+        objectSlotItr->Clear();
 
     // GO created by some spell
     if (uint32 spellid = gameObj->GetSpellId())
@@ -5155,8 +5151,6 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
             GetSpellHistory()->SendCooldownEvent(createBySpell);
     }
 
-    m_gameObj.remove(gameObj);
-
     if (del)
     {
         gameObj->SetRespawnTime(0);
@@ -5164,27 +5158,30 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
     }
 }
 
+void Unit::RemoveGameObject(GameObject* gameObj, bool del)
+{
+    if (!gameObj || gameObj->GetOwnerGUID() != GetGUID())
+        return;
+
+    RemoveGameObjectImpl(gameObj, del);
+
+    m_gameObj.remove(gameObj);
+}
+
 void Unit::RemoveGameObject(uint32 spellid, bool del)
 {
     if (m_gameObj.empty())
         return;
-    GameObjectList::iterator i, next;
-    for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
+
+    for (auto i = m_gameObj.begin(); i != m_gameObj.end(); )
     {
-        next = i;
         if (spellid == 0 || (*i)->GetSpellId() == spellid)
         {
-            (*i)->SetOwnerGUID(ObjectGuid::Empty);
-            if (del)
-            {
-                (*i)->SetRespawnTime(0);
-                (*i)->Delete();
-            }
-
-            next = m_gameObj.erase(i);
+            RemoveGameObjectImpl(*i, del);
+            i = m_gameObj.erase(i);
         }
         else
-            ++next;
+            ++i;
     }
 }
 
@@ -5193,11 +5190,9 @@ void Unit::RemoveAllGameObjects()
     // remove references to unit
     while (!m_gameObj.empty())
     {
-        GameObjectList::iterator i = m_gameObj.begin();
-        (*i)->SetOwnerGUID(ObjectGuid::Empty);
-        (*i)->SetRespawnTime(0);
-        (*i)->Delete();
-        m_gameObj.erase(i);
+        GameObject* gameObj = m_gameObj.front();
+        m_gameObj.pop_front();
+        RemoveGameObjectImpl(gameObj, true);
     }
 }
 
@@ -10329,7 +10324,7 @@ void Unit::ResumeMovement(uint32 timer/* = 0*/, uint8 slot/* = 0*/)
 
 bool Unit::IsSitState() const
 {
-    uint8 s = GetStandState();
+    UnitStandStateType s = GetStandState();
     return
         s == UNIT_STAND_STATE_SIT_CHAIR        || s == UNIT_STAND_STATE_SIT_LOW_CHAIR  ||
         s == UNIT_STAND_STATE_SIT_MEDIUM_CHAIR || s == UNIT_STAND_STATE_SIT_HIGH_CHAIR ||
@@ -10338,7 +10333,7 @@ bool Unit::IsSitState() const
 
 bool Unit::IsStandState() const
 {
-    uint8 s = GetStandState();
+    UnitStandStateType s = GetStandState();
     return !IsSitState() && s != UNIT_STAND_STATE_SLEEP && s != UNIT_STAND_STATE_KNEEL;
 }
 
@@ -10351,9 +10346,8 @@ void Unit::SetStandState(UnitStandStateType state)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
-        data << (uint8)state;
-        ToPlayer()->SendDirectMessage(&data);
+        WorldPackets::Misc::StandStateUpdate packet(state);
+        ToPlayer()->SendDirectMessage(packet.Write());
     }
 }
 

@@ -71,19 +71,34 @@ class TC_GAME_API Item : public Object
 
         virtual bool Create(ObjectGuid::LowType guidlow, uint32 itemId, Player const* owner);
 
+        std::string const& GetNameForLocaleIdx(LocaleConstant locale) const override;
+
         ItemTemplate const* GetTemplate() const;
 
         ObjectGuid GetOwnerGUID()    const { return GetGuidValue(ITEM_FIELD_OWNER); }
         void SetOwnerGUID(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_OWNER, guid); }
-        Player* GetOwner()const;
+        ObjectGuid GetContainedIn()    const { return GetGuidValue(ITEM_FIELD_CONTAINED); }
+        void SetContainedIn(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_CONTAINED, guid); }
+        ObjectGuid GetCreator()    const { return GetGuidValue(ITEM_FIELD_CREATOR); }
+        void SetCreator(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_CREATOR, guid); }
+        ObjectGuid GetGiftCreator()    const { return GetGuidValue(ITEM_FIELD_GIFTCREATOR); }
+        void SetGiftCreator(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_GIFTCREATOR, guid); }
+        Player* GetOwner() const;
+
+        void SetExpiration(uint32 expiration) { SetUInt32Value(ITEM_FIELD_DURATION, expiration); }
 
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_SOULBOUND, val); }
-        bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_SOULBOUND); }
+        bool HasItemFlag(ItemFieldFlags flag) const { return HasFlag(ITEM_FIELD_FLAGS, flag); }
+        void SetItemFlag(ItemFieldFlags flags) { SetFlag(ITEM_FIELD_FLAGS, flags); }
+        void RemoveItemFlag(ItemFieldFlags flags) { RemoveFlag(ITEM_FIELD_FLAGS, flags); }
+        void ReplaceAllItemFlags(ItemFieldFlags flags) { SetUInt32Value(ITEM_FIELD_FLAGS, flags); }
+
+        bool IsSoulBound() const { return HasItemFlag(ITEM_FIELD_FLAG_SOULBOUND); }
         bool IsBoundAccountWide() const { return GetTemplate()->HasFlag(ITEM_FLAG_IS_BOUND_TO_ACCOUNT); }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
         virtual void SaveToDB(CharacterDatabaseTransaction trans);
-        virtual bool LoadFromDB(ObjectGuid::LowType guid, ObjectGuid owner_guid, Field* fields, uint32 entry);
+        virtual bool LoadFromDB(ObjectGuid::LowType guid, ObjectGuid ownerGuid, Field* fields, uint32 entry);
         static void DeleteFromDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid);
         virtual void DeleteFromDB(CharacterDatabaseTransaction trans);
         static void DeleteFromInventoryDB(CharacterDatabaseTransaction trans, ObjectGuid::LowType itemGuid);
@@ -95,19 +110,21 @@ class TC_GAME_API Item : public Object
         Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return nullptr; }
         Bag const* ToBag() const { if (IsBag()) return reinterpret_cast<Bag const*>(this); else return nullptr; }
 
-        bool IsRefundable() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_REFUNDABLE); }
-        bool IsBOPTradeable() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_BOP_TRADEABLE); }
-        bool IsWrapped() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_WRAPPED); }
-        bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_UNLOCKED); }
-        bool IsBag() const { return GetTemplate()->InventoryType == INVTYPE_BAG; }
+        bool IsRefundable() const { return HasItemFlag(ITEM_FIELD_FLAG_REFUNDABLE); }
+        bool IsBOPTradeable() const { return HasItemFlag(ITEM_FIELD_FLAG_BOP_TRADEABLE); }
+        bool IsWrapped() const { return HasItemFlag(ITEM_FIELD_FLAG_WRAPPED); }
+        bool IsLocked() const { return !HasItemFlag(ITEM_FIELD_FLAG_UNLOCKED); }
+        bool IsBag() const { return GetTemplate()->GetInventoryType() == INVTYPE_BAG; }
         bool IsCurrencyToken() const { return GetTemplate()->IsCurrencyToken(); }
         bool IsNotEmptyBag() const;
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
+        void SetDurability(uint32 durability) { SetUInt32Value(ITEM_FIELD_DURABILITY, durability); }
+        void SetMaxDurability(uint32 maxDurability) { SetUInt32Value(ITEM_FIELD_MAXDURABILITY, maxDurability); }
         bool CanBeTraded(bool mail = false, bool trade = false) const;
         void SetInTrade(bool b = true) { mb_in_trade = b; }
         bool IsInTrade() const { return mb_in_trade; }
 
-        uint32 CalculateDurabilityRepairCost(float discount) const;
+        uint32 CalculateDurabilityRepairCost(float discount, bool useRateConfig = true) const;
 
         bool HasEnchantRequiredSkill(Player const* player) const;
         uint32 GetEnchantRequiredLevel() const;
@@ -156,6 +173,7 @@ class TC_GAME_API Item : public Object
 
         void SendTimeUpdate(Player* owner);
         void UpdateDuration(Player* owner, uint32 diff);
+        void SetCreatePlayedTime(uint32 createPlayedTime) { SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, createPlayedTime); }
 
         // spell charges (signed but stored as unsigned)
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
@@ -174,12 +192,14 @@ class TC_GAME_API Item : public Object
             uState = state;
         }
 
-        bool hasQuest(uint32 quest_id) const override { return GetTemplate()->StartQuest == quest_id; }
+        bool hasQuest(uint32 quest_id) const override { return GetTemplate()->GetStartQuest() == quest_id; }
         bool hasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetTemplate()->IsPotion(); }
         bool IsWeaponVellum() const { return GetTemplate()->IsWeaponVellum(); }
         bool IsArmorVellum() const { return GetTemplate()->IsArmorVellum(); }
         bool IsConjuredConsumable() const { return GetTemplate()->IsConjuredConsumable(); }
+        uint32 GetItemLevel() const { return GetTemplate()->GetBaseItemLevel(); }
+        uint32 GetDisplayId() const { return GetTemplate()->GetDisplayId(); }
 
         // Item Refund system
         void SetNotRefundable(Player* owner, bool changestate = true, CharacterDatabaseTransaction* trans = nullptr);
@@ -206,6 +226,14 @@ class TC_GAME_API Item : public Object
         void RemoveFromObjectUpdate() override;
 
         uint32 GetScriptId() const { return GetTemplate()->ScriptId; }
+
+        uint32 GetBuyPrice() const;
+        static uint32 GetBuyPrice(ItemTemplate const* proto);
+        uint32 GetSellPrice(bool forVendor = false) const;
+        static uint32 GetSellPrice(ItemTemplate const* proto);
+
+        void SetPetitionId(uint32 petitionId) { SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1, petitionId); }
+        void SetPetitionNumSignatures(uint32 signatures) { SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + 1, signatures); }
 
         std::string GetDebugInfo() const override;
     private:

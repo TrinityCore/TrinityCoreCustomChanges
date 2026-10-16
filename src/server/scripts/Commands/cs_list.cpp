@@ -160,7 +160,7 @@ public:
 
     static bool HandleListItemCommand(ChatHandler* handler, Hyperlink<item> item, Optional<uint32> countArg)
     {
-        uint32 itemId = item->Item->ItemId;
+        uint32 itemId = item->Item->GetId();
         uint32 count = countArg.value_or(10);
 
         if (count == 0)
@@ -471,10 +471,9 @@ public:
         handler->PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, auras.size());
         for (auto const& [aurId, aurApp] : auras)
         {
-            bool talent = GetTalentSpellCost(aurApp->GetBase()->GetId()) > 0;
-
             Aura const* aura = aurApp->GetBase();
             char const* name = aura->GetSpellInfo()->SpellName[handler->GetSessionDbcLocale()];
+            bool talent = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_IS_TALENT);
 
             if (!ShouldListAura(aura->GetSpellInfo(), spellId, namePart, handler->GetSessionDbcLocale()))
                 continue;

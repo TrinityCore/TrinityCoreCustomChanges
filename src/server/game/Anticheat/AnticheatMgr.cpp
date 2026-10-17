@@ -21,6 +21,7 @@
 #include "Battleground.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "GameObject.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapManager.h"

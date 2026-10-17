@@ -30,6 +30,7 @@
 #include "Map.h"
 #include "Object.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldPacket.h"
 

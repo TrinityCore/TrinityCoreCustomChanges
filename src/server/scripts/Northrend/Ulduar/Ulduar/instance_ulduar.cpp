@@ -585,7 +585,7 @@ class instance_ulduar : public InstanceMapScript
                         if (Creature* hodir = GetCreature(DATA_HODIR))
                             hodir->AI()->DoAction(ACTION_CACHE_SHATTERED);
                         if (GameObject* hodirRareCache = instance->GetGameObject(HodirRareCacheGUID))
-                            hodirRareCache->ActivateObject(GameObjectActions(GameObjectActions::Despawn));
+                            hodirRareCache->ActivateObject(GameObjectActions::Despawn);
                         break;
                     case EVENT_FLASH_FREEZE_FINISHED:
                         if (Creature* hodir = GetCreature(DATA_HODIR))
@@ -653,9 +653,9 @@ class instance_ulduar : public InstanceMapScript
                         if (state == DONE)
                         {
                             if (GameObject* hodirRareCache = instance->GetGameObject(HodirRareCacheGUID))
-                                hodirRareCache->ActivateObject(GameObjectActions(GameObjectActions::MakeActive));
+                                hodirRareCache->ActivateObject(GameObjectActions::MakeActive);
                             if (GameObject* hodirChest = instance->GetGameObject(HodirChestGUID))
-                                hodirChest->ActivateObject(GameObjectActions(GameObjectActions::MakeActive));
+                                hodirChest->ActivateObject(GameObjectActions::MakeActive);
 
                             instance->SummonCreature(NPC_HODIR_OBSERVATION_RING, ObservationRingKeepersPos[1]);
                         }
@@ -696,8 +696,8 @@ class instance_ulduar : public InstanceMapScript
                                 if (Player* player = itr->GetSource())
                                     for (uint8 slot = EQUIPMENT_SLOT_MAINHAND; slot <= EQUIPMENT_SLOT_RANGED; ++slot)
                                         if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-                                            if (item->GetTemplate()->ItemLevel > _maxWeaponItemLevel)
-                                                _maxWeaponItemLevel = item->GetTemplate()->ItemLevel;
+                                            if (item->GetItemLevel() > _maxWeaponItemLevel)
+                                                _maxWeaponItemLevel = item->GetItemLevel();
                         }
                         else if (state == IN_PROGRESS)
                         {
@@ -716,11 +716,11 @@ class instance_ulduar : public InstanceMapScript
                                         {
                                             if (slot >= EQUIPMENT_SLOT_MAINHAND && slot <= EQUIPMENT_SLOT_RANGED)
                                             {
-                                                if (item->GetTemplate()->ItemLevel > _maxWeaponItemLevel)
-                                                    _maxWeaponItemLevel = item->GetTemplate()->ItemLevel;
+                                                if (item->GetItemLevel() > _maxWeaponItemLevel)
+                                                    _maxWeaponItemLevel = item->GetItemLevel();
                                             }
-                                            else if (item->GetTemplate()->ItemLevel > _maxArmorItemLevel)
-                                                _maxArmorItemLevel = item->GetTemplate()->ItemLevel;
+                                            else if (item->GetItemLevel() > _maxArmorItemLevel)
+                                                _maxArmorItemLevel = item->GetItemLevel();
                                         }
                                     }
                                 }

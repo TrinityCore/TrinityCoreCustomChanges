@@ -77,6 +77,15 @@ struct CompareThreatLessThan
     bool operator()(ThreatReference const* a, ThreatReference const* b) const;
 };
 
+enum class ThreatListClientUpdateFlags : uint8
+{
+    None                = 0x0,
+    UpdateNeeded        = 0x1,
+    ForceHighestUpdate  = 0x2
+};
+
+DEFINE_ENUM_FLAG(ThreatListClientUpdateFlags);
+
 // Please check Game/Combat/ThreatManager.h for documentation on how this class works!
 class TC_GAME_API ThreatManager
 {
@@ -116,6 +125,7 @@ class TC_GAME_API ThreatManager
         // returns ThreatReference amount if a ref exists, 0.0f otherwise
         float GetThreat(Unit const* who, bool includeOffline = false) const;
         size_t GetThreatListSize() const;
+        uint32 GetThreatListPlayerCount(bool includeOffline = false) const;
         // fastest of the three threat list getters - gets the threat list in "arbitrary" order
         // iterators will invalidate on adding/removing entries from the threat list; slightly less finicky than GetSorted.
         Trinity::IteratorPair<ThreatListIterator, std::nullptr_t> GetUnsortedThreatList() const;
@@ -196,7 +206,7 @@ class TC_GAME_API ThreatManager
         void PutThreatListRef(ObjectGuid const& guid, ThreatReference* ref);
         void PurgeThreatListRef(ObjectGuid const& guid);
 
-        bool _needClientUpdate;
+        EnumFlag<ThreatListClientUpdateFlags> _updateFlags;
         uint32 _updateTimer;
         std::unique_ptr<Heap> _sortedThreatList;
         std::unordered_map<ObjectGuid, ThreatReference*> _myThreatListEntries;

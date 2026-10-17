@@ -231,7 +231,7 @@ class TC_GAME_API Battlefield : public ZoneScript
         void SendInitWorldStatesTo(Player* player);
 
         /// Update data of a worldstate to all players present in zone
-        void SendUpdateWorldState(uint32 field, uint32 value);
+        void SendUpdateWorldState(uint32 variable, uint32 value);
 
         /**
          * \brief Called every time for update bf data and time
@@ -430,15 +430,8 @@ class TC_GAME_API Battlefield : public ZoneScript
         void BroadcastPacketToWar(WorldPacket const* data) const;
 
         // CapturePoint system
-        void AddCapturePoint(BfCapturePoint* cp) { m_capturePoints[cp->GetCapturePointEntry()] = cp; }
-
-        BfCapturePoint* GetCapturePoint(ObjectGuid::LowType lowguid) const
-        {
-            Battlefield::BfCapturePointMap::const_iterator itr = m_capturePoints.find(lowguid);
-            if (itr != m_capturePoints.end())
-                return itr->second;
-            return nullptr;
-        }
+        void AddCapturePoint(BfCapturePoint* cp);
+        BfCapturePoint* GetCapturePoint(uint32 entry) const;
 
         void RegisterZone(uint32 zoneid);
         bool HasPlayer(Player* player) const;

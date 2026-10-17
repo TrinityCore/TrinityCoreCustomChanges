@@ -26,6 +26,7 @@
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"
+#include "TicketPackets.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -68,7 +69,7 @@ bool GmTicket::LoadFromDB(Field* fields)
     uint8 index = 0;
     _id                 = fields[  index].GetUInt32();
     _type               = TicketType(fields[++index].GetUInt8());
-    _playerGuid         = ObjectGuid(HighGuid::Player, fields[++index].GetUInt32());
+    _playerGuid         = ObjectGuid::Create<HighGuid::Player>(fields[++index].GetUInt32());
     _playerName         = fields[++index].GetString();
     _message            = fields[++index].GetString();
     _createTime         = fields[++index].GetUInt32();
@@ -77,8 +78,8 @@ bool GmTicket::LoadFromDB(Field* fields)
     _posY               = fields[++index].GetFloat();
     _posZ               = fields[++index].GetFloat();
     _lastModifiedTime   = fields[++index].GetUInt32();
-    _closedBy           = ObjectGuid(uint64(fields[++index].GetInt32()));
-    _assignedTo         = ObjectGuid(HighGuid::Player, fields[++index].GetUInt32());
+    _closedBy           = fields[++index].GetUInt32() ? ObjectGuid::Create<HighGuid::Player>(fields[index].GetUInt32()) : ObjectGuid::Empty;
+    _assignedTo         = fields[++index].GetUInt32() ? ObjectGuid::Create<HighGuid::Player>(fields[index].GetUInt32()) : ObjectGuid::Empty;
     _comment            = fields[++index].GetString();
     _response           = fields[++index].GetString();
     _completed          = fields[++index].GetBool();
@@ -105,7 +106,7 @@ void GmTicket::SaveToDB(CharacterDatabaseTransaction trans) const
     stmt->setFloat (++index, _posY);
     stmt->setFloat (++index, _posZ);
     stmt->setUInt32(++index, uint32(_lastModifiedTime));
-    stmt->setInt32 (++index, int32(_closedBy.GetCounter()));
+    stmt->setUInt32(++index, _closedBy.GetCounter());
     stmt->setUInt32(++index, _assignedTo.GetCounter());
     stmt->setString(++index, _comment);
     stmt->setString(++index, _response);
@@ -123,25 +124,6 @@ void GmTicket::DeleteFromDB()
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GM_TICKET);
     stmt->setUInt32(0, _id);
     CharacterDatabase.Execute(stmt);
-}
-
-void GmTicket::WritePacket(WorldPacket& data) const
-{
-    data << uint32(GMTICKET_STATUS_HASTEXT);
-    data << uint32(_id);
-    data << _message;
-    data << uint8(_needMoreHelp);
-    data << GetAge(_lastModifiedTime);
-    if (GmTicket* ticket = sTicketMgr->GetOldestOpenTicket())
-        data << GetAge(ticket->GetLastModifiedTime());
-    else
-        data << float(0);
-
-    // I am not sure how blizzlike this is, and we don't really have a way to find out
-    data << GetAge(sTicketMgr->GetLastChange());
-
-    data << uint8(std::min(_escalatedStatus, TICKET_IN_ESCALATION_QUEUE));                              // escalated data
-    data << uint8(_viewed ? GMTICKET_OPENEDBYGM_STATUS_OPENED : GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED); // whether or not it has been viewed
 }
 
 void GmTicket::SendResponse(WorldSession* session) const
@@ -384,7 +366,7 @@ void TicketMgr::CloseTicket(uint32 ticketId, ObjectGuid source)
     {
         CharacterDatabaseTransaction trans = CharacterDatabaseTransaction(nullptr);
         ticket->SetClosedBy(source);
-        if (source)
+        if (!source.IsEmpty())
             --_openTicketCount;
         ticket->SaveToDB(trans);
     }
@@ -397,7 +379,7 @@ void TicketMgr::ResolveAndCloseTicket(uint32 ticketId, ObjectGuid source)
         CharacterDatabaseTransaction trans = CharacterDatabaseTransaction(nullptr);
         ticket->SetClosedBy(source);
         ticket->SetResolvedBy(source);
-        if (source)
+        if (!source.IsEmpty())
             --_openTicketCount;
         ticket->SaveToDB(trans);
     }
@@ -445,21 +427,35 @@ void TicketMgr::ShowEscalatedList(ChatHandler& handler) const
 
 void TicketMgr::SendTicket(WorldSession* session, GmTicket* ticket) const
 {
-    WorldPacket data(SMSG_GMTICKET_GETTICKET, (4 + 4 + 1 + 4 + 4 + 4 + 1 + 1));
+    WorldPackets::Ticket::GMTicketGetTicketResponse response;
 
     if (ticket)
-        ticket->WritePacket(data);
-    else
-        data << uint32(GMTICKET_STATUS_DEFAULT);
+    {
+        response.Result = GMTICKET_STATUS_HASTEXT;
 
-    session->SendPacket(&data);
+        WorldPackets::Ticket::GMTicketInfo& ticketInfo = response.Info;
+        ticketInfo.TicketID = ticket->GetId();
+        ticketInfo.TicketDescription = ticket->GetMessage();
+        ticketInfo.Category = ticket->GetNeedMoreHelp();
+        ticketInfo.TicketOpenTime = GetAge(ticket->GetLastModifiedTime());
+        if (GmTicket const* oldestTicket = sTicketMgr->GetOldestOpenTicket())
+            ticketInfo.OldestTicketTime = GetAge(oldestTicket->GetLastModifiedTime());
+
+        ticketInfo.UpdateTime = GetAge(sTicketMgr->GetLastChange());
+        ticketInfo.AssignedToGM = std::min(ticket->GetEscalatedStatus(), TICKET_IN_ESCALATION_QUEUE);
+        ticketInfo.OpenedByGM = ticket->IsViewed() ? GMTICKET_OPENEDBYGM_STATUS_OPENED : GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED;
+    }
+    else
+        response.Result = GMTICKET_STATUS_DEFAULT;
+
+    session->SendPacket(response.Write());
 }
 
 std::string GmTicket::GetAssignedToName() const
 {
     std::string name;
     // save queries if ticket is not assigned
-    if (_assignedTo)
+    if (!_assignedTo.IsEmpty())
         sCharacterCache->GetCharacterNameByGuid(_assignedTo, name);
 
     return name;

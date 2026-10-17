@@ -31,15 +31,11 @@ class Spell;
 class SpellMgr;
 class SpellInfo;
 class Unit;
+class WorldObject;
 struct Condition;
 struct SpellChainNode;
-struct SpellTargetPosition;
-struct SpellDurationEntry;
 struct SpellModifier;
-struct SpellRangeEntry;
-struct SpellRadiusEntry;
-struct SpellEntry;
-struct SpellCastTimesEntry;
+enum WeaponAttackType : uint8;
 
 enum SpellTargetSelectionCategories
 {
@@ -167,6 +163,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_DEPRECATED_LIQUID_AURA        = 0x00400000, // DO NOT REUSE
     SPELL_ATTR0_CU_IS_TALENT                     = 0x00800000, // reserved for master branch
     SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED          = 0x01000000,
+    SPELL_ATTR0_CU_CAN_TARGET_ANY_PRIVATE_OBJECT = 0x02000000, // reserved for master branch
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
@@ -212,21 +209,21 @@ public:
     SpellEffIndex EffectIndex;
     SpellEffects Effect;
     AuraType  ApplyAuraName;
-    uint32    Amplitude;
+    uint32    ApplyAuraPeriod;
     int32     DieSides;
     float     RealPointsPerLevel;
     int32     BasePoints;
     float     PointsPerComboPoint;
-    float     ValueMultiplier;
-    float     DamageMultiplier;
-    float     BonusMultiplier;
+    float     Amplitude;
+    float     ChainAmplitude;
+    float     BonusCoefficient;
     int32     MiscValue;
     int32     MiscValueB;
     Mechanics Mechanic;
     SpellImplicitTargetInfo TargetA;
     SpellImplicitTargetInfo TargetB;
     SpellRadiusEntry const* RadiusEntry;
-    uint32    ChainTarget;
+    uint32    ChainTargets;
     uint32    ItemType;
     uint32    TriggerSpell;
     flag96    SpellClassMask;
@@ -310,8 +307,8 @@ class TC_GAME_API SpellInfo
         uint32 FacingCasterFlags;
         uint32 CasterAuraState;
         uint32 TargetAuraState;
-        uint32 CasterAuraStateNot;
-        uint32 TargetAuraStateNot;
+        uint32 ExcludeCasterAuraState;
+        uint32 ExcludeTargetAuraState;
         uint32 CasterAuraSpell;
         uint32 TargetAuraSpell;
         uint32 ExcludeCasterAuraSpell;
@@ -360,7 +357,7 @@ class TC_GAME_API SpellInfo
         flag96 SpellFamilyFlags;
         uint32 DmgClass;
         uint32 PreventionType;
-        int32  AreaGroupId;
+        int32  RequiredAreasID;
         uint32 SchoolMask;
         std::array<SpellEffectInfo, MAX_SPELL_EFFECTS> _effects;
         uint32 ExplicitTargetMask;

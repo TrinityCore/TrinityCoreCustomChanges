@@ -60,9 +60,8 @@ TC_GAME_API bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint
 TC_GAME_API void Zone2MapCoordinates(float &x, float &y, uint32 zone);
 TC_GAME_API void Map2ZoneCoordinates(float &x, float &y, uint32 zone);
 
-typedef std::map<uint32/*pair32(map, diff)*/, MapDifficulty> MapDifficultyMap;
-TC_GAME_API MapDifficulty const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
-TC_GAME_API MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
+TC_GAME_API MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
+TC_GAME_API MapDifficultyEntry const* GetDownscaledMapDifficultyData(uint32 mapId, Difficulty &difficulty);
 
 TC_GAME_API uint32 const* /*[MAX_TALENT_TABS]*/ GetTalentTabPages(uint8 cls);
 
@@ -92,7 +91,6 @@ TC_GAME_API extern DBCStorage <AchievementEntry>             sAchievementStore;
 TC_GAME_API extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 TC_GAME_API extern DBCStorage <AreaTableEntry>               sAreaTableStore;
 TC_GAME_API extern DBCStorage <AreaGroupEntry>               sAreaGroupStore;
-TC_GAME_API extern DBCStorage <AreaPOIEntry>                 sAreaPOIStore;
 TC_GAME_API extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
 TC_GAME_API extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
 TC_GAME_API extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
@@ -152,13 +150,13 @@ TC_GAME_API extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomProperti
 TC_GAME_API extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
 TC_GAME_API extern DBCStorage <ItemSetEntry>                 sItemSetStore;
 TC_GAME_API extern DBCStorage <LFGDungeonEntry>              sLFGDungeonStore;
+TC_GAME_API extern DBCStorage <LFGDungeonExpansionEntry>     sLFGDungeonExpansionStore;
 TC_GAME_API extern DBCStorage <LightEntry>                   sLightStore;
 TC_GAME_API extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 TC_GAME_API extern DBCStorage <LockEntry>                    sLockStore;
 TC_GAME_API extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
 TC_GAME_API extern DBCStorage <MapEntry>                     sMapStore;
-//TC_GAME_API extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore; -- use GetMapDifficultyData insteed
-TC_GAME_API extern MapDifficultyMap                          sMapDifficultyMap;
+TC_GAME_API extern DBCStorage <MapDifficultyEntry>           sMapDifficultyStore;
 TC_GAME_API extern DBCStorage <MovieEntry>                   sMovieStore;
 TC_GAME_API extern DBCStorage <OverrideSpellDataEntry>       sOverrideSpellDataStore;
 TC_GAME_API extern DBCStorage <PowerDisplayEntry>            sPowerDisplayStore;

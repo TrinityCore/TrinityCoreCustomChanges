@@ -46,11 +46,12 @@ class go_shadowforge_brazier : public GameObjectScript
                     instance->SetData(TYPE_LYCEUM, DONE);
                 else
                     instance->SetData(TYPE_LYCEUM, IN_PROGRESS);
-                // If used brazier open linked doors (North or South)
-                if (me->GetGUID() == instance->GetGuidData(DATA_SF_BRAZIER_N))
+                // If used both braziers, open linked doors (North and South)
+                if (instance->GetData(TYPE_LYCEUM) == DONE)
+                {
                     instance->HandleGameObject(instance->GetGuidData(DATA_GOLEM_DOOR_N), true);
-                else if (me->GetGUID() == instance->GetGuidData(DATA_SF_BRAZIER_S))
                     instance->HandleGameObject(instance->GetGuidData(DATA_GOLEM_DOOR_S), true);
+                }
 
                 return false;
             }
@@ -123,6 +124,8 @@ enum GrimstoneTexts
     SAY_TEXT5          = 4,
     SAY_TEXT6          = 5
 };
+
+static constexpr uint32 PATH_ESCORT_GRIMSTONE = 80770;
 
 /// @todo implement quest part of event (different end boss)
 class npc_grimstone : public CreatureScript
@@ -246,7 +249,7 @@ public:
                 {
                     MobDeath_Timer = 2500;
 
-                    if (RingBossGUID)
+                    if (!RingBossGUID.IsEmpty())
                     {
                         Creature* boss = ObjectAccessor::GetCreature(*me, RingBossGUID);
                         if (boss && !boss->IsAlive() && boss->isDead())
@@ -287,7 +290,8 @@ public:
                     case 0:
                         Talk(SAY_TEXT5);
                         HandleGameObject(DATA_ARENA4, false);
-                        Start(false, false);
+                        LoadPath(PATH_ESCORT_GRIMSTONE);
+                        Start(false);
                         CanWalk = true;
                         Event_Timer = 0;
                         break;
@@ -502,7 +506,8 @@ enum Rocknot
 {
     SAY_GOT_BEER       = 0,
     QUEST_ALE          = 4295,
-    SPELL_DRUNKEN_RAGE = 14872
+    SPELL_DRUNKEN_RAGE = 14872,
+    PATH_ESCORT_ROCKNOT = 76026
 };
 
 class npc_rocknot : public CreatureScript
@@ -618,7 +623,8 @@ public:
                     Talk(SAY_GOT_BEER);
                     DoCastSelf(SPELL_DRUNKEN_RAGE, false);
 
-                    Start(false, false);
+                    LoadPath(PATH_ESCORT_ROCKNOT);
+                    Start(false);
                 }
             }
         }

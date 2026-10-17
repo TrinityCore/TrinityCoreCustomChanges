@@ -15,45 +15,113 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TalentPackets_h__
-#define TalentPackets_h__
+#ifndef TRINITYCORE_TALENT_PACKETS_H
+#define TRINITYCORE_TALENT_PACKETS_H
 
 #include "ObjectGuid.h"
 #include "Packet.h"
+#include "PacketUtilities.h"
+#include "SharedDefines.h"
+#include <variant>
 
-namespace WorldPackets::Talents
+namespace WorldPackets
 {
-class RespecWipeConfirm final : public ServerPacket
-{
-public:
-    explicit RespecWipeConfirm(ObjectGuid respecMaster, uint32 cost)
-        : ServerPacket(MSG_TALENT_WIPE_CONFIRM, 8 + 4), RespecMaster(respecMaster), Cost(cost) { }
+    namespace Talent
+    {
+        struct TalentEntry
+        {
+            uint32 TalentID = 0;
+            int8 Rank = 0;
+        };
 
-    WorldPacket const* Write() override;
+        struct TalentGroupInfo
+        {
+            std::vector<TalentEntry> Talents;
+            std::array<uint16, MAX_GLYPH_SLOT_INDEX> GlyphIDs;
+        };
 
-    ObjectGuid RespecMaster;
-    uint32 Cost = 0;
-};
+        struct TalentInfoUpdate
+        {
+            uint32 UnspentTalentPoints = 0;
+            uint8 ActiveGroup = 0;
+            std::vector<TalentGroupInfo> TalentGroups;
+        };
 
-class ConfirmRespecWipe final : public ClientPacket
-{
-public:
-    explicit ConfirmRespecWipe(WorldPacket&& packet) : ClientPacket(MSG_TALENT_WIPE_CONFIRM, std::move(packet)) { }
+        struct PetTalentInfoUpdate
+        {
+            uint32 UnspentTalentPoints = 0;
+            std::vector<TalentEntry> Talents;
+        };
 
-    void Read() override;
+        class UpdateTalentData final : public ServerPacket
+        {
+        public:
+            explicit UpdateTalentData() : ServerPacket(SMSG_TALENTS_INFO, 50) { }
 
-    ObjectGuid RespecMaster;
-};
+            WorldPacket const* Write() override;
 
-class InvoluntarilyReset final : public ServerPacket
-{
-public:
-    explicit InvoluntarilyReset(bool isPetTalents) : ServerPacket(SMSG_TALENTS_INVOLUNTARILY_RESET, 1), IsPetTalents(isPetTalents ? 1 : 0) { }
+            std::variant<TalentInfoUpdate, PetTalentInfoUpdate> Info;
+        };
 
-    WorldPacket const* Write() override;
+        struct LearnTalentEntry
+        {
+            uint32 TalentID = 0;
+            uint32 Rank = 0;
+        };
 
-    uint8 IsPetTalents = 0;
-};
+        class LearnTalent final : public ClientPacket
+        {
+        public:
+            explicit LearnTalent(WorldPacket&& packet) : ClientPacket(CMSG_LEARN_TALENT, std::move(packet)) { }
+
+            void Read() override;
+
+            LearnTalentEntry Talent;
+        };
+
+        class LearnPreviewTalents final : public ClientPacket
+        {
+        public:
+            explicit LearnPreviewTalents(WorldPacket&& packet) : ClientPacket(CMSG_LEARN_PREVIEW_TALENTS, std::move(packet)) { }
+
+            void Read() override;
+
+            Array<LearnTalentEntry, 150> Talents;
+        };
+
+        class RespecWipeConfirm final : public ServerPacket
+        {
+        public:
+            explicit RespecWipeConfirm() : ServerPacket(MSG_TALENT_WIPE_CONFIRM, 8 + 4) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid RespecMaster;
+            uint32 Cost = 0;
+        };
+
+        class ConfirmRespecWipe final : public ClientPacket
+        {
+        public:
+            explicit ConfirmRespecWipe(WorldPacket&& packet) : ClientPacket(MSG_TALENT_WIPE_CONFIRM, std::move(packet)) { }
+
+            void Read() override;
+
+            ObjectGuid RespecMaster;
+        };
+
+        class TalentsInvoluntarilyReset final : public ServerPacket
+        {
+        public:
+            explicit TalentsInvoluntarilyReset(bool isPetTalents) : ServerPacket(SMSG_TALENTS_INVOLUNTARILY_RESET, 1), IsPetTalents(isPetTalents ? 1 : 0) { }
+
+            WorldPacket const* Write() override;
+
+            uint8 IsPetTalents = 0;
+        };
+
+        ByteBuffer& operator<<(ByteBuffer& data, TalentInfoUpdate const& talentInfo);
+    }
 }
 
-#endif // TalentPackets_h__
+#endif // TRINITYCORE_TALENT_PACKETS_H

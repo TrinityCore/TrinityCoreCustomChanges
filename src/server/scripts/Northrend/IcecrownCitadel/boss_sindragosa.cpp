@@ -34,7 +34,7 @@
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 
-enum Texts
+enum SindragosaTexts
 {
     SAY_AGGRO                           = 0, // You are fools to have come to this place! The icy winds of Northrend will consume your souls!
     SAY_UNCHAINED_MAGIC                 = 1, // Suffer, mortals, as your pathetic magic betrays you!
@@ -51,7 +51,7 @@ enum Texts
     EMOTE_BERSERK_RAID                  = 11
 };
 
-enum Spells
+enum SindragosaSpells
 {
     // Sindragosa
     SPELL_SINDRAGOSA_S_FURY     = 70608,
@@ -101,7 +101,7 @@ enum Spells
     SPELL_FROST_INFUSION        = 72292,
 };
 
-enum Events
+enum SindragosaEvents
 {
     // Sindragosa
     EVENT_BERSERK                   = 1,
@@ -139,7 +139,7 @@ enum Events
     EVENT_GROUP_LAND_PHASE          = 1,
 };
 
-enum FrostwingData
+enum SindragosaFrostwingData
 {
     DATA_MYSTIC_BUFFET_STACK    = 0,
     DATA_FROSTWYRM_OWNER        = 1,
@@ -149,7 +149,7 @@ enum FrostwingData
     DATA_IS_THIRD_PHASE         = 5
 };
 
-enum MovementPoints
+enum SindragosaPoints
 {
     POINT_FROSTWYRM_FLY_IN  = 1,
     POINT_FROSTWYRM_LAND    = 2,
@@ -160,7 +160,7 @@ enum MovementPoints
     POINT_LAND_GROUND       = 7,
 };
 
-enum Shadowmourne
+enum SindragosMisc
 {
     QUEST_FROST_INFUSION        = 24757
 };
@@ -224,6 +224,7 @@ class FrostBeaconSelector : NonTankTargetSelector
         }
 };
 
+// 36853 - Sindragosa
 struct boss_sindragosa : public BossAI
 {
     boss_sindragosa(Creature* creature) : BossAI(creature, DATA_SINDRAGOSA)
@@ -473,6 +474,8 @@ struct boss_sindragosa : public BossAI
                 case EVENT_FROST_BREATH:
                     DoCastVictim(_isThirdPhase ? SPELL_FROST_BREATH_P2 : SPELL_FROST_BREATH_P1);
                     events.ScheduleEvent(EVENT_FROST_BREATH, 20s, 25s, EVENT_GROUP_LAND_PHASE);
+                    if (events.GetTimeUntilEvent(EVENT_ICY_GRIP) < 2s)
+                        events.RescheduleEvent(EVENT_ICY_GRIP, 2s, EVENT_GROUP_LAND_PHASE);
                     break;
                 case EVENT_UNCHAINED_MAGIC:
                     Talk(SAY_UNCHAINED_MAGIC);
@@ -480,8 +483,12 @@ struct boss_sindragosa : public BossAI
                     events.ScheduleEvent(EVENT_UNCHAINED_MAGIC, 30s, 35s, EVENT_GROUP_LAND_PHASE);
                     break;
                 case EVENT_ICY_GRIP:
-                    DoCastSelf(SPELL_ICY_GRIP);
+                    DoCastAOE(SPELL_ICY_GRIP);
                     events.ScheduleEvent(EVENT_BLISTERING_COLD, 1s, EVENT_GROUP_LAND_PHASE);
+                    if (events.GetTimeUntilEvent(EVENT_FROST_BREATH) < 6s)
+                        events.RescheduleEvent(EVENT_FROST_BREATH, 6s, EVENT_GROUP_LAND_PHASE);
+                    if (_isThirdPhase)
+                        events.ScheduleEvent(EVENT_ICY_GRIP, 62s, 67s);
                     break;
                 case EVENT_BLISTERING_COLD:
                     Talk(EMOTE_WARN_BLISTERING_COLD);
@@ -576,6 +583,7 @@ private:
     bool _isThirdPhase;
 };
 
+// 36980 - Ice Tomb
 struct npc_ice_tomb : public ScriptedAI
 {
     npc_ice_tomb(Creature* creature) : ScriptedAI(creature)
@@ -644,6 +652,7 @@ private:
     uint32 _existenceCheckTimer;
 };
 
+// 37534 - Spinestalker
 struct npc_spinestalker : public ScriptedAI
 {
     npc_spinestalker(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()), _summoned(false) { }
@@ -653,7 +662,7 @@ struct npc_spinestalker : public ScriptedAI
         // Increase add count
         if (!me->isDead())
         {
-            _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+            _instance->SetData64(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
             Reset();
         }
     }
@@ -675,7 +684,7 @@ struct npc_spinestalker : public ScriptedAI
     void JustAppeared() override
     {
         ScriptedAI::JustAppeared();
-        _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+        _instance->SetData64(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -763,6 +772,7 @@ private:
     bool _summoned;
 };
 
+// 37533 - Rimefang
 struct npc_rimefang_icc : public ScriptedAI
 {
     npc_rimefang_icc(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()), _summoned(false)
@@ -780,7 +790,7 @@ struct npc_rimefang_icc : public ScriptedAI
         // Increase add count
         if (!me->isDead())
         {
-            _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+            _instance->SetData64(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
             Reset();
         }
     }
@@ -802,7 +812,7 @@ struct npc_rimefang_icc : public ScriptedAI
     void JustAppeared() override
     {
         ScriptedAI::JustAppeared();
-        _instance->SetData(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+        _instance->SetData64(DATA_SINDRAGOSA_FROSTWYRMS, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -917,6 +927,8 @@ private:
     bool _summoned;
 };
 
+// 37531 - Frostwarden Handler
+// 37532 - Frostwing Whelp
 struct npc_sindragosa_trash : public ScriptedAI
 {
     npc_sindragosa_trash(Creature* creature) : ScriptedAI(creature)
@@ -938,7 +950,7 @@ struct npc_sindragosa_trash : public ScriptedAI
         if (!me->isDead())
         {
             if (me->GetEntry() == NPC_FROSTWING_WHELP)
-                _instance->SetData(_frostwyrmId, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+                _instance->SetData64(_frostwyrmId, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
             Reset();
         }
     }
@@ -961,7 +973,7 @@ struct npc_sindragosa_trash : public ScriptedAI
 
         // Increase add count
         if (me->GetEntry() == NPC_FROSTWING_WHELP)
-            _instance->SetData(_frostwyrmId, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
+            _instance->SetData64(_frostwyrmId, me->GetSpawnId());  // this cannot be in Reset because reset also happens on evade
     }
 
     void SetData(uint32 type, uint32 data) override
@@ -1173,7 +1185,7 @@ class spell_sindragosa_frost_breath : public SpellScript
             return;
 
         // Check difficulty and quest status
-        if (!(target->GetRaidDifficulty() & RAID_DIFFICULTY_MASK_25MAN) || target->GetQuestStatus(QUEST_FROST_INFUSION) != QUEST_STATUS_INCOMPLETE)
+        if (!target->GetMap()->Is25ManRaid() || target->GetQuestStatus(QUEST_FROST_INFUSION) != QUEST_STATUS_INCOMPLETE)
             return;
 
         // Check if player has Shadow's Edge equipped and not ready for infusion
@@ -1296,6 +1308,29 @@ class spell_sindragosa_ice_tomb_trap : public AuraScript
     }
 };
 
+class SindragosaIcyGripTargetFilter
+{
+public:
+    explicit SindragosaIcyGripTargetFilter(Unit* caster) : _caster(caster) { }
+
+    bool operator()(WorldObject* object) const
+    {
+        if (!object->ToUnit())
+            return true;
+        // No frost beaconed players
+        if (object->ToUnit()->HasAura(SPELL_FROST_BEACON))
+            return true;
+        // Not current Victim
+        if (object->ToUnit() == _caster->GetVictim())
+            return true;
+
+        return false;
+    }
+
+private:
+    Unit* _caster;
+};
+
 // 70117 - Icy Grip
 class spell_sindragosa_icy_grip : public SpellScript
 {
@@ -1306,6 +1341,11 @@ class spell_sindragosa_icy_grip : public SpellScript
         return ValidateSpellInfo({ SPELL_ICY_GRIP_JUMP });
     }
 
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if(SindragosaIcyGripTargetFilter(GetCaster()));
+    }
+
     void HandleScript(SpellEffIndex effIndex)
     {
         PreventHitDefaultEffect(effIndex);
@@ -1314,6 +1354,7 @@ class spell_sindragosa_icy_grip : public SpellScript
 
     void Register() override
     {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sindragosa_icy_grip::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         OnEffectHitTarget += SpellEffectFn(spell_sindragosa_icy_grip::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };

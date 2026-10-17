@@ -21,13 +21,13 @@
 #include "InstanceScript.h"
 #include "sethekk_halls.h"
 
-DoorData const doorData[] =
+static constexpr DoorData doorData[] =
 {
     { GO_IKISS_DOOR, DATA_TALON_KING_IKISS, DOOR_TYPE_PASSAGE },
     { 0,             0,                     DOOR_TYPE_ROOM    } // END
 };
 
-ObjectData const gameObjectData[] =
+static constexpr ObjectData gameObjectData[] =
 {
     { GO_TALON_KING_COFFER, DATA_TALON_KING_COFFER },
     { 0,                    0                      } // END
@@ -46,17 +46,6 @@ class instance_sethekk_halls : public InstanceMapScript
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
                 LoadObjectData(nullptr, gameObjectData);
-            }
-
-            void OnCreatureCreate(Creature* creature) override
-            {
-                if (creature->GetEntry() == NPC_ANZU)
-                {
-                    if (GetBossState(DATA_ANZU) == DONE)
-                        creature->DisappearAndDie();
-                    else
-                        SetBossState(DATA_ANZU, IN_PROGRESS);
-                }
             }
 
             bool SetBossState(uint32 type, EncounterState state) override

@@ -73,7 +73,6 @@ void AddSC_boss_amnennar_the_coldbringer();
 void AddSC_razorfen_downs();
 void AddSC_instance_razorfen_downs();
 // Razorfen Kraul
-void AddSC_razorfen_kraul();
 void AddSC_instance_razorfen_kraul();
 // Ruins of ahn'qiraj
 void AddSC_boss_kurinnaxx();
@@ -83,6 +82,7 @@ void AddSC_boss_buru();
 void AddSC_boss_ayamiss();
 void AddSC_boss_ossirian();
 void AddSC_instance_ruins_of_ahnqiraj();
+void AddSC_ruins_of_ahnqiraj();
 // Temple of ahn'qiraj
 void AddSC_boss_cthun();
 void AddSC_boss_viscidus();
@@ -95,6 +95,7 @@ void AddSC_boss_twinemperors();
 void AddSC_boss_ouro();
 void AddSC_npc_anubisath_sentinel();
 void AddSC_instance_temple_of_ahnqiraj();
+void AddSC_temple_of_ahnqiraj();
 // Wailing caverns
 void AddSC_wailing_caverns();
 void AddSC_instance_wailing_caverns();
@@ -186,7 +187,6 @@ void AddKalimdorScripts()
     AddSC_razorfen_downs();
     AddSC_instance_razorfen_downs();
     // Razorfen Kraul
-    AddSC_razorfen_kraul();
     AddSC_instance_razorfen_kraul();
     // Ruins of ahn'qiraj
     AddSC_boss_kurinnaxx();
@@ -196,6 +196,7 @@ void AddKalimdorScripts()
     AddSC_boss_ayamiss();
     AddSC_boss_ossirian();
     AddSC_instance_ruins_of_ahnqiraj();
+    AddSC_ruins_of_ahnqiraj();
     // Temple of ahn'qiraj
     AddSC_boss_cthun();
     AddSC_boss_viscidus();
@@ -208,6 +209,7 @@ void AddKalimdorScripts()
     AddSC_boss_ouro();
     AddSC_npc_anubisath_sentinel();
     AddSC_instance_temple_of_ahnqiraj();
+    AddSC_temple_of_ahnqiraj();
     // Wailing caverns
     AddSC_wailing_caverns();
     AddSC_instance_wailing_caverns();

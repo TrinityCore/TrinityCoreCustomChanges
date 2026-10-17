@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.40, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.46, for Linux (x86_64)
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	8.0.40-0ubuntu0.22.04.1
+-- Server version	8.0.46-0ubuntu0.24.04.4
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -1088,6 +1088,7 @@ CREATE TABLE `character_queststatus_seasonal` (
   `guid` int unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `quest` int unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   `event` int unsigned NOT NULL DEFAULT '0' COMMENT 'Event Identifier',
+  `completedTime` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`,`quest`),
   KEY `idx_guid` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Player System';
@@ -2073,7 +2074,8 @@ CREATE TABLE `item_loot_items` (
   `under_threshold` tinyint(1) NOT NULL DEFAULT '0',
   `needs_quest` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'quest drop',
   `rnd_prop` int NOT NULL DEFAULT '0' COMMENT 'random enchantment added when originally rolled',
-  `rnd_suffix` int NOT NULL DEFAULT '0' COMMENT 'random suffix added when originally rolled'
+  `rnd_suffix` int NOT NULL DEFAULT '0' COMMENT 'random suffix added when originally rolled',
+  PRIMARY KEY (`container_id`,`item_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2232,7 +2234,7 @@ CREATE TABLE `mail` (
   `deliver_time` int unsigned NOT NULL DEFAULT '0',
   `money` int unsigned NOT NULL DEFAULT '0',
   `cod` int unsigned NOT NULL DEFAULT '0',
-  `checked` tinyint unsigned NOT NULL DEFAULT '0',
+  `checked` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_receiver` (`receiver`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Mail System';
@@ -2507,14 +2509,15 @@ DROP TABLE IF EXISTS `quest_tracker`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `quest_tracker` (
-  `id` mediumint unsigned NOT NULL DEFAULT '0',
+  `id` int unsigned NOT NULL DEFAULT '0',
   `character_guid` int unsigned NOT NULL DEFAULT '0',
   `quest_accept_time` datetime NOT NULL,
   `quest_complete_time` datetime DEFAULT NULL,
   `quest_abandon_time` datetime DEFAULT NULL,
   `completed_by_gm` tinyint(1) NOT NULL DEFAULT '0',
   `core_hash` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
-  `core_revision` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0'
+  `core_revision` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  UNIQUE KEY `idx_latest_quest_for_character` (`id`,`character_guid`,`quest_accept_time` DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2688,7 +2691,13 @@ INSERT INTO `updates` VALUES
 ('2024_04_10_00_characters.sql','E0D6E19ACE6759332402FA27C23B0F7745C49742','ARCHIVED','2024-04-10 16:07:02',0),
 ('2024_08_17_00_characters.sql','08705FBCB8504E8B1009FDAF955F56D734FAD782','ARCHIVED','2024-08-17 22:26:12',0),
 ('2024_10_03_00_characters.sql','408249A6992999A36EB94089D184972E8E0767A3','ARCHIVED','2024-10-03 11:10:18',0),
-('2024_11_22_00_characters.sql','9EA2A4F88036D1D5F47EE8A6B634D52D0014986E','ARCHIVED','2024-11-22 23:18:14',0);
+('2024_11_22_00_characters.sql','9EA2A4F88036D1D5F47EE8A6B634D52D0014986E','ARCHIVED','2024-11-22 23:18:14',0),
+('2025_07_20_00_characters_2022_07_03_00_characters.sql','D3F04078C0846BCF7C8330AC20C39B8C3AEE7002','ARCHIVED','2022-07-03 23:37:24',0),
+('2025_09_09_00_characters.sql','A1A793D656117C31DAA92653DF0BE4AE6354358A','ARCHIVED','2025-09-09 14:03:38',0),
+('2025_10_21_00_characters.sql','DAC3249AE0CF374815D6A656489FE7B0AD3AA051','ARCHIVED','2025-10-21 18:16:45',0),
+('2026_09_09_00_characters.sql','AEBBEFF9434695DE9A1ACBEEEF312B2C0791377B','ARCHIVED','2026-09-09 19:08:27',0),
+('2026_09_12_00_characters.sql','A476229E4CCA5553050524484DD685FDCCDF91EF','RELEASED','2026-09-11 23:59:59',0),
+('2026_10_05_00_characters.sql','9F10D43D4FBD253308862806066A8CEDAE7E5965','RELEASED','2026-10-05 11:57:42',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2859,4 +2868,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-22 23:18:18
+-- Dump completed on 2026-09-09 19:08:55

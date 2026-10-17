@@ -125,6 +125,8 @@ private:
     bool _enrage;
 };
 
+static constexpr uint32 PATH_ESCORT_SCARLET_TRAINEE = 52602;
+
 struct npc_scarlet_trainee : public EscortAI
 {
     npc_scarlet_trainee(Creature* creature) : EscortAI(creature)
@@ -134,11 +136,12 @@ struct npc_scarlet_trainee : public EscortAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (_startTimer)
+        if (_startTimer && !me->IsInCombat())
         {
             if (_startTimer <= diff)
             {
-                Start(true, true);
+                LoadPath(PATH_ESCORT_SCARLET_TRAINEE);
+                Start(true);
                 _startTimer = 0;
             }
             else

@@ -16,6 +16,7 @@
  */
 
 #include "ThreatManager.h"
+#include "CombatPackets.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "CreatureGroups.h"
@@ -49,7 +50,8 @@ void ThreatReference::AddThreat(float amount)
         HeapNotifyIncreased();
     else
         HeapNotifyDecreased();
-    _mgr._needClientUpdate = true;
+
+    _mgr._updateFlags |= ThreatListClientUpdateFlags::UpdateNeeded;
 }
 
 void ThreatReference::ScaleThreat(float factor)
@@ -61,7 +63,8 @@ void ThreatReference::ScaleThreat(float factor)
         HeapNotifyIncreased();
     else
         HeapNotifyDecreased();
-    _mgr._needClientUpdate = true;
+
+    _mgr._updateFlags |= ThreatListClientUpdateFlags::UpdateNeeded;
 }
 
 void ThreatReference::UpdateOffline()
@@ -81,6 +84,7 @@ void ThreatReference::UpdateOffline()
         _online = ShouldBeSuppressed() ? ONLINE_STATE_SUPPRESSED : ONLINE_STATE_ONLINE;
         HeapNotifyIncreased();
         _mgr.RegisterForAIUpdate(GetVictim()->GetGUID());
+        _mgr._updateFlags |= ThreatListClientUpdateFlags::ForceHighestUpdate;
     }
 }
 
@@ -141,7 +145,7 @@ void ThreatReference::UpdateTauntState(TauntState state)
     else
         HeapNotifyIncreased();
 
-    _mgr._needClientUpdate = true;
+    _mgr._updateFlags |= ThreatListClientUpdateFlags::UpdateNeeded;
 }
 
 void ThreatReference::ClearThreat()
@@ -194,7 +198,7 @@ void ThreatReference::HeapNotifyDecreased()
     return true;
 }
 
-ThreatManager::ThreatManager(Unit* owner) : _owner(owner), _ownerCanHaveThreatList(false), _needClientUpdate(false), _updateTimer(THREAT_UPDATE_INTERVAL),
+ThreatManager::ThreatManager(Unit* owner) : _owner(owner), _ownerCanHaveThreatList(false), _updateFlags(ThreatListClientUpdateFlags::None), _updateTimer(THREAT_UPDATE_INTERVAL),
     _sortedThreatList(std::make_unique<Heap>()), _currentVictimRef(nullptr), _fixateRef(nullptr)
 {
     for (int8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -279,6 +283,17 @@ float ThreatManager::GetThreat(Unit const* who, bool includeOffline) const
 size_t ThreatManager::GetThreatListSize() const
 {
     return _sortedThreatList->size();
+}
+
+uint32 ThreatManager::GetThreatListPlayerCount(bool includeOffline/* = false*/) const
+{
+    if (includeOffline)
+        return uint32(_sortedThreatList->size());
+    uint32 returnValue = 0;
+    for (ThreatReference const* ref : *_sortedThreatList)
+        if (ref->IsAvailable() && ref->GetVictim()->GetTypeId() == TYPEID_PLAYER)
+            ++returnValue;
+    return returnValue;
 }
 
 Trinity::IteratorPair<ThreatManager::ThreatListIterator, std::nullptr_t> ThreatManager::GetUnsortedThreatList() const
@@ -576,13 +591,13 @@ Unit* ThreatManager::GetFixateTarget() const
 void ThreatManager::UpdateVictim()
 {
     ThreatReference const* const newVictim = ReselectVictim();
-    bool const newHighest = newVictim && (newVictim != _currentVictimRef);
+    bool const newHighest = newVictim && ((newVictim != _currentVictimRef) || _updateFlags.HasFlag(ThreatListClientUpdateFlags::ForceHighestUpdate));
 
     _currentVictimRef = newVictim;
-    if (newHighest || _needClientUpdate)
+    if (newHighest || _updateFlags.HasFlag(ThreatListClientUpdateFlags::UpdateNeeded))
     {
         SendThreatListToClients(newHighest);
-        _needClientUpdate = false;
+        _updateFlags = ThreatListClientUpdateFlags::None;
     }
 
     ProcessAIUpdates();
@@ -822,36 +837,47 @@ void ThreatManager::SendClearAllThreatToClients() const
 
 void ThreatManager::SendRemoveToClients(Unit const* victim) const
 {
-    WorldPacket data(SMSG_THREAT_REMOVE, 16);
-    data << _owner->GetPackGUID();
-    data << victim->GetPackGUID();
-    _owner->SendMessageToSet(&data, false);
+    WorldPackets::Combat::ThreatRemove threatRemove;
+    threatRemove.UnitGUID = _owner->GetGUID();
+    threatRemove.AboutGUID = victim->GetGUID();
+    _owner->SendMessageToSet(threatRemove.Write(), false);
 }
 
 void ThreatManager::SendThreatListToClients(bool newHighest) const
 {
-    WorldPacket data(newHighest ? SMSG_HIGHEST_THREAT_UPDATE : SMSG_THREAT_UPDATE, (_sortedThreatList->size() + 2) * 8); // guess
-    data << _owner->GetPackGUID();
-    if (newHighest)
-        data << _currentVictimRef->GetVictim()->GetPackGUID();
-    size_t countPos = data.wpos();
-    data << uint32(0); // placeholder
-    uint32 count = 0;
-    for (ThreatReference const* ref : *_sortedThreatList)
+    auto fillSharedPacketDataAndSend = [&](auto& packet)
     {
-        if (!ref->IsAvailable())
-            continue;
-        data << ref->GetVictim()->GetPackGUID();
-        data << uint32(ref->GetThreat() * 100);
-        ++count;
+        packet.UnitGUID = _owner->GetGUID();
+        packet.ThreatList.reserve(_sortedThreatList->size());
+        for (ThreatReference const* ref : *_sortedThreatList)
+        {
+            if (!ref->IsAvailable())
+                continue;
+
+            WorldPackets::Combat::ThreatInfo threatInfo;
+            threatInfo.UnitGUID = ref->GetVictim()->GetGUID();
+            threatInfo.Threat = int32(ref->GetThreat() * 100);
+            packet.ThreatList.push_back(threatInfo);
+        }
+        _owner->SendMessageToSet(packet.Write(), false);
+    };
+
+    if (newHighest)
+    {
+        WorldPackets::Combat::HighestThreatUpdate highestThreatUpdate;
+        highestThreatUpdate.HighestThreatGUID = _currentVictimRef->GetVictim()->GetGUID();
+        fillSharedPacketDataAndSend(highestThreatUpdate);
     }
-    data.put<uint32>(countPos, count);
-    _owner->SendMessageToSet(&data, false);
+    else
+    {
+        WorldPackets::Combat::ThreatUpdate threatUpdate;
+        fillSharedPacketDataAndSend(threatUpdate);
+    }
 }
 
 void ThreatManager::PutThreatListRef(ObjectGuid const& guid, ThreatReference* ref)
 {
-    _needClientUpdate = true;
+    _updateFlags |= ThreatListClientUpdateFlags::UpdateNeeded;
     auto& inMap = _myThreatListEntries[guid];
     ASSERT(!inMap, "Duplicate threat reference at %p being inserted on %s for %s - memory leak!", ref, _owner->GetGUID().ToString().c_str(), guid.ToString().c_str());
     inMap = ref;

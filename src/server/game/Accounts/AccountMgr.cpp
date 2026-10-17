@@ -44,7 +44,7 @@ AccountMgr* AccountMgr::instance()
 
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password, std::string email /*= ""*/)
 {
-    if (utf8length(username) > MAX_ACCOUNT_STR)
+    if (utf8length(username) > MAX_ACCOUNT_STR[sWorld->getBoolConfig(CONFIG_EXTENDED_ACCOUNT_NAME_LENGTH_LIMIT)] || username.length() > MAX_ACCOUNT_NAME_BYTES)
         return AccountOpResult::AOR_NAME_TOO_LONG;                           // username's too long
 
     if (utf8length(password) > MAX_PASS_STR)
@@ -95,7 +95,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     {
         do
         {
-            ObjectGuid guid(HighGuid::Player, (*result)[0].GetUInt32());
+            ObjectGuid guid = ObjectGuid::Create<HighGuid::Player>((*result)[0].GetUInt32());
 
             // Kick if player is online
             if (Player* p = ObjectAccessor::FindConnectedPlayer(guid))
@@ -163,7 +163,7 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUser
     if (!result)
         return AccountOpResult::AOR_NAME_NOT_EXIST;
 
-    if (utf8length(newUsername) > MAX_ACCOUNT_STR)
+    if (utf8length(newUsername) > MAX_ACCOUNT_STR[sWorld->getBoolConfig(CONFIG_EXTENDED_ACCOUNT_NAME_LENGTH_LIMIT)] || newUsername.length() > MAX_ACCOUNT_NAME_BYTES)
         return AccountOpResult::AOR_NAME_TOO_LONG;
 
     if (utf8length(newPassword) > MAX_PASS_STR)

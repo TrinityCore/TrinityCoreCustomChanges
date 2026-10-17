@@ -66,6 +66,7 @@ enum DeathKnightSpells
     SPELL_DK_GHOUL_EXPLODE                      = 47496,
     SPELL_DK_GLYPH_OF_DISEASE                   = 63334,
     SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE        = 58625,
+    SPELL_DK_HUNGERING_COLD_PROC                = 51209,
     SPELL_DK_IMPROVED_BLOOD_PRESENCE_R1         = 50365,
     SPELL_DK_IMPROVED_FROST_PRESENCE_R1         = 50384,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_R1        = 50391,
@@ -74,6 +75,7 @@ enum DeathKnightSpells
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
     SPELL_DK_ITEM_SIGIL_VENGEFUL_HEART          = 64962,
     SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
+    SPELL_DK_LICHBORNE                          = 50397,
     SPELL_DK_MASTER_OF_GHOULS                   = 52143,
     SPELL_DK_BLOOD_PLAGUE                       = 55078,
     SPELL_DK_RAISE_DEAD_USE_REAGENT             = 48289,
@@ -893,7 +895,7 @@ class spell_dk_death_strike : public SpellScript
         if (Unit* target = GetHitUnit())
         {
             uint32 count = target->GetDiseasesByCaster(caster->GetGUID());
-            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetEffectInfo(EFFECT_0).DamageMultiplier)));
+            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetEffectInfo(EFFECT_0).ChainAmplitude)));
             // Improved Death Strike
             if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, DK_ICON_ID_IMPROVED_DEATH_STRIKE, 0))
                 AddPct(bp, caster->CalculateSpellDamage(aurEff->GetSpellInfo()->GetEffect(EFFECT_2)));
@@ -981,7 +983,7 @@ class spell_dk_glyph_of_scourge_strike : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_DK_GLYPH_OF_SCOURGE_STRIKE_SCRIPT, aurEff);
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_DK_GLYPH_OF_SCOURGE_STRIKE_SCRIPT, aurEff);
     }
 
     void Register() override
@@ -1085,6 +1087,27 @@ class spell_dk_hungering_cold : public AuraScript
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_dk_hungering_cold::CheckProc);
+    }
+};
+
+// 49203 - Hungering Cold
+class spell_dk_hungering_cold_init : public SpellScript
+{
+    PrepareSpellScript(spell_dk_hungering_cold_init);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_DK_HUNGERING_COLD_PROC });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_DK_HUNGERING_COLD_PROC, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dk_hungering_cold_init::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
     }
 };
 
@@ -1299,6 +1322,33 @@ class spell_dk_improved_unholy_presence : public AuraScript
     }
 };
 
+// 49039 - Lichborne
+class spell_dk_lichborne : public AuraScript
+{
+    PrepareAuraScript(spell_dk_lichborne);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_DK_LICHBORNE });
+    }
+
+    void AfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_DK_LICHBORNE, true);
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->RemoveAurasDueToSpell(SPELL_DK_LICHBORNE);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_dk_lichborne::AfterApply, EFFECT_0, SPELL_AURA_MECHANIC_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_dk_lichborne::AfterRemove, EFFECT_0, SPELL_AURA_MECHANIC_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 // 61257 - Runic Power Back on Snare/Root
 class spell_dk_pvp_4p_bonus : public AuraScript
 {
@@ -1344,7 +1394,7 @@ class spell_dk_mark_of_blood : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_DK_MARK_OF_BLOOD_HEAL, aurEff);
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_DK_MARK_OF_BLOOD_HEAL, aurEff);
     }
 
     void Register() override
@@ -1363,21 +1413,24 @@ class spell_dk_necrosis : public AuraScript
         return ValidateSpellInfo({ SPELL_DK_NECROSIS_DAMAGE });
     }
 
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+        return damageInfo && damageInfo->GetDamage();
+    }
+
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
 
-        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
-        if (!damageInfo || !damageInfo->GetDamage())
-            return;
-
         CastSpellExtraArgs args(aurEff);
-        args.AddSpellBP0(CalculatePct(damageInfo->GetDamage(), aurEff->GetAmount()));
-        eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_DK_NECROSIS_DAMAGE, args);
+        args.AddSpellBP0(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()));
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_DK_NECROSIS_DAMAGE, args);
     }
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_dk_necrosis::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_dk_necrosis::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
@@ -1620,7 +1673,8 @@ class spell_dk_raise_dead : public SpellScript
 
                 if (!player->HasItemCount(reagentSpell->Reagent[i], reagentSpell->ReagentCount[i]))
                 {
-                    Spell::SendCastResult(player, reagentSpell, 0, SPELL_FAILED_REAGENTS);
+                    uint32 param1 = reagentSpell->Reagent[i];
+                    Spell::SendCastResult(player, reagentSpell, 0, SPELL_FAILED_REAGENTS, SPELL_CUSTOM_ERROR_NONE, &param1);
                     return SPELL_FAILED_DONT_REPORT;
                 }
             }
@@ -1657,7 +1711,7 @@ class spell_dk_raise_dead : public SpellScript
     {
         // No corpse found, take reagents
         if (!_corpse)
-            GetCaster()->CastSpell(GetCaster(), SPELL_DK_RAISE_DEAD_USE_REAGENT, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST));
+            GetCaster()->CastSpell(GetCaster(), SPELL_DK_RAISE_DEAD_USE_REAGENT, TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
     }
 
     uint32 GetGhoulSpellId()
@@ -1889,7 +1943,7 @@ class spell_dk_sudden_doom : public AuraScript
         if (!spellId)
             return;
 
-        caster->CastSpell(eventInfo.GetProcTarget(), spellId, aurEff);
+        caster->CastSpell(eventInfo.GetActionTarget(), spellId, aurEff);
     }
 
     void Register() override
@@ -1956,7 +2010,7 @@ class spell_dk_threat_of_thassarian : public AuraScript
             return;
 
         spellId = sSpellMgr->GetSpellWithRank(spellId, spellInfo->GetRank());
-        caster->CastSpell(eventInfo.GetProcTarget(), spellId, aurEff);
+        caster->CastSpell(eventInfo.GetActionTarget(), spellId, aurEff);
     }
 
     void Register() override
@@ -1979,19 +2033,21 @@ class spell_dk_unholy_blight : public AuraScript
         });
     }
 
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+        return damageInfo && damageInfo->GetDamage();
+    }
+
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
 
-        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
-        if (!damageInfo || !damageInfo->GetDamage())
-            return;
-
         Unit* caster = eventInfo.GetActor();
-        Unit* target = eventInfo.GetProcTarget();
+        Unit* target = eventInfo.GetActionTarget();
 
         SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_DK_UNHOLY_BLIGHT_DAMAGE);
-        int32 amount = CalculatePct(static_cast<int32>(damageInfo->GetDamage()), aurEff->GetAmount());
+        int32 amount = CalculatePct(static_cast<int32>(eventInfo.GetDamageInfo()->GetDamage()), aurEff->GetAmount());
         if (AuraEffect const* glyph = caster->GetAuraEffect(SPELL_DK_GLYPH_OF_UNHOLY_BLIGHT, EFFECT_0, caster->GetGUID()))
             AddPct(amount, glyph->GetAmount());
 
@@ -2005,6 +2061,7 @@ class spell_dk_unholy_blight : public AuraScript
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_dk_unholy_blight::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_dk_unholy_blight::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
@@ -2060,19 +2117,22 @@ class spell_dk_wandering_plague : public AuraScript
         return ValidateSpellInfo({ SPELL_DK_WANDERING_PLAGUE_DAMAGE });
     }
 
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (!roll_chance_f(eventInfo.GetActor()->GetUnitCriticalChanceAgainst(BASE_ATTACK, eventInfo.GetActionTarget())))
+            return false;
+
+        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+        return damageInfo && damageInfo->GetDamage();
+    }
+
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         Unit* caster = eventInfo.GetActor();
-        Unit* target = eventInfo.GetProcTarget();
-        if (!roll_chance_f(caster->GetUnitCriticalChanceAgainst(BASE_ATTACK, target)))
-            return;
+        Unit* target = eventInfo.GetActionTarget();
 
-        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
-        if (!damageInfo || !damageInfo->GetDamage())
-            return;
-
-        int32 amount = CalculatePct(static_cast<int32>(damageInfo->GetDamage()), aurEff->GetAmount());
+        int32 amount = CalculatePct(static_cast<int32>(eventInfo.GetDamageInfo()->GetDamage()), aurEff->GetAmount());
         CastSpellExtraArgs args(aurEff);
         args.AddSpellBP0(amount);
         caster->CastSpell(target, SPELL_DK_WANDERING_PLAGUE_DAMAGE, args);
@@ -2080,6 +2140,7 @@ class spell_dk_wandering_plague : public AuraScript
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_dk_wandering_plague::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_dk_wandering_plague::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
@@ -2652,7 +2713,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
         if (!caster)
             return;
 
-        std::list<Creature*> runeWeapons;
+        std::list<TempSummon*> runeWeapons;
         caster->GetAllMinionsByEntry(runeWeapons, NPC_DK_DANCING_RUNE_WEAPON);
         for (Creature* temp : runeWeapons)
         {
@@ -2698,7 +2759,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
             return;
 
         if (runeWeapon->IsInCombat() && runeWeapon->GetVictim())
-            runeWeapon->CastSpell(runeWeapon->GetVictim(), procSpell->Id, CastSpellExtraArgs(TriggerCastFlags::TRIGGERED_IGNORE_POWER_AND_REAGENT_COST));
+            runeWeapon->CastSpell(runeWeapon->GetVictim(), procSpell->Id, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
     }
 
     void Register() override
@@ -2736,11 +2797,13 @@ void AddSC_deathknight_spell_scripts()
     RegisterSpellScript(spell_dk_hysteria);
     RegisterSpellScript(spell_dk_frost_fever);
     RegisterSpellScript(spell_dk_hungering_cold);
+    RegisterSpellScript(spell_dk_hungering_cold_init);
     RegisterSpellScript(spell_dk_icebound_fortitude);
     RegisterSpellScript(spell_dk_improved_blood_presence);
     RegisterSpellScript(spell_dk_improved_blood_presence_triggered);
     RegisterSpellScript(spell_dk_improved_frost_presence);
     RegisterSpellScript(spell_dk_improved_unholy_presence);
+    RegisterSpellScript(spell_dk_lichborne);
     RegisterSpellScript(spell_dk_pvp_4p_bonus);
     RegisterSpellScript(spell_dk_mark_of_blood);
     RegisterSpellScript(spell_dk_necrosis);

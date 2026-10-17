@@ -37,6 +37,7 @@ enum RogueSpells
 {
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK       = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN            = 31231,
+    SPELL_ROGUE_CHEATING_DEATH                  = 45182,
     SPELL_ROGUE_GLYPH_OF_PREPARATION            = 56819,
     SPELL_ROGUE_KILLING_SPREE                   = 51690,
     SPELL_ROGUE_KILLING_SPREE_TELEPORT          = 57840,
@@ -50,6 +51,7 @@ enum RogueSpells
     SPELL_ROGUE_HONOR_AMONG_THIEVES             = 51698,
     SPELL_ROGUE_HONOR_AMONG_THIEVES_PROC        = 52916,
     SPELL_ROGUE_HONOR_AMONG_THIEVES_2           = 51699,
+    SPELL_ROGUE_HUNGER_FOR_BLOOD                = 63848,
     SPELL_ROGUE_T10_2P_BONUS                    = 70804,
     SPELL_ROGUE_GLYPH_OF_BACKSTAB_TRIGGER       = 63975,
     SPELL_ROGUE_QUICK_RECOVERY_ENERGY           = 31663,
@@ -71,7 +73,7 @@ class spell_rog_blade_flurry : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+        _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetActionTarget());
         return _procTarget != nullptr;
     }
 
@@ -145,6 +147,27 @@ class spell_rog_cheat_death : public AuraScript
     }
 };
 
+// 31231 - Cheat Death
+class spell_rog_cheat_death_cooldown : public SpellScript
+{
+    PrepareSpellScript(spell_rog_cheat_death_cooldown);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_ROGUE_CHEATING_DEATH });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_ROGUE_CHEATING_DEATH, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_rog_cheat_death_cooldown::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 // -51664 - Cut to the Chase
 class spell_rog_cut_to_the_chase : public AuraScript
 {
@@ -186,7 +209,7 @@ class spell_rog_deadly_brew : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_ROGUE_CRIPPLING_POISON, aurEff);
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_ROGUE_CRIPPLING_POISON, aurEff);
     }
 
     void Register() override
@@ -259,7 +282,7 @@ class spell_rog_deadly_poison : public SpellScript
                         continue;
 
                     // Do not reproc deadly
-                    if (spellInfo->SpellFamilyFlags.IsEqual(0x10000, 0x80000, 0))
+                    if (spellInfo->SpellFamilyFlags == flag96(0x10000, 0x80000, 0))
                         continue;
 
                     if (spellInfo->IsPositive())
@@ -637,7 +660,7 @@ class spell_rog_glyph_of_backstab : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), SPELL_ROGUE_GLYPH_OF_BACKSTAB_TRIGGER, aurEff);
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), SPELL_ROGUE_GLYPH_OF_BACKSTAB_TRIGGER, aurEff);
     }
 
     void Register() override
@@ -923,6 +946,27 @@ class spell_rog_honor_among_thieves_proc_aura : public AuraScript
     }
 };
 
+// 51662 - Hunger For Blood
+class spell_rog_hunger_for_blood : public SpellScript
+{
+    PrepareSpellScript(spell_rog_hunger_for_blood);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_ROGUE_HUNGER_FOR_BLOOD });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_ROGUE_HUNGER_FOR_BLOOD, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_rog_hunger_for_blood::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 // -51627 - Turn the Tables
 class spell_rog_turn_the_tables : public AuraScript
 {
@@ -986,6 +1030,7 @@ void AddSC_rogue_spell_scripts()
 {
     RegisterSpellScript(spell_rog_blade_flurry);
     RegisterSpellScript(spell_rog_cheat_death);
+    RegisterSpellScript(spell_rog_cheat_death_cooldown);
     RegisterSpellScript(spell_rog_cut_to_the_chase);
     RegisterSpellScript(spell_rog_deadly_brew);
     RegisterSpellScript(spell_rog_deadly_poison);
@@ -1005,6 +1050,7 @@ void AddSC_rogue_spell_scripts()
     RegisterSpellScript(spell_rog_tricks_of_the_trade_proc);
     RegisterSpellScript(spell_rog_honor_among_thieves);
     RegisterSpellAndAuraScriptPair(spell_rog_honor_among_thieves_proc, spell_rog_honor_among_thieves_proc_aura);
+    RegisterSpellScript(spell_rog_hunger_for_blood);
     RegisterSpellScript(spell_rog_turn_the_tables);
     RegisterSpellScript(spell_rog_vanish);
 }

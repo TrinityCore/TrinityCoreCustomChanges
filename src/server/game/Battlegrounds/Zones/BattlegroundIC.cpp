@@ -16,6 +16,7 @@
  */
 
 #include "BattlegroundIC.h"
+#include "BattlegroundPackets.h"
 #include "GameObject.h"
 #include "Log.h"
 #include "Map.h"
@@ -23,14 +24,11 @@
 #include "ScriptedCreature.h"
 #include "Transport.h"
 #include "Vehicle.h"
-#include "WorldPacket.h"
 #include "WorldStatePackets.h"
 
-void BattlegroundICScore::BuildObjectivesBlock(WorldPacket& data)
+void BattlegroundICScore::BuildObjectivesBlock(WorldPackets::Battleground::PVPLogData_Player& playerData)
 {
-    data << uint32(2); // Objectives Count
-    data << uint32(BasesAssaulted);
-    data << uint32(BasesDefended);
+    playerData.Stats = { BasesAssaulted, BasesDefended };
 }
 
 BattlegroundIC::BattlegroundIC()
@@ -251,7 +249,7 @@ void BattlegroundIC::AddPlayer(Player* player)
     bool const isInBattleground = IsPlayerInBattleground(player->GetGUID());
     Battleground::AddPlayer(player);
     if (!isInBattleground)
-        PlayerScores[player->GetGUID().GetCounter()] = new BattlegroundICScore(player->GetGUID());
+        PlayerScores[player->GetGUID()] = new BattlegroundICScore(player->GetGUID());
 
     if (nodePoint[NODE_TYPE_QUARRY].nodeState == (player->GetTeamId() == TEAM_ALLIANCE ? NODE_STATE_CONTROLLED_A : NODE_STATE_CONTROLLED_H))
         player->CastSpell(player, SPELL_QUARRY, true);

@@ -17,18 +17,16 @@
 
 #include "vmapexport.h"
 #include "adtfile.h"
+#include "Errors.h"
+#include "mpq_libmpq.h"
+#include "StringFormat.h"
 #include "vec3d.h"
-#include "mpq_libmpq04.h"
-
 #include "VMapDefinitions.h"
 #include "wmo.h"
 #include <fstream>
 #include <map>
 #include <cstdio>
 #include <cstdlib>
-#include "Errors.h"
-#undef min
-#undef max
 
 WMORoot::WMORoot(std::string const& filename)
     : filename(filename), color(0), nTextures(0), nGroups(0), nPortals(0), nLights(0),
@@ -91,8 +89,8 @@ bool WMORoot::open()
                 std::string path = ptr;
 
                 char* s = GetPlainName(ptr);
-                fixnamen(s, strlen(s));
-                fixname2(s, strlen(s));
+                FixNameCase(s, strlen(s));
+                FixNameSpaces(s, strlen(s));
 
                 uint32 doodadNameIndex = ptr - f.getPointer();
                 ptr += path.length() + 1;
@@ -190,9 +188,6 @@ bool WMOGroup::open(WMORoot* rootWMO)
         }
         fourcc[4] = 0;
         size_t nextpos = f.getPos() + size;
-        LiquEx_size = 0;
-        liquflags = 0;
-
         if (!strcmp(fourcc,"MOGP"))//header
         {
             f.read(&groupName, 4);
@@ -536,14 +531,12 @@ void MapObject::Extract(ADT::MODF const& mapObjDef, char const* WmoInstName, uin
 
     //-----------add_in _dir_file----------------
 
-    char tempname[512];
-    sprintf(tempname, "%s/%s", szWorkDirWmo, WmoInstName);
-    FILE *input;
-    input = fopen(tempname, "r+b");
+    std::string tempname = Trinity::StringFormat("{}/{}", szWorkDirWmo, WmoInstName);
+    FILE* input = fopen(tempname.c_str(), "r+b");
 
     if (!input)
     {
-        printf("WMOInstance::WMOInstance: couldn't open %s\n", tempname);
+        printf("WMOInstance::WMOInstance: couldn't open %s\n", tempname.c_str());
         return;
     }
 

@@ -16,10 +16,12 @@
  */
 
 #include "ScriptMgr.h"
+#include "SpellScript.h"
 #include "zulgurub.h"
 #include "GameEventMgr.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
+#include "Unit.h"
 
 /*######
  ## go_brazier_of_madness
@@ -74,7 +76,61 @@ public:
     }
 };
 
+enum PoisonousBlood
+{
+    SPELL_POISONOUS_BLOOD     = 24321
+};
+
+// 24320 - Poisonous Blood
+class spell_zulgurub_poisonous_blood : public SpellScript
+{
+    PrepareSpellScript(spell_zulgurub_poisonous_blood);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_POISONOUS_BLOOD });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        GetHitUnit()->CastSpell(GetHitUnit(), SPELL_POISONOUS_BLOOD);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_zulgurub_poisonous_blood::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+enum AxeFlurry
+{
+    SPELL_AXE_FLURRY      = 24020
+};
+
+// 24019 - Axe Flurry
+class spell_zulgurub_axe_flurry : public SpellScript
+{
+    PrepareSpellScript(spell_zulgurub_axe_flurry);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_AXE_FLURRY });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetHitUnit(), SPELL_AXE_FLURRY, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_zulgurub_axe_flurry::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_zulgurub()
 {
     new go_brazier_of_madness();
+    RegisterSpellScript(spell_zulgurub_poisonous_blood);
+    RegisterSpellScript(spell_zulgurub_axe_flurry);
 }

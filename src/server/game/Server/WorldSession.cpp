@@ -133,7 +133,8 @@ WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldS
     m_sessionDbLocaleIndex(locale),
     _timezoneOffset(timezoneOffset),
     m_latency(0),
-    m_TutorialsChanged(TUTORIALS_FLAG_NONE),
+    _tutorials(),
+    _tutorialsChanged(TUTORIALS_FLAG_NONE),
     recruiterId(recruiter),
     isRecruiter(isARecruiter),
     _RBACData(nullptr),
@@ -148,8 +149,6 @@ WorldSession::WorldSession(uint32 id, std::string&& name, std::shared_ptr<WorldS
     _calendarEventCreationCooldown(0),
     _gameClient(new GameClient(this))
 {
-    memset(m_Tutorials, 0, sizeof(m_Tutorials));
-
     if (m_Socket)
     {
         m_Address = m_Socket->GetRemoteIpAddress().to_string();
@@ -668,7 +667,7 @@ bool WorldSession::DisallowHyperlinksAndMaybeKick(std::string const& str)
     return false;
 }
 
-void WorldSession::SendNotification(const char *format, ...)
+void WorldSession::SendNotification(char const* format, ...)
 {
     if (format)
     {
@@ -685,15 +684,15 @@ void WorldSession::SendNotification(const char *format, ...)
     }
 }
 
-void WorldSession::SendNotification(uint32 string_id, ...)
+void WorldSession::SendNotification(uint32 stringId, ...)
 {
-    char const* format = GetTrinityString(string_id);
+    char const* format = GetTrinityString(stringId);
     if (format)
     {
         va_list ap;
         char szStr[1024];
         szStr[0] = '\0';
-        va_start(ap, string_id);
+        va_start(ap, stringId);
         vsnprintf(szStr, 1024, format, ap);
         va_end(ap);
 
@@ -743,12 +742,6 @@ void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
         , GetOpcodeNameForLogging(static_cast<OpcodeServer>(recvPacket.GetOpcode())), GetPlayerInfo());
 }
 
-void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
-{
-    TC_LOG_ERROR("network.opcode", "Received deprecated opcode {} from {}"
-        , GetOpcodeNameForLogging(static_cast<OpcodeClient>(recvPacket.GetOpcode())), GetPlayerInfo());
-}
-
 void WorldSession::SendAuthWaitQueue(uint32 position)
 {
     if (position == 0)
@@ -771,7 +764,7 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
         if (mask & (1 << i))
-            m_accountData[i] = AccountData();
+            _accountData[i] = AccountData();
 
     if (!result)
         return;
@@ -794,13 +787,13 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
             continue;
         }
 
-        m_accountData[type].Time = time_t(fields[1].GetUInt32());
-        m_accountData[type].Data = fields[2].GetString();
+        _accountData[type].Time = time_t(fields[1].GetUInt32());
+        _accountData[type].Data = fields[2].GetString();
     }
     while (result->NextRow());
 }
 
-void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string const& data)
+void WorldSession::SetAccountData(AccountDataType type, time_t time, std::string const& data)
 {
     uint32 id = 0;
     CharacterDatabaseStatements index;
@@ -822,12 +815,12 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(index);
     stmt->setUInt32(0, id);
     stmt->setUInt8 (1, type);
-    stmt->setUInt32(2, uint32(tm));
+    stmt->setUInt32(2, uint32(time));
     stmt->setString(3, data);
     CharacterDatabase.Execute(stmt);
 
-    m_accountData[type].Time = tm;
-    m_accountData[type].Data = data;
+    _accountData[type].Time = time;
+    _accountData[type].Data = data;
 }
 
 void WorldSession::SendAccountDataTimes(uint32 mask)
@@ -844,42 +837,42 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
 
 void WorldSession::LoadTutorialsData(PreparedQueryResult result)
 {
-    memset(m_Tutorials, 0, sizeof(uint32) * MAX_ACCOUNT_TUTORIAL_VALUES);
+    _tutorials = { };
 
     if (result)
     {
         for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
-            m_Tutorials[i] = (*result)[i].GetUInt32();
-        m_TutorialsChanged |= TUTORIALS_FLAG_LOADED_FROM_DB;
+            _tutorials[i] = (*result)[i].GetUInt32();
+        _tutorialsChanged |= TUTORIALS_FLAG_LOADED_FROM_DB;
     }
 
-    m_TutorialsChanged &= ~TUTORIALS_FLAG_CHANGED;
+    _tutorialsChanged &= ~TUTORIALS_FLAG_CHANGED;
 }
 
 void WorldSession::SendTutorialsData()
 {
     WorldPackets::Misc::TutorialFlags packet;
-    memcpy(packet.TutorialData.data(), m_Tutorials, sizeof(packet.TutorialData));
+    packet.TutorialData = _tutorials;
     SendPacket(packet.Write());
 }
 
 void WorldSession::SaveTutorialsData(CharacterDatabaseTransaction trans)
 {
-    if (!(m_TutorialsChanged & TUTORIALS_FLAG_CHANGED))
+    if (!(_tutorialsChanged & TUTORIALS_FLAG_CHANGED))
         return;
 
-    bool const hasTutorialsInDB = (m_TutorialsChanged & TUTORIALS_FLAG_LOADED_FROM_DB) != 0;
+    bool const hasTutorialsInDB = (_tutorialsChanged & TUTORIALS_FLAG_LOADED_FROM_DB) != 0;
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(hasTutorialsInDB ? CHAR_UPD_TUTORIALS : CHAR_INS_TUTORIALS);
     for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
-        stmt->setUInt32(i, m_Tutorials[i]);
+        stmt->setUInt32(i, _tutorials[i]);
     stmt->setUInt32(MAX_ACCOUNT_TUTORIAL_VALUES, GetAccountId());
     trans->Append(stmt);
 
     // now has, set flag so next save uses update query
     if (!hasTutorialsInDB)
-        m_TutorialsChanged |= TUTORIALS_FLAG_LOADED_FROM_DB;
+        _tutorialsChanged |= TUTORIALS_FLAG_LOADED_FROM_DB;
 
-    m_TutorialsChanged &= ~TUTORIALS_FLAG_CHANGED;
+    _tutorialsChanged &= ~TUTORIALS_FLAG_CHANGED;
 }
 
 void WorldSession::LoadInstanceTimeRestrictions(PreparedQueryResult result)
@@ -951,7 +944,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo* mi)
         return;
     }
 
-    Unit* mover = ValidateAndGetUnitBeingMoved(mi->guid, true /*all remaining uses are ack handlers*/);
+    Unit* mover = ValidateAndGetUnitBeingMoved(mi->guid, static_cast<OpcodeClient>(data.GetOpcode()), true /*all remaining uses are ack handlers*/);
     ValidateMovementInfo(mover, mi);
 }
 

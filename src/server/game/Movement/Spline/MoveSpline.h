@@ -24,6 +24,15 @@
 
 enum class AnimTier : uint8;
 
+namespace WorldPackets
+{
+    namespace Movement
+    {
+        class CommonMovement;
+        class MonsterMove;
+    }
+}
+
 namespace Movement
 {
     struct Location : public Vector3
@@ -41,8 +50,12 @@ namespace Movement
     // point can have vertical acceleration motion componemt(used in fall, parabolic movement)
     class TC_GAME_API MoveSpline
     {
+        friend class WorldPackets::Movement::CommonMovement;
+        friend class WorldPackets::Movement::MonsterMove;
+
     public:
         typedef Spline<int32> MySpline;
+
         enum UpdateResult
         {
             Result_None         = 0x01,
@@ -50,7 +63,6 @@ namespace Movement
             Result_NextCycle    = 0x04,
             Result_NextSegment  = 0x08
         };
-        friend class PacketBuilder;
 
     protected:
         MySpline        spline;
@@ -121,8 +133,8 @@ namespace Movement
         bool Finalized() const { return splineflags.done; }
         bool isCyclic() const { return splineflags.cyclic; }
         bool isFalling() const { return splineflags.falling; }
-        Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3(); }
-        Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3(); }
+        Vector3 const& FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3::zero(); }
+        Vector3 const& CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3::zero(); }
         int32 currentPathIdx() const;
 
         bool HasAnimation() const { return splineflags.animation; }

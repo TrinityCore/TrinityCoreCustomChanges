@@ -309,10 +309,13 @@ void Spell::EffectEnvironmentalDMG()
         DamageInfo damageInfo(unitCaster, unitTarget, damage, m_spellInfo, m_spellInfo->GetSchoolMask(), SPELL_DIRECT_DAMAGE, BASE_ATTACK);
         Unit::CalcAbsorbResist(damageInfo);
 
-        uint32 const absorb = damageInfo.GetAbsorb();
-        uint32 const resist = damageInfo.GetResist();
+        SpellNonMeleeDamage log(unitCaster, unitTarget, m_spellInfo->Id, m_spellInfo->GetSchoolMask());
+        log.damage = damageInfo.GetDamage();
+        log.absorb = damageInfo.GetAbsorb();
+        log.resist = damageInfo.GetResist();
+
         if (unitCaster)
-            unitCaster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_spellInfo->GetSchoolMask(), absorb, resist, false, 0, false);
+            unitCaster->SendSpellNonMeleeDamageLog(&log);
     }
 }
 
@@ -672,7 +675,7 @@ void Spell::EffectSchoolDMG()
             }
         }
 
-        if (unitCaster && damage > 0 && apply_direct_bonus)
+        if (unitCaster && apply_direct_bonus)
         {
             damage = unitCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE, *effectInfo, { });
             damage = unitTarget->SpellDamageBonusTaken(unitCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
@@ -1473,7 +1476,7 @@ void Spell::DoCreateItem(uint32 itemId)
 
         // set the "Crafted by ..." property of the item
         if (pItem->GetTemplate()->HasSignature())
-            pItem->SetGuidValue(ITEM_FIELD_CREATOR, player->GetGUID());
+            pItem->SetCreator(player->GetGUID());
 
         // send info to the client
         player->SendNewItem(pItem, num_to_add, true, bgType == 0);
@@ -1826,7 +1829,7 @@ void Spell::EffectOpenLock()
     }
     else if (itemTarget)
     {
-        lockId = itemTarget->GetTemplate()->LockID;
+        lockId = itemTarget->GetTemplate()->GetLockID();
         guid = itemTarget->GetGUID();
     }
     else
@@ -1850,7 +1853,7 @@ void Spell::EffectOpenLock()
         SendLoot(guid, LOOT_SKINNING);
     else if (itemTarget)
     {
-        itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_UNLOCKED);
+        itemTarget->SetItemFlag(ITEM_FIELD_FLAG_UNLOCKED);
         itemTarget->SetState(ITEM_CHANGED, itemTarget->GetOwner());
     }
 
@@ -2352,18 +2355,7 @@ void Spell::EffectDispel()
     }
     m_caster->SendMessageToSet(&dataSuccess, true);
 
-    // On success dispel
-    // Devour Magic
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->GetCategory() == SPELLCATEGORY_DEVOUR_MAGIC)
-    {
-        CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
-        args.AddSpellMod(SPELLVALUE_BASE_POINT0, m_spellInfo->GetEffect(EFFECT_1).CalcValue());
-        m_caster->CastSpell(m_caster, 19658, args);
-        // Glyph of Felhunter
-        if (Unit* owner = m_caster->GetOwner())
-            if (owner->GetAura(56249))
-                owner->CastSpell(owner, 19658, args);
-    }
+    CallScriptSuccessfulDispel(SpellEffIndex(effectInfo->EffectIndex));
 }
 
 void Spell::EffectDualWield()
@@ -2444,10 +2436,11 @@ void Spell::EffectUntrainTalents()
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (!unitTarget->IsPlayer())
         return;
 
-    unitTarget->ToPlayer()->SendTalentWipeConfirm(m_caster->GetGUID());
+    Player* playerTarget = unitTarget->ToPlayer();
+    playerTarget->SendRespecWipeConfirm(m_caster->GetGUID(), playerTarget->GetNextResetTalentsCost());
 }
 
 void Spell::EffectTeleUnitsFaceCaster()
@@ -2579,7 +2572,7 @@ void Spell::EffectEnchantItemPerm()
         {
             sLog->OutCommand(player->GetSession()->GetAccountId(), "GM {} (Account: {}) enchanting(perm): {} (Entry: {}) for player: {} (Account: {})",
                 player->GetName(), player->GetSession()->GetAccountId(),
-                itemTarget->GetTemplate()->Name1, itemTarget->GetEntry(),
+                itemTarget->GetNameForLocaleIdx(sWorld->GetDefaultDbcLocale()), itemTarget->GetEntry(),
                 item_owner->GetName(), item_owner->GetSession()->GetAccountId());
         }
 
@@ -2644,7 +2637,7 @@ void Spell::EffectEnchantItemPrismatic()
     {
         sLog->OutCommand(player->GetSession()->GetAccountId(), "GM {} (Account: {}) enchanting(perm): {} (Entry: {}) for player: {} (Account: {})",
             player->GetName(), player->GetSession()->GetAccountId(),
-            itemTarget->GetTemplate()->Name1, itemTarget->GetEntry(),
+            itemTarget->GetNameForLocaleIdx(sWorld->GetDefaultDbcLocale()), itemTarget->GetEntry(),
             item_owner->GetName(), item_owner->GetSession()->GetAccountId());
     }
 
@@ -2775,7 +2768,7 @@ void Spell::EffectEnchantItemTmp()
     {
         sLog->OutCommand(player->GetSession()->GetAccountId(), "GM {} (Account: {}) enchanting(temp): {} (Entry: {}) for player: {} (Account: {})",
             player->GetName(), player->GetSession()->GetAccountId(),
-            itemTarget->GetTemplate()->Name1, itemTarget->GetEntry(),
+            itemTarget->GetNameForLocaleIdx(sWorld->GetDefaultDbcLocale()), itemTarget->GetEntry(),
             item_owner->GetName(), item_owner->GetSession()->GetAccountId());
     }
 
@@ -3071,7 +3064,7 @@ void Spell::EffectWeaponDmg()
                 // 50% more damage with daggers
                 if (unitCaster->GetTypeId() == TYPEID_PLAYER)
                     if (Item* item = unitCaster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
-                        if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                        if (item->GetTemplate()->GetSubClass() == ITEM_SUBCLASS_WEAPON_DAGGER)
                             totalDamagePercentMod *= 1.5f;
             }
             // Mutilate (for each hand)
@@ -3769,7 +3762,7 @@ void Spell::EffectApplyGlyph()
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    if (m_glyphIndex >= MAX_GLYPH_SLOT_INDEX)
+    if (m_misc.GlyphSlot >= MAX_GLYPH_SLOT_INDEX)
         return;
 
     Player* player = m_caster->ToPlayer();
@@ -3778,7 +3771,7 @@ void Spell::EffectApplyGlyph()
 
     // glyph sockets level requirement
     uint8 minLevel = 0;
-    switch (m_glyphIndex)
+    switch (m_misc.GlyphSlot)
     {
         case 0:
         case 1: minLevel = 15; break;
@@ -3798,7 +3791,7 @@ void Spell::EffectApplyGlyph()
     {
         if (GlyphPropertiesEntry const* newGlyphProperties = sGlyphPropertiesStore.LookupEntry(newGlyph))
         {
-            if (GlyphSlotEntry const* newGlyphSlot = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(m_glyphIndex)))
+            if (GlyphSlotEntry const* newGlyphSlot = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(m_misc.GlyphSlot)))
             {
                 if (newGlyphProperties->GlyphSlotFlags != newGlyphSlot->Type)
                 {
@@ -3808,17 +3801,17 @@ void Spell::EffectApplyGlyph()
             }
 
             // remove old glyph
-            if (uint32 oldGlyph = player->GetGlyph(player->GetActiveTalentGroup(), m_glyphIndex))
+            if (uint32 oldGlyph = player->GetGlyph(player->GetActiveTalentGroup(), m_misc.GlyphSlot))
             {
                 if (GlyphPropertiesEntry const* oldGlyphProperties = sGlyphPropertiesStore.LookupEntry(oldGlyph))
                 {
                     player->RemoveAurasDueToSpell(oldGlyphProperties->SpellID);
-                    player->SetGlyph(m_glyphIndex, 0);
+                    player->SetGlyph(m_misc.GlyphSlot, 0);
                 }
             }
 
             player->CastSpell(player, newGlyphProperties->SpellID, true);
-            player->SetGlyph(m_glyphIndex, newGlyph);
+            player->SetGlyph(m_misc.GlyphSlot, newGlyph);
             player->SendTalentsInfoData(false);
         }
     }
@@ -3894,7 +3887,7 @@ void Spell::EffectInebriate()
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || !unitTarget->IsPlayer())
         return;
 
     Player* player = unitTarget->ToPlayer();
@@ -3916,7 +3909,7 @@ void Spell::EffectInebriate()
 
     player->SetDrunkValue(currentDrunk, m_CastItem ? m_CastItem->GetEntry() : 0);
 
-    if (currentDrunk == 100 && roll_chance_i(25))
+    if (currentDrunk == 100 && drunkMod > 0 && roll_chance_i(25))
         player->CastSpell(player, 67468, false);    // Drunken Vomit
 }
 
@@ -3940,7 +3933,7 @@ void Spell::EffectFeedPet()
     if (!pet->IsAlive())
         return;
 
-    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->ItemLevel);
+    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->GetBaseItemLevel());
     if (benefit <= 0)
         return;
 
@@ -4811,7 +4804,7 @@ void Spell::EffectProspecting()
     if (sWorld->getBoolConfig(CONFIG_SKILL_PROSPECTING))
     {
         uint32 SkillValue = player->GetPureSkillValue(SKILL_JEWELCRAFTING);
-        uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;
+        uint32 reqSkillValue = itemTarget->GetTemplate()->GetRequiredSkillRank();
         player->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
     }
 
@@ -4836,7 +4829,7 @@ void Spell::EffectMilling()
     if (sWorld->getBoolConfig(CONFIG_SKILL_MILLING))
     {
         uint32 SkillValue = player->GetPureSkillValue(SKILL_INSCRIPTION);
-        uint32 reqSkillValue = itemTarget->GetTemplate()->RequiredSkillRank;
+        uint32 reqSkillValue = itemTarget->GetTemplate()->GetRequiredSkillRank();
         player->UpdateGatherSkill(SKILL_INSCRIPTION, SkillValue, reqSkillValue);
     }
 
@@ -5229,7 +5222,7 @@ void Spell::SummonGuardian(SpellEffectInfo const& spellEffectInfo, uint32 entry,
     // level of pet summoned using engineering item based at engineering skill level
     if (m_CastItem && unitCaster->GetTypeId() == TYPEID_PLAYER)
         if (ItemTemplate const* proto = m_CastItem->GetTemplate())
-            if (proto->RequiredSkill == SKILL_ENGINEERING)
+            if (proto->GetRequiredSkill() == SKILL_ENGINEERING)
                 if (uint16 skill202 = unitCaster->ToPlayer()->GetSkillValue(SKILL_ENGINEERING))
                     level = skill202 / 5;
 
@@ -5443,7 +5436,7 @@ void Spell::EffectRechargeManaGem()
 
     if (Item* pItem = player->GetItemByEntry(item_id))
     {
-        for (int x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+        for (uint32 x = 0; x < pProto->Effects.size(); ++x)
             pItem->SetSpellCharges(x, pProto->Effects[x].Charges);
         pItem->SetState(ITEM_CHANGED, player);
     }
@@ -5477,8 +5470,7 @@ void Spell::EffectBind()
         homeLoc.GetPositionX(), homeLoc.GetPositionY(), homeLoc.GetPositionZ(), homeLoc.GetMapId(), areaId);
 
     // zone update
-    WorldPackets::Misc::PlayerBound packet(m_caster->GetGUID(), areaId);
-    player->SendDirectMessage(packet.Write());
+    player->SendPlayerBound(m_caster->GetGUID(), areaId);
 }
 
 void Spell::EffectSummonRaFFriend()

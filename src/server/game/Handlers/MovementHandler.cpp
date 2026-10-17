@@ -139,7 +139,7 @@ bool WorldSession::ValidateMovementInfo(Unit const* mover, MovementInfo* mi) con
     return true;
 }
 
-Unit* WorldSession::ValidateAndGetUnitBeingMoved(ObjectGuid guid, bool forStatusAck) const
+Unit* WorldSession::ValidateAndGetUnitBeingMoved(ObjectGuid guid, OpcodeClient opcode, bool forStatusAck) const
 {
     GameClient* client = GetGameClient();
 
@@ -148,7 +148,8 @@ Unit* WorldSession::ValidateAndGetUnitBeingMoved(ObjectGuid guid, bool forStatus
     Unit* activelyMovedUnit = client->GetActivelyMovedUnit();
     if (!forStatusAck && (!activelyMovedUnit || activelyMovedUnit->GetGUID() != guid))
     {
-        TC_LOG_DEBUG("entities.unit", "Attempt at tampering movement data by Player {}", _player->GetName());
+        TC_LOG_DEBUG("entities.unit", "{} Attempted tampering movement data in {}, requesting not allowed mover {} but expected {}",
+            GetPlayerInfo(), GetOpcodeNameForLogging(opcode), guid, Object::GetGUID(activelyMovedUnit));
         return nullptr;
     }
 
@@ -157,7 +158,8 @@ Unit* WorldSession::ValidateAndGetUnitBeingMoved(ObjectGuid guid, bool forStatus
     // as control over that unit is revoked (through a 'SMSG_CONTROL_UPDATE allowMove=false' message).
     if (!client->IsAllowedToMove(guid))
     {
-        TC_LOG_DEBUG("entities.unit", "Bad or outdated movement data by Player {}", _player->GetName());
+        TC_LOG_DEBUG("entities.unit", "{} Sent bad or outdated movement data in {}, requesting not allowed mover {}",
+            GetPlayerInfo(), GetOpcodeNameForLogging(opcode), guid);
         return nullptr;
     }
 
@@ -182,7 +184,7 @@ uint32 WorldSession::AdjustClientMovementTime(uint32 time) const
         return uint32(movementTime);
 }
 
-void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recvPacket*/)
+void WorldSession::HandleMoveWorldportAckOpcode(WorldPackets::Movement::WorldPortResponse& /*packet*/)
 {
     TC_LOG_DEBUG("network", "WORLD: got MSG_MOVE_WORLDPORT_ACK.");
     HandleMoveWorldportAck();
@@ -306,10 +308,10 @@ void WorldSession::HandleMoveWorldportAck()
     if (mInstance)
     {
         // check if this instance has a reset time and send it to player if so
-        Difficulty diff = player->GetDifficulty(mEntry->IsRaid());
-        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mEntry->ID, diff))
+        Difficulty diff = newMap->GetDifficultyID();
+        if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->ID, diff))
         {
-            if (mapDiff->resetTime)
+            if (mapDiff->RaidDuration)
             {
                 if (time_t timeReset = sInstanceSaveMgr->GetResetTimeFor(mEntry->ID, diff))
                 {
@@ -351,22 +353,13 @@ void WorldSession::HandleMoveWorldportAck()
     player->ProcessDelayedOperations();
 }
 
-void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
+void WorldSession::HandleMoveTeleportAck(WorldPackets::Movement::MoveTeleportAck& packet)
 {
-    TC_LOG_DEBUG("network", "MSG_MOVE_TELEPORT_ACK");
-    ObjectGuid guid;
+    TC_LOG_DEBUG("network", "CMSG_MOVE_TELEPORT_ACK: Guid: {}, Sequence: {}, Time: {}", packet.MoverGUID.ToString(), packet.AckIndex, packet.MoveTime);
 
-    recvPacket >> guid.ReadAsPacked();
-
-    Unit* mover = ValidateAndGetUnitBeingMoved(guid, false);
+    Unit* mover = ValidateAndGetUnitBeingMoved(packet.MoverGUID, packet.GetOpcode(), false);
     if (!mover)
-    {
-        recvPacket.rfinish();                     // prevent warnings spam
         return;
-    }
-
-    uint32 sequenceIndex, time;
-    recvPacket >> sequenceIndex >> time;
 
     Player* plMover = mover->ToPlayer();
 
@@ -412,7 +405,7 @@ void WorldSession::HandleMovementOpcodes(WorldPackets::Movement::ClientPlayerMov
 
 void WorldSession::HandleMovementOpcode(OpcodeClient opcode, MovementInfo& movementInfo)
 {
-    Unit* mover = ValidateAndGetUnitBeingMoved(movementInfo.guid, false);
+    Unit* mover = ValidateAndGetUnitBeingMoved(movementInfo.guid, opcode, false);
     if (!ValidateMovementInfo(mover, &movementInfo))
         return;
 
@@ -476,14 +469,6 @@ void WorldSession::HandleMovementOpcode(OpcodeClient opcode, MovementInfo& movem
         movementInfo.transport.Reset();
     }
 
-    // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plrMover && !plrMover->IsInFlight())
-        plrMover->HandleFall(movementInfo);
-
-    // interrupt parachutes upon falling or landing in water
-    if (opcode == MSG_MOVE_FALL_LAND || opcode == MSG_MOVE_START_SWIM)
-        mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
-
     /* process position-change */
     movementInfo.guid = mover->GetGUID();
     movementInfo.time = AdjustClientMovementTime(movementInfo.time);
@@ -511,6 +496,14 @@ void WorldSession::HandleMovementOpcode(OpcodeClient opcode, MovementInfo& movem
     }
 
     mover->UpdatePosition(movementInfo.pos);
+
+    // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
+    if (opcode == MSG_MOVE_FALL_LAND && plrMover && !plrMover->IsInFlight())
+        plrMover->HandleFall();
+
+    // interrupt parachutes upon falling or landing in water
+    if (opcode == MSG_MOVE_FALL_LAND || opcode == MSG_MOVE_START_SWIM)
+        mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
 
     if (plrMover)                                            // nothing is charmed, or player charmed
     {
@@ -827,7 +820,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "CMSG_FORCE_MOVE_ROOT_ACK");
+    TC_LOG_DEBUG("network", "CMSG_MOVE_FORCE_ROOT_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -871,7 +864,7 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
-    TC_LOG_DEBUG("network", "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
+    TC_LOG_DEBUG("network", "WORLD: CMSG_MOVE_FORCE_UNROOT_ACK");
 
     ObjectGuid guid;                                        // guid - unused
     recvData >> guid.ReadAsPacked();
@@ -1024,7 +1017,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recvData)
     recvData >> guid.ReadAsPacked();
     recvData >> timeSkipped;
 
-    Unit* mover = ValidateAndGetUnitBeingMoved(guid, false);
+    Unit* mover = ValidateAndGetUnitBeingMoved(guid, static_cast<OpcodeClient>(recvData.GetOpcode()), false);
     if (!mover)
     {
         recvData.rfinish();                     // prevent warnings spam

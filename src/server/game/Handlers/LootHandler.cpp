@@ -98,7 +98,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPackets::Loot::LootItem& p
                     {
                         if (player->AddItem(item->itemid, item->count))
                         {
-                            player->SendNotifyLootItemRemoved(lootSlot);
+                            player->SendNotifyLootItemRemoved(packet.LootListID);
                             player->SendLootRelease(player->GetLootGUID());
                         }
                         else

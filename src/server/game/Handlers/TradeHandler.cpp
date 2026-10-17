@@ -89,8 +89,8 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
 
         if (Item* item = view_trade->GetItem(TradeSlots(i)))
         {
-            data << uint32(item->GetTemplate()->ItemId);       // entry
-            data << uint32(item->GetTemplate()->DisplayInfoID);// display id
+            data << uint32(item->GetTemplate()->GetId());   // entry
+            data << uint32(item->GetTemplate()->GetDisplayId());// display id
             data << uint32(item->GetCount());               // stack count
                                                             // wrapped: hide stats but show giftcreator name
             data << uint32(item->IsWrapped() ? 1 : 0);
@@ -104,7 +104,7 @@ void WorldSession::SendUpdateTrade(bool trader_data /*= true*/)
             data << uint32(item->GetSpellCharges());        // charges
             data << uint32(item->GetItemSuffixFactor());    // SuffixFactor
             data << uint32(item->GetItemRandomPropertyId());// random properties id
-            data << uint32(item->GetTemplate()->LockID);       // lock id
+            data << uint32(item->GetTemplate()->GetLockID()); // lock id
                                                             // max durability
             data << uint32(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
                                                             // durability
@@ -147,13 +147,13 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 {
                     sLog->OutCommand(_player->GetSession()->GetAccountId(), "GM {} (Account: {}) trade: {} (Entry: {} Count: {}) to player: {} (Account: {})",
                         _player->GetName(), _player->GetSession()->GetAccountId(),
-                        myItems[i]->GetTemplate()->Name1, myItems[i]->GetEntry(), myItems[i]->GetCount(),
+                        myItems[i]->GetNameForLocaleIdx(sWorld->GetDefaultDbcLocale()), myItems[i]->GetEntry(), myItems[i]->GetCount(),
                         trader->GetName(), trader->GetSession()->GetAccountId());
                 }
 
                 // adjust time (depends on /played)
                 if (myItems[i]->IsBOPTradeable())
-                    myItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, trader->GetTotalPlayedTime()-(_player->GetTotalPlayedTime()-myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                    myItems[i]->SetCreatePlayedTime(trader->GetTotalPlayedTime()-(_player->GetTotalPlayedTime()-myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 trader->MoveItemToInventory(traderDst, myItems[i], true, true);
             }
@@ -165,13 +165,13 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 {
                     sLog->OutCommand(trader->GetSession()->GetAccountId(), "GM {} (Account: {}) trade: {} (Entry: {} Count: {}) to player: {} (Account: {})",
                         trader->GetName(), trader->GetSession()->GetAccountId(),
-                        hisItems[i]->GetTemplate()->Name1, hisItems[i]->GetEntry(), hisItems[i]->GetCount(),
+                        hisItems[i]->GetNameForLocaleIdx(sWorld->GetDefaultDbcLocale()), hisItems[i]->GetEntry(), hisItems[i]->GetCount(),
                         _player->GetName(), _player->GetSession()->GetAccountId());
                 }
 
                 // adjust time (depends on /played)
                 if (hisItems[i]->IsBOPTradeable())
-                    hisItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, _player->GetTotalPlayedTime()-(trader->GetTotalPlayedTime()-hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                    hisItems[i]->SetCreatePlayedTime(_player->GetTotalPlayedTime()-(trader->GetTotalPlayedTime()-hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
                 // store
                 _player->MoveItemToInventory(playerDst, hisItems[i], true, true);
             }
@@ -479,12 +479,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         {
             if (myItems[i])
             {
-                myItems[i]->SetGuidValue(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
+                myItems[i]->SetGiftCreator(_player->GetGUID());
                 _player->MoveItemFromInventory(myItems[i]->GetBagSlot(), myItems[i]->GetSlot(), true);
             }
             if (hisItems[i])
             {
-                hisItems[i]->SetGuidValue(ITEM_FIELD_GIFTCREATOR, trader->GetGUID());
+                hisItems[i]->SetGiftCreator(trader->GetGUID());
                 trader->MoveItemFromInventory(hisItems[i]->GetBagSlot(), hisItems[i]->GetSlot(), true);
             }
         }

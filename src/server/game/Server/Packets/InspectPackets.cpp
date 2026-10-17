@@ -40,7 +40,7 @@ ByteBuffer& operator<<(ByteBuffer& data, InspectItemData const& item)
     return data;
 }
 
-InspectItemData::InspectItemData(Item const* item)
+InspectItemData::InspectItemData(::Item const* item)
 {
     CreatorGUID = item->GetGuidValue(ITEM_FIELD_CREATOR);
 
@@ -68,5 +68,28 @@ WorldPacket const* InspectResult::Write()
         _worldPacket << item;
 
     return &_worldPacket;
+}
+
+void RequestHonorStats::Read()
+{
+    _worldPacket >> TargetGUID;
+}
+
+WorldPacket const* InspectHonorStats::Write()
+{
+    _worldPacket << PlayerGUID;
+    _worldPacket << uint8(LifetimeMaxRank);
+    _worldPacket << uint16(TodayHonorableKills);
+    _worldPacket << uint16(YesterdayHonorableKills);
+    _worldPacket << uint32(TodayContribution);
+    _worldPacket << uint32(YesterdayContribution);
+    _worldPacket << uint32(LifetimeHonorableKills);
+
+    return &_worldPacket;
+}
+
+void QueryInspectAchievements::Read()
+{
+    _worldPacket >> Guid.ReadAsPacked();
 }
 }

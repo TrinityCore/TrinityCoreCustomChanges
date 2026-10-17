@@ -4292,11 +4292,10 @@ bool InstanceMap::HasPermBoundPlayers() const
 uint32 InstanceMap::GetMaxPlayers() const
 {
     MapDifficultyEntry const* mapDiff = GetMapDifficulty();
-    MapDifficulty const* mapDiff = GetMapDifficulty();
-    if (mapDiff && mapDiff->maxPlayers && (sConfigMgr->GetBoolDefault("AutoBalance.enable", true)))
-        return (mapDiff->maxPlayers == 10 ? 30 : mapDiff->maxPlayers);
+    if (mapDiff && mapDiff->MaxPlayers && (sConfigMgr->GetBoolDefault("AutoBalance.enable", true)))
+        return (mapDiff->MaxPlayers == 10 ? 30 : mapDiff->MaxPlayers);
     else
-        return mapDiff->maxPlayers;
+        return mapDiff->MaxPlayers;
 
     return GetEntry()->MaxPlayers;
 }

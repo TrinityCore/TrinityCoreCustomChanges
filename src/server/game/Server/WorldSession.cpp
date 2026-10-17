@@ -796,7 +796,7 @@ void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
     bool cheater = sAnticheatMgr->CheckIsLuaCheater(GetAccountId());
     if (!cheater)
     {
-        cheater = sAnticheatMgr->CheckBlockedLuaFunctions(m_accountData, _player);
+        cheater = sAnticheatMgr->CheckBlockedLuaFunctions(_accountData, _player);
     }
 
     if (!_isLuaCheater)

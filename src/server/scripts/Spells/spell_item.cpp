@@ -27,6 +27,7 @@
 #include "Creature.h"
 #include "CreatureAIImpl.h"
 #include "DBCStores.h"
+#include "Log.h"
 #include "LootMgr.h"
 #include "Map.h"
 #include "ObjectMgr.h"
@@ -1121,7 +1122,13 @@ class spell_item_flask_of_the_north : public SpellScript
                 break;
         }
 
-        caster->CastSpell(caster, possibleSpells[urand(0, (possibleSpells.size() - 1))], true);
+        if (possibleSpells.empty())
+        {
+            TC_LOG_WARN("spells", "Missing spells for class {} in script spell_item_flask_of_the_north", caster->GetClass());
+            return;
+        }
+
+        caster->CastSpell(caster, Trinity::Containers::SelectRandomContainerElement(possibleSpells), true);
     }
 
     void Register() override
@@ -2605,7 +2612,7 @@ class spell_item_gift_of_the_harvester : public SpellScript
 
     SpellCastResult CheckRequirement()
     {
-        std::list<Creature*> ghouls;
+        std::list<TempSummon*> ghouls;
         GetCaster()->GetAllMinionsByEntry(ghouls, NPC_GHOUL);
         if (ghouls.size() >= MAX_GHOULS)
         {

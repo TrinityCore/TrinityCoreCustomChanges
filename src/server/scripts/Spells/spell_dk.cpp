@@ -66,6 +66,7 @@ enum DeathKnightSpells
     SPELL_DK_GHOUL_EXPLODE                      = 47496,
     SPELL_DK_GLYPH_OF_DISEASE                   = 63334,
     SPELL_DK_GLYPH_OF_ICEBOUND_FORTITUDE        = 58625,
+    SPELL_DK_HUNGERING_COLD_PROC                = 51209,
     SPELL_DK_IMPROVED_BLOOD_PRESENCE_R1         = 50365,
     SPELL_DK_IMPROVED_FROST_PRESENCE_R1         = 50384,
     SPELL_DK_IMPROVED_UNHOLY_PRESENCE_R1        = 50391,
@@ -894,7 +895,7 @@ class spell_dk_death_strike : public SpellScript
         if (Unit* target = GetHitUnit())
         {
             uint32 count = target->GetDiseasesByCaster(caster->GetGUID());
-            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetEffectInfo(EFFECT_0).DamageMultiplier)));
+            int32 bp = int32(count * caster->CountPctFromMaxHealth(int32(GetEffectInfo(EFFECT_0).ChainAmplitude)));
             // Improved Death Strike
             if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, DK_ICON_ID_IMPROVED_DEATH_STRIKE, 0))
                 AddPct(bp, caster->CalculateSpellDamage(aurEff->GetSpellInfo()->GetEffect(EFFECT_2)));
@@ -1086,6 +1087,27 @@ class spell_dk_hungering_cold : public AuraScript
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_dk_hungering_cold::CheckProc);
+    }
+};
+
+// 49203 - Hungering Cold
+class spell_dk_hungering_cold_init : public SpellScript
+{
+    PrepareSpellScript(spell_dk_hungering_cold_init);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_DK_HUNGERING_COLD_PROC });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_DK_HUNGERING_COLD_PROC, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_dk_hungering_cold_init::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
     }
 };
 
@@ -1651,7 +1673,8 @@ class spell_dk_raise_dead : public SpellScript
 
                 if (!player->HasItemCount(reagentSpell->Reagent[i], reagentSpell->ReagentCount[i]))
                 {
-                    Spell::SendCastResult(player, reagentSpell, 0, SPELL_FAILED_REAGENTS);
+                    uint32 param1 = reagentSpell->Reagent[i];
+                    Spell::SendCastResult(player, reagentSpell, 0, SPELL_FAILED_REAGENTS, SPELL_CUSTOM_ERROR_NONE, &param1);
                     return SPELL_FAILED_DONT_REPORT;
                 }
             }
@@ -1688,7 +1711,7 @@ class spell_dk_raise_dead : public SpellScript
     {
         // No corpse found, take reagents
         if (!_corpse)
-            GetCaster()->CastSpell(GetCaster(), SPELL_DK_RAISE_DEAD_USE_REAGENT, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST));
+            GetCaster()->CastSpell(GetCaster(), SPELL_DK_RAISE_DEAD_USE_REAGENT, TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
     }
 
     uint32 GetGhoulSpellId()
@@ -2690,7 +2713,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
         if (!caster)
             return;
 
-        std::list<Creature*> runeWeapons;
+        std::list<TempSummon*> runeWeapons;
         caster->GetAllMinionsByEntry(runeWeapons, NPC_DK_DANCING_RUNE_WEAPON);
         for (Creature* temp : runeWeapons)
         {
@@ -2736,7 +2759,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
             return;
 
         if (runeWeapon->IsInCombat() && runeWeapon->GetVictim())
-            runeWeapon->CastSpell(runeWeapon->GetVictim(), procSpell->Id, CastSpellExtraArgs(TriggerCastFlags::TRIGGERED_IGNORE_POWER_AND_REAGENT_COST));
+            runeWeapon->CastSpell(runeWeapon->GetVictim(), procSpell->Id, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
     }
 
     void Register() override
@@ -2774,6 +2797,7 @@ void AddSC_deathknight_spell_scripts()
     RegisterSpellScript(spell_dk_hysteria);
     RegisterSpellScript(spell_dk_frost_fever);
     RegisterSpellScript(spell_dk_hungering_cold);
+    RegisterSpellScript(spell_dk_hungering_cold_init);
     RegisterSpellScript(spell_dk_icebound_fortitude);
     RegisterSpellScript(spell_dk_improved_blood_presence);
     RegisterSpellScript(spell_dk_improved_blood_presence_triggered);

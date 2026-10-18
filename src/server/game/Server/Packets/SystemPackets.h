@@ -28,12 +28,22 @@ namespace WorldPackets
         class FeatureSystemStatus final : public ServerPacket
         {
         public:
-            FeatureSystemStatus() : ServerPacket(SMSG_FEATURE_SYSTEM_STATUS, 2) { }
+            explicit FeatureSystemStatus() : ServerPacket(SMSG_FEATURE_SYSTEM_STATUS, 2) { }
 
             WorldPacket const* Write() override;
 
             uint8 ComplaintStatus = COMPLAINT_ENABLED_WITH_AUTO_IGNORE;
             bool VoiceEnabled = false;
+        };
+
+        class MOTD final : public ServerPacket
+        {
+        public:
+            explicit MOTD() : ServerPacket(SMSG_MOTD) { }
+
+            WorldPacket const* Write() override;
+
+            std::vector<std::string> const* Text = nullptr;
         };
     }
 }

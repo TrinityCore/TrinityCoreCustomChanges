@@ -77,6 +77,14 @@ enum ZAGameObjectIds
     GO_STRANGE_GONG                     = 187359
 };
 
+enum ZAActionIds
+{
+    ACTION_WAVE_DONE_1                  = 2357600,
+    ACTION_WAVE_DONE_2                  = 2357601,
+    ACTION_WAVE_DONE_3                  = 2357602,
+    ACTION_WAVE_DONE_4                  = 2357603
+};
+
 template <class AI, class T>
 inline AI* GetZulAmanAI(T* obj)
 {

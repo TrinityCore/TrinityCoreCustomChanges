@@ -20,24 +20,14 @@
 #include "gruuls_lair.h"
 #include "InstanceScript.h"
 
-DoorData const doorData[] =
+static constexpr DoorData doorData[] =
 {
     { GO_MAULGAR_DOOR,  DATA_MAULGAR,   DOOR_TYPE_PASSAGE },
     { GO_GRUUL_DOOR,    DATA_GRUUL,     DOOR_TYPE_ROOM },
     { 0,                0,              DOOR_TYPE_ROOM } // END
 };
 
-MinionData const minionData[] =
-{
-    { NPC_MAULGAR,              DATA_MAULGAR },
-    { NPC_KROSH_FIREHAND,       DATA_MAULGAR },
-    { NPC_OLM_THE_SUMMONER,     DATA_MAULGAR },
-    { NPC_KIGGLER_THE_CRAZED,   DATA_MAULGAR },
-    { NPC_BLINDEYE_THE_SEER,    DATA_MAULGAR },
-    { 0, 0 }
-};
-
-ObjectData const creatureData[] =
+static constexpr ObjectData creatureData[] =
 {
     { NPC_MAULGAR,              DATA_MAULGAR },
     { 0,                        0            } // END
@@ -55,7 +45,6 @@ class instance_gruuls_lair : public InstanceMapScript
                 SetHeaders(DataHeader);
                 SetBossNumber(EncounterCount);
                 LoadDoorData(doorData);
-                LoadMinionData(minionData);
                 LoadObjectData(creatureData, nullptr);
             }
         };

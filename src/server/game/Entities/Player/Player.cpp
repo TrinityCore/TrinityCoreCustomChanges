@@ -1985,7 +1985,7 @@ void Player::Regenerate(Powers power)
         return;
 
     uint32 curValue = GetPower(power);
-    float addvalue  = GetPowerRegen(power) * 0.001f * m_regenTimer;
+    float addvalue = GetPowerRegen(power) * 0.001f * m_regenTimer;
 
     if (addvalue < 0.0f)
     {
@@ -2085,7 +2085,7 @@ void Player::RegenerateHealth()
     {
         curValue += integerValue;
         m_healthFraction = addValue - integerValue;
-}
+    }
     else
     {
         curValue = maxValue;
@@ -2588,7 +2588,7 @@ void Player::InitTalentForLevel()
     }
 
     if (!GetSession()->PlayerLoading())
-        SendTalentsInfoData(false);                         // update at client
+        SendTalentsInfoData(false); // update at client
 }
 
 void Player::InitStatsForLevel(bool reapplyMods)
@@ -2910,7 +2910,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
     if (!spellInfo)
     {
         // do character spell book cleanup (all characters)
-        if (!IsInWorld() && !learning)                       // spell load case
+        if (!IsInWorld() && !learning) // spell load case
         {
             TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: {}) does not exist. Deleting for all characters in `character_spell` and `character_talent`.", spellId);
 
@@ -2925,7 +2925,7 @@ bool Player::AddTalent(uint32 spellId, uint8 spec, bool learning)
     if (!SpellMgr::IsSpellValid(spellInfo, this, false))
     {
         // do character spell book cleanup (all characters)
-        if (!IsInWorld() && !learning)                       // spell load case
+        if (!IsInWorld() && !learning) // spell load case
         {
             TC_LOG_ERROR("spells", "Player::AddTalent: Spell (ID: {}) is invalid. Deleting for all characters in `character_spell` and `character_talent`.", spellId);
 
@@ -3256,7 +3256,7 @@ bool Player::AddSpell(uint32 spellId, bool active, bool learning, bool dependent
     if (uint32 freeProfs = GetFreePrimaryProfessionPoints())
     {
         if (spellInfo->IsPrimaryProfessionFirstRank())
-            SetFreePrimaryProfessions(freeProfs-1);
+            SetFreePrimaryProfessions(freeProfs - 1);
     }
 
     SkillLineAbilityMapBounds skill_bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
@@ -6554,7 +6554,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
 
     ObjectGuid victim_guid;
     int32 victim_rank = 0;
-    uint32 rank_diff = 0;
+    int32 rank_diff = 0;
 
     // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
     UpdateHonorFields();
@@ -6598,7 +6598,7 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
             uint32 vtitle = victim->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
             //uint32 victim_title = 0;
             uint32 ktitle = GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
-            uint32 killer_title = 0;
+            int32 killer_title = 0;
             if (PLAYER_TITLE_MASK_ALL_PVP & ktitle)
             {
                 for (int i = ((GetTeam() == ALLIANCE) ? 1:HKRANKMAX);i!=((GetTeam() == ALLIANCE) ? HKRANKMAX : (2*HKRANKMAX-1));i++)
@@ -6949,7 +6949,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Treat players having a quest flagging for PvP as always in hostile area
     pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
 
-    if (zone->Flags & AREA_FLAG_CAPITAL)                     // Is in a capital city
+    if (zone->Flags & AREA_FLAG_CAPITAL) // Is in a capital city
     {
         if (!pvpInfo.IsHostile || zone->IsSanctuary())
             SetRestFlag(REST_FLAG_IN_CITY);
@@ -7917,11 +7917,11 @@ void Player::CastItemCombatSpell(DamageInfo const& damageInfo, Item* item, ItemT
 void Player::CastItemUseSpell(Item* item, uint32 spellId, SpellCastTargets const& targets, uint8 castCount, uint32 misc)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-        if (!spellInfo)
-        {
-        TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: {}) has wrong spell id {}, ignoring", item->GetEntry(), spellId);
-            return;
-        }
+    if (!spellInfo)
+    {
+    TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: {}) has wrong spell id {}, ignoring", item->GetEntry(), spellId);
+        return;
+    }
 
     ItemTemplate const* proto = item->GetTemplate();
     bool isValidSpell = std::ranges::any_of(proto->Effects, [spellId](ItemEffect const& effectData)
@@ -7930,7 +7930,7 @@ void Player::CastItemUseSpell(Item* item, uint32 spellId, SpellCastTargets const
     });
 
     if (!isValidSpell)
-        {
+    {
         isValidSpell = [&]
         {
             for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
@@ -7947,15 +7947,15 @@ void Player::CastItemUseSpell(Item* item, uint32 spellId, SpellCastTargets const
     {
         TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Tried to cast Spell {} not found on Item {}, ignoring", spellId, proto->GetId());
         return;
-            }
-
-            Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
-            spell->m_fromClient = true;
-            spell->m_CastItem = item;
-    spell->m_cast_count = castCount; // set count of casts
-    spell->m_misc.Data = misc;
-            spell->prepare(targets);
         }
+
+        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+        spell->m_fromClient = true;
+        spell->m_CastItem = item;
+        spell->m_cast_count = castCount; // set count of casts
+        spell->m_misc.Data = misc;
+        spell->prepare(targets);
+    }
 
 void Player::_RemoveAllItemMods()
 {
@@ -10986,7 +10986,7 @@ InventoryResult Player::CanStoreItems(Item** items, int count, uint32* itemLimit
                     {
                         for (uint32 j = 0; j < bag->GetBagSize(); j++)
                         {
-                            if (bagCounts[t-INVENTORY_SLOT_BAG_START][j] == 0)
+                            if (bagCounts[t - INVENTORY_SLOT_BAG_START][j] == 0)
                             {
                                 bagCounts[t-INVENTORY_SLOT_BAG_START][j] = remaining_count;
                                 bagPointers[t-INVENTORY_SLOT_BAG_START][j] = item;
@@ -11562,7 +11562,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
         learnedCount += HasSpell(itemEffect.SpellID) ? 1 : 0;
     }
     if (learnableCount && learnedCount == learnableCount)
-            return EQUIP_ERR_NONE;
+        return EQUIP_ERR_NONE;
 
     return EQUIP_ERR_OK;
 }
@@ -13549,9 +13549,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
         && !item->GetTemplate()->GetSocketColor(slot - SOCK_ENCHANTMENT_SLOT))
     {
         // Check if the requirements for the prismatic socket are met before applying the gem stats
-         SpellItemEnchantmentEntry const* pPrismaticEnchant = sSpellItemEnchantmentStore.LookupEntry(item->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
-         if (!pPrismaticEnchant || (pPrismaticEnchant->RequiredSkillID > 0 && pPrismaticEnchant->RequiredSkillRank > GetSkillValue(pPrismaticEnchant->RequiredSkillID)))
-             return;
+        SpellItemEnchantmentEntry const* pPrismaticEnchant = sSpellItemEnchantmentStore.LookupEntry(item->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT));
+        if (!pPrismaticEnchant || (pPrismaticEnchant->RequiredSkillID > 0 && pPrismaticEnchant->RequiredSkillRank > GetSkillValue(pPrismaticEnchant->RequiredSkillID)))
+            return;
     }
 
     if (!item->IsBroken())
@@ -16326,11 +16326,11 @@ void Player::KilledPlayerCredit(uint16 count)
         QuestStatusData& q_status = m_QuestStatus[questid];
         if (q_status.Status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsAllowedInRaid(GetMap()->GetDifficultyID())))
         {
-                KilledPlayerCreditForQuest(count, qInfo);
-                break; // there is only one quest per zone
-            }
+            KilledPlayerCreditForQuest(count, qInfo);
+            break; // there is only one quest per zone
         }
     }
+}
 
 void Player::KilledPlayerCreditForQuest(uint16 count, Quest const* quest)
 {
@@ -19499,7 +19499,7 @@ void Player::_SaveAuras(CharacterDatabaseTransaction trans)
                 if (effect->CanBeRecalculated())
                     recalculateMask |= 1 << i;
             }
-            }
+        }
 
         uint8 index = 0;
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_AURA);
@@ -25328,51 +25328,51 @@ void Player::BuildPlayerTalentsInfoData(WorldPackets::Talent::TalentInfoUpdate& 
     talentInfo.TalentGroups.resize(GetTalentGroupsCount());        // talent group count (0, 1 or 2)
     talentInfo.ActiveGroup = GetActiveTalentGroup();               // talent group index (0 or 1)
 
-        // loop through all specs (only 1 for now)
+    // loop through all specs (only 1 for now)
     for (uint32 specIdx = 0; specIdx < GetTalentGroupsCount(); ++specIdx)
-        {
+    {
         WorldPackets::Talent::TalentGroupInfo& talentGroupInfo = talentInfo.TalentGroups[specIdx];
 
-            // find class talent tabs (all players have 3 talent tabs)
-            uint32 const* talentTabIds = GetTalentTabPages(GetClass());
+        // find class talent tabs (all players have 3 talent tabs)
+        uint32 const* talentTabIds = GetTalentTabPages(GetClass());
 
-            for (uint8 i = 0; i < MAX_TALENT_TABS; ++i)
+        for (uint8 i = 0; i < MAX_TALENT_TABS; ++i)
+        {
+            uint32 talentTabId = talentTabIds[i];
+
+            for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
             {
-                uint32 talentTabId = talentTabIds[i];
-
-                for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
-                {
                 TalentEntry const* talent = sTalentStore.LookupEntry(talentId);
                 if (!talent)
-                        continue;
+                    continue;
 
-                    // skip another tab talents
+                // skip another tab talents
                 if (talent->TabID != talentTabId)
-                        continue;
+                    continue;
 
-                    // find max talent rank (0~4)
-                    int8 curtalent_maxrank = -1;
-                    for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
-                    {
+                // find max talent rank (0~4)
+                int8 curtalent_maxrank = -1;
+                for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+                {
                     if (talent->SpellRank[rank] && HasTalent(talent->SpellRank[rank], specIdx))
-                        {
-                            curtalent_maxrank = rank;
-                            break;
-                        }
+                    {
+                        curtalent_maxrank = rank;
+                        break;
                     }
+                }
 
-                    // not learned talent
-                    if (curtalent_maxrank < 0)
-                        continue;
+                // not learned talent
+                if (curtalent_maxrank < 0)
+                    continue;
 
                 talentGroupInfo.Talents.push_back({ .TalentID = talent->ID, .Rank = curtalent_maxrank });
-                }
             }
-
-            for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-            talentGroupInfo.GlyphIDs[i] = GetGlyph(specIdx, i);  // GlyphProperties.dbc
         }
+
+        for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+        talentGroupInfo.GlyphIDs[i] = GetGlyph(specIdx, i);  // GlyphProperties.dbc
     }
+}
 
 void Player::BuildPetTalentsInfoData(WorldPackets::Talent::PetTalentInfoUpdate& petTalentInfo) const
 {
@@ -25411,7 +25411,7 @@ void Player::BuildPetTalentsInfoData(WorldPackets::Talent::PetTalentInfoUpdate& 
 
             // find max talent rank (0~4)
             int8 curtalent_maxrank = -1;
-            for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+            for (int8 rank = MAX_TALENT_RANK - 1; rank >= 0; --rank)
             {
                 if (talent->SpellRank[rank] && pet->HasSpell(talent->SpellRank[rank]))
                 {
@@ -25441,14 +25441,14 @@ void Player::SendTalentsInfoData(bool pet)
         BuildPlayerTalentsInfoData(updateTalentData.Info.emplace<0>());
 
     SendDirectMessage(updateTalentData.Write());
-        }
+}
 
 ObjectGuid const EquipmentSetInfo::IgnoredSlot = []
 {
-        ObjectGuid guid;
-        guid.SetRawValue(1);
-        return guid;
-    }();
+    ObjectGuid guid;
+    guid.SetRawValue(1);
+    return guid;
+}();
 
 void Player::SendEquipmentSetList()
 {
@@ -25460,10 +25460,10 @@ void Player::SendEquipmentSetList()
             continue;
 
         data.SetData.push_back(&eqSet.second.Data);
-        }
+    }
 
     SendDirectMessage(data.Write());
-    }
+}
 
 void Player::SetEquipmentSet(EquipmentSetInfo::EquipmentSetData const& newEqSet)
 {

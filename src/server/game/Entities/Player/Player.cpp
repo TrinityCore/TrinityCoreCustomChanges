@@ -7919,7 +7919,7 @@ void Player::CastItemUseSpell(Item* item, uint32 spellId, SpellCastTargets const
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-    TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: {}) has wrong spell id {}, ignoring", item->GetEntry(), spellId);
+        TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Item (Entry: {}) has wrong spell id {}, ignoring", item->GetEntry(), spellId);
         return;
     }
 
@@ -7947,15 +7947,15 @@ void Player::CastItemUseSpell(Item* item, uint32 spellId, SpellCastTargets const
     {
         TC_LOG_ERROR("entities.player", "Player::CastItemUseSpell: Tried to cast Spell {} not found on Item {}, ignoring", spellId, proto->GetId());
         return;
-        }
-
-        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
-        spell->m_fromClient = true;
-        spell->m_CastItem = item;
-        spell->m_cast_count = castCount; // set count of casts
-        spell->m_misc.Data = misc;
-        spell->prepare(targets);
     }
+
+    Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+    spell->m_fromClient = true;
+    spell->m_CastItem = item;
+    spell->m_cast_count = castCount; // set count of casts
+    spell->m_misc.Data = misc;
+    spell->prepare(targets);
+}
 
 void Player::_RemoveAllItemMods()
 {
@@ -10986,7 +10986,7 @@ InventoryResult Player::CanStoreItems(Item** items, int count, uint32* itemLimit
                     {
                         for (uint32 j = 0; j < bag->GetBagSize(); j++)
                         {
-                            if (bagCounts[t - INVENTORY_SLOT_BAG_START][j] == 0)
+                            if (bagCounts[t-INVENTORY_SLOT_BAG_START][j] == 0)
                             {
                                 bagCounts[t-INVENTORY_SLOT_BAG_START][j] = remaining_count;
                                 bagPointers[t-INVENTORY_SLOT_BAG_START][j] = item;
@@ -11033,7 +11033,7 @@ InventoryResult Player::CanStoreItems(Item** items, int count, uint32* itemLimit
 
                 for (uint32 j = 0; j < bag->GetBagSize(); j++)
                 {
-                    if (bagCounts[t-INVENTORY_SLOT_BAG_START][j] == 0)
+                    if (bagCounts[t - INVENTORY_SLOT_BAG_START][j] == 0)
                     {
                         bagCounts[t-INVENTORY_SLOT_BAG_START][j] = remaining_count;
                         bagPointers[t-INVENTORY_SLOT_BAG_START][j] = item;
@@ -22665,7 +22665,7 @@ void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8
     transferAborted.Arg = arg;
     transferAborted.TransfertAbort = reason;
     SendDirectMessage(transferAborted.Write());
-    }
+}
 
 void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool welcome) const
 {
@@ -25352,7 +25352,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPackets::Talent::TalentInfoUpdate& 
 
                 // find max talent rank (0~4)
                 int8 curtalent_maxrank = -1;
-                for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+                for (int8 rank = MAX_TALENT_RANK - 1; rank >= 0; --rank)
                 {
                     if (talent->SpellRank[rank] && HasTalent(talent->SpellRank[rank], specIdx))
                     {
@@ -25370,7 +25370,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPackets::Talent::TalentInfoUpdate& 
         }
 
         for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-        talentGroupInfo.GlyphIDs[i] = GetGlyph(specIdx, i);  // GlyphProperties.dbc
+            talentGroupInfo.GlyphIDs[i] = GetGlyph(specIdx, i);  // GlyphProperties.dbc
     }
 }
 

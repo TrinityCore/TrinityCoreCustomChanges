@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 20??-2008 Wilibald09
- * Copyright (C) 2011-2015 ArkCORE <http://www.arkania.net/>
- * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2015 ArkCORE (website died)
+ * Copyright (C) 2008-2026 TrinityCore <https://www.trinitycore.org>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,7 +25,9 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include <cmath>
 #include <sstream>
+#include <unordered_set>
 
 #define GOSSIP_SHOW_DEST        1000
 #define GOSSIP_TELEPORT         1001
@@ -46,13 +48,35 @@
 #define PREV_PAGE               "<- [Previous Page]"
 #define MAIN_MENU               "<= [Main Menu]"
 
+#define NPC_TELEPORT_ENTRY      100000
+#define NPC_TELEPORT_RANGE      100.0f
+#define NPC_TELEPORT_DESPAWN    60000 // 60 seconds in milliseconds
+
 using namespace nsNpcTel;
 
 namespace
 {
     Page PageC, PageD;
     Page Cat;
+    std::unordered_set<ObjectGuid> PendingTeleporterCheck;
 
+    void CheckAndSummonTeleporter(Player* player)
+    {
+        if (!player || !player->IsInWorld())
+            return;
+
+        if (!player->FindNearestCreature(NPC_TELEPORT_ENTRY, NPC_TELEPORT_RANGE, true))
+        {
+            float orient = player->GetOrientation();
+            float spawnX = player->GetPositionX() + 3.0f * std::cos(orient);
+            float spawnY = player->GetPositionY() + 3.0f * std::sin(orient);
+            float spawnZ = player->GetPositionZ();
+            float spawnO = Position::NormalizeOrientation(orient + float(M_PI));
+
+            player->UpdateAllowedPositionZ(spawnX, spawnY, spawnZ);
+            player->SummonCreature(NPC_TELEPORT_ENTRY, spawnX, spawnY, spawnZ, spawnO, TEMPSUMMON_TIMED_DESPAWN, Milliseconds(NPC_TELEPORT_DESPAWN));
+        }
+    }
     // Conversion function int->string
     std::string ConvertStr(const int64 &val)
     {
@@ -80,8 +104,19 @@ namespace
     void Teleport(Player * const player, const uint16 &map,
                   const float &X, const float &Y, const float &Z, const float &orient)
     {
+        bool sameMap = (player->GetMapId() == map);
+
         player->CastSpell(player, SPELL_VISUAL_TELEPORT, true);
         player->TeleportTo(map, X, Y, Z, orient);
+
+        if (sameMap)
+        {
+            CheckAndSummonTeleporter(player);
+        }
+        else
+        {
+            PendingTeleporterCheck.insert(player->GetGUID());
+        }
     }
 
     // Display categories
@@ -132,7 +167,7 @@ namespace
         if (CatDest::CountOfCategoryAllowedBy(player) > 1)
             AddGossipItemFor(player, GOSSIP_ICON_TALK, MAIN_MENU, GOSSIP_MAIN_MENU, 0);
 
-        SendGossipMenuFor(player,MSG_DEST, creature);
+        SendGossipMenuFor(player, MSG_DEST, creature);
     }
 
     // Verification before teleportation
@@ -166,7 +201,6 @@ namespace
         Teleport(player, dest.m_map, dest.m_X, dest.m_Y, dest.m_Z, dest.m_orient);
     }
 }
-
 class npc_teleport_gossip : public CreatureScript
 {
     public:
@@ -239,7 +273,8 @@ class npc_teleport_gossip : public CreatureScript
                     // Teleportation
                     case GOSSIP_TELEPORT:
                         CloseGossipMenuFor(player);
-                        if (player->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS)) {
+                        if (player->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
+                        {
                             DoCast(player, 38588, false); // Healing effect
                             player->RemoveAurasDueToSpell(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS);
                         }
@@ -268,9 +303,31 @@ public:
     }
 };
 
+class npc_teleport_player : public PlayerScript
+{
+public:
+    npc_teleport_player() : PlayerScript("npc_teleport_player") { }
+
+    void OnMapChanged(Player* player) override
+    {
+        auto itr = PendingTeleporterCheck.find(player->GetGUID());
+        if (itr != PendingTeleporterCheck.end())
+        {
+            PendingTeleporterCheck.erase(itr);
+            CheckAndSummonTeleporter(player);
+        }
+    }
+
+    void OnLogout(Player* player) override
+    {
+        PendingTeleporterCheck.erase(player->GetGUID());
+    }
+};
+
 void AddSC_npc_teleport()
 {
     new npc_teleport_gossip();
     new npc_teleport_load();
+    new npc_teleport_player();
 }
 // End of TeleNPC2

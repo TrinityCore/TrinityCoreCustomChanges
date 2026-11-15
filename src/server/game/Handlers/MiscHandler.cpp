@@ -340,6 +340,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPackets::Character::LogoutRequ
     }
 
     SetLogoutStartTime(GameTime::GetGameTime());
+    sScriptMgr->OnPlayerLogoutRequest(GetPlayer());
 }
 
 void WorldSession::HandlePlayerLogoutOpcode(WorldPackets::Character::PlayerLogout& /*playerLogout*/)

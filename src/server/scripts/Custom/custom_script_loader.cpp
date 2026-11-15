@@ -38,6 +38,7 @@
 // 16
 // 17
 // 18
+void AddSC_Mod_LogoutInnkeeperCheck();
 // 19
 // 20
 // 21
@@ -83,6 +84,7 @@ void AddCustomScripts()
     // 18
     // 19
     // 20
+    AddSC_Mod_LogoutInnkeeperCheck();
     // 21
     // 22
     // 23

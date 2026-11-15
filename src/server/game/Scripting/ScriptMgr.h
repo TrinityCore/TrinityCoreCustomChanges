@@ -688,6 +688,9 @@ class TC_GAME_API PlayerScript : public ScriptObject
         // Called when a player logs out.
         virtual void OnLogout(Player* player);
 
+        // Called when a player requests to log out
+        virtual void OnLogoutRequest(Player* /*player*/) { }
+
         // Called when a player is created.
         virtual void OnCreate(Player* player);
 
@@ -1026,6 +1029,7 @@ class TC_GAME_API ScriptMgr
         void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
         void OnPlayerLogin(Player* player, bool firstLogin);
         void OnPlayerLogout(Player* player);
+        void OnPlayerLogoutRequest(Player* player);
         void OnPlayerCreate(Player* player);
         void OnPlayerDelete(ObjectGuid guid, uint32 accountId);
         void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId);

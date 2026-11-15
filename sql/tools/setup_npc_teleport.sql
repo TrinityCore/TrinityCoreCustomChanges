@@ -2,9 +2,10 @@
 DROP TABLE IF EXISTS `custom_npc_tele_category`;
 CREATE TABLE `custom_npc_tele_category` (
   `id` int(6) unsigned NOT NULL default '0',
+  `supercat_id` int(6) unsigned NOT NULL default '0',
   `icon` CHAR(100) NOT NULL default 'inv_misc_shadowegg',
   `size` CHAR(100) NOT NULL default '30',
-  `colour` CHAR(100) NOT NULL default '000000',
+  `colour` CHAR(100) NOT NULL default 'FF000000',
   `name` varchar(255) NOT NULL default '',
   `flag` tinyint(3) unsigned NOT NULL default '0',
   `data0` bigint(20) unsigned NOT NULL default '0',
@@ -17,7 +18,7 @@ CREATE TABLE `custom_npc_tele_category` (
   `name_loc6` varchar(255) NOT NULL default '',
   `name_loc7` varchar(255) NOT NULL default '',
   `name_loc8` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `custom_npc_tele_destination`;

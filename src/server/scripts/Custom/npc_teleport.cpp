@@ -22,6 +22,7 @@
 #include "ScriptedGossip.h"
 #include "sc_npc_teleport.h"
 #include "Creature.h"
+#include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldSession.h"
@@ -58,7 +59,7 @@ using namespace nsNpcTel;
 namespace
 {
     Page PageC, PageD;
-    Page Cat;
+    Page Cat, SuperCat;
 
     void CheckAndSummonTeleporter(Player* player)
     {
@@ -137,19 +138,30 @@ namespace
     void AffichCat(Player * const player, Creature * const creature)
     {
         uint8 loc = player->GetSession()->GetSessionDbcLocale();
+        uint32 superCatId = SuperCat[player];
+
+        std::vector<VCatDest_t> validCats;
+        for (VCatDest_t i(0); i < TabCatDest.size(); ++i)
+        {
+            if (TabCatDest[i].GetSuperCatID() == superCatId && TabCatDest[i].IsAllowedToTeleport(player))
+                validCats.push_back(i);
+        }
 
         if (PageC[player] > 0)
             AddGossipItemFor(player, GOSSIP_ICON_TALK, PREV_PAGE, GOSSIP_PREV_PAGEC, 0);
 
-        VCatDest_t i (PageC[player] * NB_ITEM_PAGE);
-        for ( ; i < TabCatDest.size() && i < (NB_ITEM_PAGE * (PageC[player] + 1)); ++i)
+        size_t i = PageC[player] * NB_ITEM_PAGE;
+        for (; i < validCats.size() && i < (NB_ITEM_PAGE * (PageC[player] + 1)); ++i)
         {
-            if (TabCatDest[i].IsAllowedToTeleport(player))
-                AddGossipItemFor(player, GOSSIP_ICON_TRAINER, TabCatDest[i].GetName(loc, player->IsGameMaster()).c_str(), GOSSIP_SHOW_DEST, i); //book categorie
+            VCatDest_t catIdx = validCats[i];
+            AddGossipItemFor(player, GOSSIP_ICON_TRAINER, TabCatDest[catIdx].GetName(loc, player->IsGameMaster()).c_str(), GOSSIP_SHOW_DEST, catIdx);
         }
 
-        if (i < TabCatDest.size())
+        if (i < validCats.size())
             AddGossipItemFor(player, GOSSIP_ICON_TALK, NEXT_PAGE, GOSSIP_NEXT_PAGEC, 0);
+
+        if (superCatId > 0)
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, MAIN_MENU, GOSSIP_MAIN_MENU, 0);
 
         SendGossipMenuFor(player, MSG_CAT, creature);
     }
@@ -178,7 +190,7 @@ namespace
         if (i < TabCatDest[Cat[player]].size())
             AddGossipItemFor(player, GOSSIP_ICON_TALK, NEXT_PAGE, GOSSIP_NEXT_PAGED, 0);
 
-        if (CatDest::CountOfCategoryAllowedBy(player) > 1)
+        if (SuperCat[player] > 0 || CatDest::CountOfCategoryAllowedBy(player, 0) > 1)
             AddGossipItemFor(player, GOSSIP_ICON_TALK, MAIN_MENU, GOSSIP_MAIN_MENU, 0);
 
         SendGossipMenuFor(player, MSG_DEST, creature);
@@ -226,7 +238,7 @@ class npc_teleport_gossip : public CreatureScript
 
             bool OnGossipHello(Player* player) override
             {
-                PageC(player) = PageD(player) = Cat(player) = 0;
+                PageC(player) = PageD(player) = Cat(player) = SuperCat(player) = 0;
 
                 if (player->IsInCombat())
                 {
@@ -249,10 +261,20 @@ class npc_teleport_gossip : public CreatureScript
                 ClearGossipMenuFor(player);
                 switch (sender)
                 {
-                    // Display destinations
+                    // Display destinations or subcategories
                     case GOSSIP_SHOW_DEST:
-                        Cat(player) = action;
-                        AffichDest(player, me);
+                        if (TabCatDest[action].HasSubCategories())
+                        {
+                            SuperCat(player) = TabCatDest[action].GetCatID();
+                            PageC(player) = 0;
+                            AffichCat(player, me);
+                        }
+                        else
+                        {
+                            Cat(player) = action;
+                            PageD(player) = 0;
+                            AffichDest(player, me);
+                        }
                         break;
 
                     // Previous categories page
@@ -314,6 +336,15 @@ public:
     void OnStartup() override
     {
         LoadNpcTele();
+    }
+
+    void OnConfigLoad(bool reload) override
+    {
+        if (reload)
+        {
+            TC_LOG_INFO("server.loading", "Re-Loading npc_teleport tables...");
+            LoadNpcTele();
+        }
     }
 };
 

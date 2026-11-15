@@ -12,8 +12,6 @@ namespace
     constexpr uint32 MAP_ICECROWN_CITADEL     = 631;
     constexpr uint32 NPC_IGB_MURADIN          = 36948;
     constexpr uint32 NPC_IGB_SAURFANG         = 36939;
-    constexpr uint32 NPC_SKYBREAKER_SORCERER  = 37116;
-    constexpr uint32 NPC_KORKRON_BATTLE_MAGE  = 37117;
 }
 
 class Dynamic_Resurrections : public PlayerScript

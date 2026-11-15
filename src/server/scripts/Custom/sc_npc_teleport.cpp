@@ -128,6 +128,7 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
           case TEAM_ALLIANCE:   return player->GetTeam() == ALLIANCE;
           case TEAM_ALL:        return true;
         }
+        break;
 
       case FLAG_GUILD:
         return player->GetGuildId() == m_catvalue.data0;

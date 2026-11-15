@@ -165,6 +165,7 @@ public:
             player->SendDirectMessage(&data);
 
             ChatHandler(player->GetSession()).PSendSysMessage(warnMsg, dist);
+            player->PlayDirectSound(8960, player);
         }
     }
 };

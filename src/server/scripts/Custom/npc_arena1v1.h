@@ -39,12 +39,12 @@
 #ifndef ARENA_1V1_H
 #define ARENA_1V1_H
 
-bool config_Enable;
-uint8 config_minLevel;
-uint32 config_Costs;
-bool config_VendorRating;
-float config_ArenaPointsMulti;
-bool config_BlockForbiddenTalents;
+inline bool config_Enable;
+inline uint8 config_minLevel;
+inline uint32 config_Costs;
+inline bool config_VendorRating;
+inline float config_ArenaPointsMulti;
+inline bool config_BlockForbiddenTalents;
 
 void TC1V1CONFIG()
 {
@@ -93,10 +93,10 @@ static bool Arena1v1CheckTalents(Player* player)
             if (talentInfo->SpellRank[rank] == 0)
                 continue;
 
-            if (player->HasTalent(talentInfo->SpellRank[rank], player->GetActiveSpec()))
+            if (player->HasTalent(talentInfo->SpellRank[rank], player->GetActiveTalentGroup()))
             {
                 for (int8 i = 0; FORBIDDEN_TALENTS_IN_1V1_ARENA[i] != 0; i++)
-                    if (FORBIDDEN_TALENTS_IN_1V1_ARENA[i] == talentInfo->PrereqTalent)
+                    if (FORBIDDEN_TALENTS_IN_1V1_ARENA[i] == talentInfo->TabID)
                         count += rank + 1;
             }
         }

@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "DisableMgr.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundPackets.h"
 #include "Battleground.h"
 #include "ArenaTeam.h"
 #include "Language.h"
@@ -80,10 +81,11 @@ public:
             }
 
             BattlegroundTypeId bgTypeId = bg->GetTypeID();
-            BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype);
             PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), player->GetLevel());
             if (!bracketEntry)
                 return false;
+
+            BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, bracketEntry->GetBracketId(), arenatype);
 
             // check if already in queue
             if (player->GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
@@ -117,16 +119,15 @@ public:
             BattlegroundQueue &bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
             bg->SetRated(isRated);
 
-            GroupQueueInfo* ginfo = bgQueue.AddGroup(player, NULL, bgTypeId, bracketEntry, arenatype, isRated, false, arenaRating, matchmakerRating, ateamId);
-            uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
+            GroupQueueInfo* ginfo = bgQueue.AddGroup(player, nullptr, bracketEntry, isRated, false, arenaRating, matchmakerRating, ateamId);
+            uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo);
             uint32 queueSlot = player->AddBattlegroundQueueId(bgQueueTypeId);
 
-            WorldPacket data;
-            // send status packet (in queue)
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, 0, arenatype, 0);
-            player->GetSession()->SendPacket(&data);
+            WorldPackets::Battleground::BattlefieldStatusQueued queued;
+            sBattlegroundMgr->BuildBattlegroundStatusQueued(&queued, bg, queueSlot, ginfo->JoinTime, bgQueueTypeId, avgTime);
+            player->SendDirectMessage(queued.Write());
 
-            sBattlegroundMgr->ScheduleQueueUpdate(matchmakerRating, arenatype, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+            sBattlegroundMgr->ScheduleQueueUpdate(matchmakerRating, bgQueueTypeId);
 
             return true;
         }
@@ -192,7 +193,14 @@ public:
                 return true;
             }
 
-            if (player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5))
+            BattlegroundQueueTypeId bgQueueTypeId = BATTLEGROUND_QUEUE_NONE;
+            if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), player->GetLevel()))
+                    bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_AA, bracketEntry->GetBracketId(), ARENA_TYPE_5v5);
+
+            bool inQueue = (bgQueueTypeId != BATTLEGROUND_QUEUE_NONE && player->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId));
+
+            if (inQueue)
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Leave queue 1v1 Arena", GOSSIP_SENDER_MAIN, 3, "Are you sure?", 0, false);
             else
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Sign up 1v1 Arena (unrated)", GOSSIP_SENDER_MAIN, 20);
@@ -201,7 +209,7 @@ public:
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Create new 1v1 Arenateam", GOSSIP_SENDER_MAIN, 1, "Create 1v1 arenateam?", config_Costs, false);
             else
             {
-                if (player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5) == false)
+                if (!inQueue)
                 {
                     AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Sign up 1v1 Arena (rated)", GOSSIP_SENDER_MAIN, 2);
                     AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Disband arenateam", GOSSIP_SENDER_MAIN, 5, "Are you sure?", 0, false);
@@ -263,9 +271,20 @@ public:
 
             case 3: // Leave Queue
             {
-                WorldPacket Data;
-                Data << (uint8)0x1 << (uint8)0x0 << (uint32)BATTLEGROUND_AA << (uint16)0x0 << (uint8)0x0;
-                player->GetSession()->HandleBattleFieldPortOpcode(Data);
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), player->GetLevel()))
+                    {
+                        BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_AA, bracketEntry->GetBracketId(), ARENA_TYPE_5v5);
+                        uint32 queueSlot = player->GetBattlegroundQueueIndex(bgQueueTypeId);
+                        if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)
+                        {
+                            BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
+                            bgQueue.RemovePlayer(player->GetGUID(), true);
+                            player->RemoveBattlegroundQueueId(bgQueueTypeId);
+                        }
+                    }
+                }
                 CloseGossipMenuFor(player);
                 return true;
             }
@@ -292,10 +311,12 @@ public:
 
             case 5: // Disband arenateam
             {
-                WorldPacket Data;
-                Data << (uint32)player->GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5));
-                player->GetSession()->HandleArenaTeamLeaveOpcode(Data);
-                ChatHandler(player->GetSession()).SendSysMessage("|cffFF4500[1v1 Arena System]:|r Arenateam deleted!");
+                uint32 teamId = player->GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5));
+                if (ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(teamId))
+                {
+                    at->Disband(player->GetSession());
+                    ChatHandler(player->GetSession()).SendSysMessage("|cffFF4500[1v1 Arena System]:|r Arenateam deleted!");
+                }
                 CloseGossipMenuFor(player);
                 return true;
             }

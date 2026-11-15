@@ -68,6 +68,7 @@ namespace nsNpcTel
     struct CatValue
     {
         uint32 catid;
+        uint32 supercatid;
         nsNpcTel::Flag flag;
         uint64 data0;
         uint32 data1;
@@ -94,12 +95,14 @@ namespace nsNpcTel
         void   AddDest(const Dest &item)       { m_TabDest.push_back(item); }
         Dest   GetDest(const uint32 &id) const { return m_TabDest[id]; }
         uint32 GetCatID(void)             const { return m_catvalue.catid; }
+        uint32 GetSuperCatID(void)        const { return m_catvalue.supercatid; }
+        bool   HasSubCategories(void)     const;
         uint32 size(void)             const { return m_TabDest.size(); }
 
         std::string GetName(const uint8 loc /* = 0 */, const bool IsGM = false)    const;
         bool IsAllowedToTeleport(Player * const player) const;
 
-        static uint32 CountOfCategoryAllowedBy(Player * const player);
+        static uint32 CountOfCategoryAllowedBy(Player * const player, uint32 supercatid = 0);
 
     private:
 
@@ -114,7 +117,7 @@ namespace nsNpcTel
       protected:
 
         // Class instance for current player
-        class TC_GAME_API Instance
+        class Instance
         {
           public:
 
@@ -157,11 +160,11 @@ namespace nsNpcTel
     // Verification of data integrity
     bool IsValidData(const CatValue cat);
 
-    extern TC_GAME_API VCatDest TabCatDest;
+    TC_GAME_API extern VCatDest TabCatDest;
 }
 
 // Loading contents of database
-void TC_GAME_API LoadNpcTele(void);
+void LoadNpcTele(void);
 
 //extern WorldDatabaseWorkerPool WorldDatabase;
 

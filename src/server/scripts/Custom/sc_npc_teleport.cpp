@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 20??-2008 Wilibald09
- * Copyright (C) 2011-2015 ArkCORE <http://www.arkania.net/>
- * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2011-2015 ArkCORE (webpage dead)
+ * Copyright (C) 2008-2016 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,10 +18,11 @@
  */
 
 #include "Player.h"
-#include "Log.h"
 #include "sc_npc_teleport.h"
 #include "WorldSession.h"
 #include "DatabaseEnv.h"
+#include "Log.h"
+
 #define TELE    nsNpcTel::CatDest
 #define PAGE    nsNpcTel::Page
 #define PAGEI   PAGE::Instance
@@ -126,7 +127,6 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
           case TEAM_HORDE:      return player->GetTeam() == HORDE;
           case TEAM_ALLIANCE:   return player->GetTeam() == ALLIANCE;
           case TEAM_ALL:        return true;
-          default: TC_LOG_ERROR("misc", "Invalid m_catvalue.data0 . Important problem..."); return false;
         }
 
       case FLAG_GUILD:
@@ -167,19 +167,29 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
       case FLAG_PLAYER:
         return player->GetGUID().GetCounter() == m_catvalue.data0;
 
-      default: TC_LOG_ERROR("misc", "Invalid flag (category: %u). Important problem...", GetCatID()); return false;
+      default: TC_LOG_ERROR("misc", "Invalid flag (category: {}). Important problem...", GetCatID());
     }
 
-    TC_LOG_ERROR("misc", "Invalid flag (category: %u). Important problem...", GetCatID());
+    TC_LOG_ERROR("misc", "Invalid flag (category: {}). Important problem...", GetCatID());
     return false;
 }
 
-uint32 TELE::CountOfCategoryAllowedBy(Player * const player)
+bool TELE::HasSubCategories(void) const
+{
+    for (VCatDest_t i(0); i < TabCatDest.size(); ++i)
+    {
+        if (TabCatDest[i].GetSuperCatID() == m_catvalue.catid)
+            return true;
+    }
+    return false;
+}
+
+uint32 TELE::CountOfCategoryAllowedBy(Player * const player, uint32 supercatid /* = 0 */)
 {
     uint32 count(0);
     for (VCatDest_t i(0); i < TabCatDest.size(); ++i)
     {
-        if (TabCatDest[i].IsAllowedToTeleport(player))
+        if (TabCatDest[i].GetSuperCatID() == supercatid && TabCatDest[i].IsAllowedToTeleport(player))
             ++count;
     }
     return count;
@@ -317,20 +327,17 @@ void LoadNpcTele(void)
         "custom_npc_tele_association",
     };
 
+
     QueryResult result = WorldDatabase.PQuery(
-        "SELECT `flag`, `data0`, `data1`, `cat_id`, C.`icon` `iconcat`, C.`size` `iconsize`,  C.`colour` `colourcat`, C.`name` `namecat`, "
-        //       0       1        2        3                  4                   5                       6                     7
+        "SELECT C.`flag`, C.`data0`, C.`data1`, C.`id`, C.`supercat_id`, C.`icon` `iconcat`, C.`size` `iconsize`, C.`colour` `colourcat`, C.`name` `namecat`, "
         "C.`name_loc1`, C.`name_loc2`, C.`name_loc3`, C.`name_loc4`, C.`name_loc5`, C.`name_loc6`, C.`name_loc7`, C.`name_loc8`, "
-        //  8              9              10             11             12             13             14             15
         "D.`icon` `icondest`, D.`size` `sizedest`, D.`colour` `colourdest`, D.`name` `namedest`, "
-        //         16                   17                     18                     19
         "D.`name_loc1`, D.`name_loc2`, D.`name_loc3`, D.`name_loc4`, D.`name_loc5`, D.`name_loc6`, D.`name_loc7`, D.`name_loc8`, "
-        //  20             21             22             23             24             25             26             27
-        "`pos_X`, `pos_Y`, `pos_Z`, `orientation`, `map`, `level`, `cost` "
-        //28       29       30       31             32     33       34
-        "FROM `{}` C, `{}` D, `{}` A "
-        "WHERE C.`id` = `cat_id` AND D.`id` = `dest_id` "
-        "ORDER BY `namecat`, `cat_id`, `namedest`", Table[0], Table[1], Table[2]);
+        "D.`pos_X`, D.`pos_Y`, D.`pos_Z`, D.`orientation`, D.`map`, D.`level`, D.`cost`, A.`dest_id` "
+        "FROM `{}` C "
+        "LEFT JOIN `{}` A ON C.`id` = A.`cat_id` "
+        "LEFT JOIN `{}` D ON D.`id` = A.`dest_id` "
+        "ORDER BY C.`supercat_id`, `namecat`, C.`id`, `namedest`", Table[0], Table[2], Table[1]);
 
     nsNpcTel::TabCatDest.clear();
 
@@ -356,6 +363,7 @@ void LoadNpcTele(void)
             nsNpcTel::CatValue catvalue =
             {
                 fields[3].GetUInt32(),
+                fields[4].GetUInt32(),
                 (nsNpcTel::Flag)fields[0].GetUInt8(),
                 fields[1].GetUInt64(),
                 fields[2].GetUInt32()
@@ -373,19 +381,19 @@ void LoadNpcTele(void)
                 catid = catvalue.catid;
                 nsNpcTel::CatName catname =
                 {
-                    fields[4].GetString(),  // Cat icon
-                    fields[5].GetString(),  // Cat size
-                    fields[6].GetString(),  // Cat colour
+                    fields[5].GetString(),  // Cat icon
+                    fields[6].GetString(),  // Cat size
+                    fields[7].GetString(),  // Cat colour
                     {
-                        fields[7].GetString(),  // Cat Name
-                        fields[8].GetString(),  // Cat Name Loc1
-                        fields[9].GetString(),  // Cat Name Loc2
-                        fields[10].GetString(),  // Cat Name Loc3
-                        fields[11].GetString(),  // Cat Name Loc4
-                        fields[12].GetString(),  // Cat Name Loc5
-                        fields[13].GetString(), // Cat Name Loc6
-                        fields[14].GetString(), // Cat Name Loc7
-                        fields[15].GetString()  // Cat Name Loc8
+                        fields[8].GetString(),  // Cat Name
+                        fields[9].GetString(),  // Cat Name Loc1
+                        fields[10].GetString(), // Cat Name Loc2
+                        fields[11].GetString(), // Cat Name Loc3
+                        fields[12].GetString(), // Cat Name Loc4
+                        fields[13].GetString(), // Cat Name Loc5
+                        fields[14].GetString(), // Cat Name Loc6
+                        fields[15].GetString(), // Cat Name Loc7
+                        fields[16].GetString()  // Cat Name Loc8
                     }
                 };
 
@@ -393,33 +401,36 @@ void LoadNpcTele(void)
                 nsNpcTel::TabCatDest.push_back(categorie);
             }
 
-            nsNpcTel::Dest item =
+            if (!fields[36].IsNull())
             {
-                fields[16].GetString(),    // Dest icon
-                fields[17].GetString(),    // Dest size
-                fields[18].GetString(),    // Dest colour
+                nsNpcTel::Dest item =
                 {
-                    fields[19].GetString(),    // Dest Name
-                    fields[20].GetString(),    // Dest Name_loc1
-                    fields[21].GetString(),    // Dest Name_loc2
-                    fields[22].GetString(),    // Dest Name_loc3
-                    fields[23].GetString(),    // Dest Name_loc4
-                    fields[24].GetString(),    // Dest Name_loc5
-                    fields[25].GetString(),    // Dest Name_loc6
-                    fields[26].GetString(),    // Dest Name_loc7
-                    fields[27].GetString()     // Dest Name_loc8
-                },
-                fields[28].GetFloat(),      // X
-                fields[29].GetFloat(),      // Y
-                fields[30].GetFloat(),      // Z
-                fields[31].GetFloat(),      // Orientation
-                fields[32].GetUInt16(),     // Map
-                fields[33].GetUInt8(),      // Level
-                fields[34].GetUInt32()      // Cost
-            };
+                    fields[17].GetString(),    // Dest icon
+                    fields[18].GetString(),    // Dest size
+                    fields[19].GetString(),    // Dest colour
+                    {
+                        fields[20].GetString(),    // Dest Name
+                        fields[21].GetString(),    // Dest Name_loc1
+                        fields[22].GetString(),    // Dest Name_loc2
+                        fields[23].GetString(),    // Dest Name_loc3
+                        fields[24].GetString(),    // Dest Name_loc4
+                        fields[25].GetString(),    // Dest Name_loc5
+                        fields[26].GetString(),    // Dest Name_loc6
+                        fields[27].GetString(),    // Dest Name_loc7
+                        fields[28].GetString()     // Dest Name_loc8
+                    },
+                    fields[29].GetFloat(),      // X
+                    fields[30].GetFloat(),      // Y
+                    fields[31].GetFloat(),      // Z
+                    fields[32].GetFloat(),      // Orientation
+                    fields[33].GetUInt16(),     // Map
+                    fields[34].GetUInt8(),      // Level
+                    fields[35].GetUInt32()      // Cost
+                };
 
-            nsNpcTel::TabCatDest.back().AddDest(item);
-            ++nbDest;
+                nsNpcTel::TabCatDest.back().AddDest(item);
+                ++nbDest;
+            }
         } while (result->NextRow());
 
         TC_LOG_INFO("server.loading", " ");
@@ -428,5 +439,6 @@ void LoadNpcTele(void)
     else
         TC_LOG_ERROR("misc", "WARNING >> Loaded 0 npc_teleport.");
 }
+
 
 #undef TELE

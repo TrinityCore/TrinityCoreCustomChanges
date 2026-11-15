@@ -25,9 +25,9 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "EventProcessor.h"
 #include <cmath>
 #include <sstream>
-#include <unordered_set>
 
 #define GOSSIP_SHOW_DEST        1000
 #define GOSSIP_TELEPORT         1001
@@ -51,6 +51,7 @@
 #define NPC_TELEPORT_ENTRY      100000
 #define NPC_TELEPORT_RANGE      100.0f
 #define NPC_TELEPORT_DESPAWN    60000 // 60 seconds in milliseconds
+#define NPC_TELEPORT_DELAY      500   // 500ms check interval
 
 using namespace nsNpcTel;
 
@@ -58,7 +59,6 @@ namespace
 {
     Page PageC, PageD;
     Page Cat;
-    std::unordered_set<ObjectGuid> PendingTeleporterCheck;
 
     void CheckAndSummonTeleporter(Player* player)
     {
@@ -77,6 +77,30 @@ namespace
             player->SummonCreature(NPC_TELEPORT_ENTRY, spawnX, spawnY, spawnZ, spawnO, TEMPSUMMON_TIMED_DESPAWN, Milliseconds(NPC_TELEPORT_DESPAWN));
         }
     }
+
+    class SummonTeleporterEvent : public BasicEvent
+    {
+    public:
+        explicit SummonTeleporterEvent(Player* player) : _player(player) { }
+
+        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) override
+        {
+            if (!_player || !_player->IsInWorld())
+                return true;
+
+            if (_player->IsBeingTeleported() || _player->GetSession()->PlayerLoading())
+            {
+                _player->m_Events.AddEventAtOffset(new SummonTeleporterEvent(_player), Milliseconds(NPC_TELEPORT_DELAY));
+                return true;
+            }
+
+            CheckAndSummonTeleporter(_player);
+            return true;
+        }
+
+    private:
+        Player* _player;
+    };
     // Conversion function int->string
     std::string ConvertStr(const int64 &val)
     {
@@ -104,19 +128,9 @@ namespace
     void Teleport(Player * const player, const uint16 &map,
                   const float &X, const float &Y, const float &Z, const float &orient)
     {
-        bool sameMap = (player->GetMapId() == map);
-
         player->CastSpell(player, SPELL_VISUAL_TELEPORT, true);
         player->TeleportTo(map, X, Y, Z, orient);
-
-        if (sameMap)
-        {
-            CheckAndSummonTeleporter(player);
-        }
-        else
-        {
-            PendingTeleporterCheck.insert(player->GetGUID());
-        }
+        player->m_Events.AddEventAtOffset(new SummonTeleporterEvent(player), Milliseconds(NPC_TELEPORT_DELAY));
     }
 
     // Display categories
@@ -303,31 +317,9 @@ public:
     }
 };
 
-class npc_teleport_player : public PlayerScript
-{
-public:
-    npc_teleport_player() : PlayerScript("npc_teleport_player") { }
-
-    void OnMapChanged(Player* player) override
-    {
-        auto itr = PendingTeleporterCheck.find(player->GetGUID());
-        if (itr != PendingTeleporterCheck.end())
-        {
-            PendingTeleporterCheck.erase(itr);
-            CheckAndSummonTeleporter(player);
-        }
-    }
-
-    void OnLogout(Player* player) override
-    {
-        PendingTeleporterCheck.erase(player->GetGUID());
-    }
-};
-
 void AddSC_npc_teleport()
 {
     new npc_teleport_gossip();
     new npc_teleport_load();
-    new npc_teleport_player();
 }
 // End of TeleNPC2

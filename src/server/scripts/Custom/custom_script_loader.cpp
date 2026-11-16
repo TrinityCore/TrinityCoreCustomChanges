@@ -44,6 +44,7 @@
 // 22
 // 23
 // 24
+void AddSC_reagent_bank();
 // 25
 // 26
 // 27
@@ -89,6 +90,7 @@ void AddCustomScripts()
     // 24
     // 25
     // 26
+    AddSC_reagent_bank();
     // 27
     // 28
     // 29

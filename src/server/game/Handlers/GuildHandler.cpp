@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "WorldPacket.h"
+#include "../scripts/Custom/ReagentBankMgr.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPackets::Guild::QueryGuildInfo& query)
 {
@@ -235,6 +236,17 @@ void WorldSession::HandleGuildBankMoneyWithdrawn(WorldPackets::Guild::GuildBankR
 
 void WorldSession::HandleGuildPermissionsQuery(WorldPackets::Guild::GuildPermissionsQuery& /* packet */)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+    {
+        WorldPackets::Guild::GuildPermissionsQueryResults permPacket;
+        permPacket.RankID = 0;
+        permPacket.WithdrawGoldLimit = 0;
+        permPacket.Flags = 0;
+        permPacket.NumTabs = 1;
+        SendPacket(permPacket.Write());
+        return;
+    }
+
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->SendPermissions(this);
 }
@@ -242,6 +254,19 @@ void WorldSession::HandleGuildPermissionsQuery(WorldPackets::Guild::GuildPermiss
 // Called when clicking on Guild bank gameobject
 void WorldSession::HandleGuildBankActivate(WorldPackets::Guild::GuildBankActivate& packet)
 {
+    if (GetPlayer())
+    {
+        if (GameObject* go = GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
+        {
+            if (sReagentBankMgr->IsEnabled() && go->GetEntry() == sReagentBankMgr->GetGameObjectEntry())
+            {
+                sReagentBankMgr->OpenBank(GetPlayer(), packet.Banker);
+                return;
+            }
+        }
+        sReagentBankMgr->CloseBank(GetPlayer()->GetGUID());
+    }
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANKER_ACTIVATE [{}]: [{}] AllSlots: {}"
         , GetPlayerInfo(), packet.Banker.ToString(), packet.FullUpdate);
 
@@ -262,6 +287,12 @@ void WorldSession::HandleGuildBankActivate(WorldPackets::Guild::GuildBankActivat
 // Called when opening guild bank tab only (first one)
 void WorldSession::HandleGuildBankQueryTab(WorldPackets::Guild::GuildBankQueryTab& packet)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+    {
+        sReagentBankMgr->SendBankList(GetPlayer());
+        return;
+    }
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_QUERY_TAB [{}]: {}, TabId: {}, ShowTabs: {}"
         , GetPlayerInfo(), packet.Banker.ToString(), packet.Tab, packet.FullUpdate);
 
@@ -275,6 +306,9 @@ void WorldSession::HandleGuildBankQueryTab(WorldPackets::Guild::GuildBankQueryTa
 
 void WorldSession::HandleGuildBankDepositMoney(WorldPackets::Guild::GuildBankDepositMoney& packet)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+        return;
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_DEPOSIT_MONEY [{}]: [{}], money: {}",
         GetPlayerInfo(), packet.Banker.ToString(), packet.Money);
 
@@ -286,6 +320,9 @@ void WorldSession::HandleGuildBankDepositMoney(WorldPackets::Guild::GuildBankDep
 
 void WorldSession::HandleGuildBankWithdrawMoney(WorldPackets::Guild::GuildBankWithdrawMoney& packet)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+        return;
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_WITHDRAW_MONEY [{}]: [{}], money: {}",
         GetPlayerInfo(), packet.Banker.ToString(), packet.Money);
 
@@ -296,6 +333,21 @@ void WorldSession::HandleGuildBankWithdrawMoney(WorldPackets::Guild::GuildBankWi
 
 void WorldSession::HandleGuildBankSwapItems(WorldPackets::Guild::GuildBankSwapItems& packet)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+    {
+        if (packet.BankOnly)
+        {
+            sReagentBankMgr->SendBankList(GetPlayer());
+            return;
+        }
+
+        if (packet.AutoStore)
+            sReagentBankMgr->HandleAutoStore(GetPlayer(), packet.BankSlot, packet.ContainerSlot, packet.ContainerItemSlot, packet.StackCount);
+        else
+            sReagentBankMgr->HandleSwapItems(GetPlayer(), packet.BankSlot, packet.ContainerSlot, packet.ContainerItemSlot, packet.StackCount, packet.ToSlot == 0);
+        return;
+    }
+
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))
         return;
 
@@ -331,6 +383,9 @@ void WorldSession::HandleGuildBankSwapItems(WorldPackets::Guild::GuildBankSwapIt
 
 void WorldSession::HandleGuildBankBuyTab(WorldPackets::Guild::GuildBankBuyTab& packet)
 {
+    if (GetPlayer() && sReagentBankMgr->IsBankOpen(GetPlayer()->GetGUID()))
+        return;
+
     TC_LOG_DEBUG("guild", "CMSG_GUILD_BANK_BUY_TAB [{}]: [{}[, TabId: {}", GetPlayerInfo(), packet.Banker .ToString(), packet.BankTab);
 
     if (GetPlayer()->GetGameObjectIfCanInteractWith(packet.Banker, GAMEOBJECT_TYPE_GUILD_BANK))

@@ -4069,6 +4069,23 @@ Allow.IP.Based.Action.Logging = 0
 ###################################################################################################
 
 ###################################################################################################
+# REAGENT BANK SETTINGS
+#
+#    ReagentBank.Enable
+#        Description: Enable or disable the custom Reagent Bank system.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+ReagentBank.Enable = 1
+
+#    ReagentBank.GameObjectEntry
+#        Description: Entry ID of the GameObject (type 34) that opens the Reagent Bank.
+#        Default:     250000
+
+ReagentBank.GameObjectEntry = 250000
+###################################################################################################
+
+###################################################################################################
 # PACKET SPOOF PROTECTION SETTINGS
 #
 # These settings determine which action to take when harmful packet spoofing is detected.

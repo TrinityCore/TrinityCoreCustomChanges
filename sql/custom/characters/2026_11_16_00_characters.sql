@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS `character_reagent_bank` (
+  `guid` INT UNSIGNED NOT NULL,
+  `slot` TINYINT UNSIGNED NOT NULL,
+  `item_entry` INT UNSIGNED NOT NULL,
+  `count` INT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`guid`, `slot`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

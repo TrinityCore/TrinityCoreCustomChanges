@@ -20,7 +20,24 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
+#include "Chat.h"
+
+#define TAXI_STOP_NAMED_0    "Stop requested: you will land at %s."
+#define TAXI_STOP_NAMED_6    "Parada solicitada: aterrizar\xC3\xA1s en %s."
+#define TAXI_STOP_NAMED_7    "Parada solicitada: aterrizar\xC3\xA1s en %s."
+
+#define TAXI_STOP_GENERIC_0  "Stop requested: you will land at the next known flight point."
+#define TAXI_STOP_GENERIC_6  "Parada solicitada: aterrizar\xC3\xA1s en el pr\xC3\xB3ximo punto de vuelo conocido."
+#define TAXI_STOP_GENERIC_7  "Parada solicitada: aterrizar\xC3\xA1s en el pr\xC3\xB3ximo punto de vuelo conocido."
+
+#define TAXI_STOP_DIRECT_0   "You are already flying directly to your next known flight point."
+#define TAXI_STOP_DIRECT_6   "Ya te diriges directamente a tu pr\xC3\xB3ximo punto de vuelo conocido."
+#define TAXI_STOP_DIRECT_7   "Ya te diriges directamente a tu pr\xC3\xB3ximo punto de vuelo conocido."
+
 #include "DBCStores.h"
+#include "FlightPathMovementGenerator.h"
+#include "MotionMaster.h"
+#include "MovementDefines.h"
 #include "GameClient.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
@@ -349,6 +366,46 @@ void WorldSession::HandleCancelCastOpcode(WorldPackets::Spells::CancelCast& canc
 
 void WorldSession::HandleCancelAuraOpcode(WorldPackets::Spells::CancelAura& cancelAura)
 {
+    if (cancelAura.SpellID == 26393 && _player->IsInFlight())
+    {
+        LocaleConstant loc = GetSessionDbcLocale();
+        char const* msgNamed   = TAXI_STOP_NAMED_0;
+        char const* msgGeneric = TAXI_STOP_GENERIC_0;
+        char const* msgDirect  = TAXI_STOP_DIRECT_0;
+
+        switch (loc)
+        {
+            case 6:
+                msgNamed   = TAXI_STOP_NAMED_6;
+                msgGeneric = TAXI_STOP_GENERIC_6;
+                msgDirect  = TAXI_STOP_DIRECT_6;
+                break;
+            case 7:
+                msgNamed   = TAXI_STOP_NAMED_7;
+                msgGeneric = TAXI_STOP_GENERIC_7;
+                msgDirect  = TAXI_STOP_DIRECT_7;
+                break;
+            default:
+                break;
+        }
+
+        if (uint32 stopNode = _player->m_taxi.RequestEarlyLanding(_player->isTaxiCheater()))
+        {
+            if (MovementGenerator* movGen = _player->GetMotionMaster()->GetCurrentMovementGenerator())
+                if (movGen->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE)
+                    static_cast<FlightPathMovementGenerator*>(movGen)->TrimPath(_player, _player->m_taxi.GetPath().size() - 1);
+
+            _player->RemoveAurasDueToSpell(cancelAura.SpellID);
+            if (TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(stopNode))
+                ChatHandler(this).PSendSysMessage(msgNamed, nodeEntry->Name[loc]);
+            else
+                ChatHandler(this).SendSysMessage(msgGeneric);
+        }
+        else
+            ChatHandler(this).SendSysMessage(msgDirect);
+        return;
+    }
+
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(cancelAura.SpellID);
     if (!spellInfo)
         return;

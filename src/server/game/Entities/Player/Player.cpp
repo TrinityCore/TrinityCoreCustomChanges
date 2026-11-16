@@ -21211,6 +21211,7 @@ void Player::FinishTaxiFlight()
 
 void Player::CleanupAfterTaxiFlight()
 {
+    RemoveAurasDueToSpell(26393);
     m_taxi.ClearTaxiDestinations(); // not destinations, clear source node
     Dismount();
     RemoveUnitFlag(UNIT_FLAG_REMOVE_CLIENT_CONTROL | UNIT_FLAG_ON_TAXI);

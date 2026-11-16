@@ -17,9 +17,18 @@
 
 #include "WorldSession.h"
 #include "Common.h"
+#include "Chat.h"
+
+#define TAXI_FLY_HINT_0 "Right-click the flight icon (top right) to land at the next known flight point."
+#define TAXI_FLY_HINT_6 "Haz clic derecho en el icono de vuelo (arriba a la derecha) para aterrizar en el pr\xC3\xB3ximo punto conocido."
+#define TAXI_FLY_HINT_7 "Haz clic derecho en el icono de vuelo (arriba a la derecha) para aterrizar en el pr\xC3\xB3ximo punto conocido."
+
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include <queue>
+#include <unordered_map>
+#include <vector>
 #include "FlightPathMovementGenerator.h"
 #include "Log.h"
 #include "MotionMaster.h"
@@ -37,6 +46,69 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvData)
 
     recvData >> guid;
     SendTaxiStatus(guid);
+}
+
+namespace
+{
+    bool CanTeamUseTaxiNode(TaxiNodesEntry const* node, uint32 team)
+    {
+        if (!node)
+            return false;
+
+        if (team == HORDE)
+            return node->MountCreatureID[0] != 0;
+        if (team == ALLIANCE)
+            return node->MountCreatureID[1] != 0;
+
+        return true;
+    }
+
+    void BuildBridgedTaxiMask(Player const* player, uint32 startNode, PlayerTaxi& outTaxi)
+    {
+        if (!player || !startNode || player->isTaxiCheater())
+            return;
+
+        uint32 team = player->GetTeam();
+        std::queue<uint32> frontier;
+        std::unordered_map<uint32, uint32> parent;
+
+        frontier.push(startNode);
+        parent[startNode] = 0;
+
+        while (!frontier.empty())
+        {
+            uint32 curr = frontier.front();
+            frontier.pop();
+
+            // If player already knows this node, mark all intermediate nodes back to startNode in outTaxi
+            if (curr != startNode && player->m_taxi.IsTaximaskNodeKnown(curr))
+            {
+                uint32 step = curr;
+                while (step != 0 && step != startNode)
+                {
+                    outTaxi.SetTaximaskNode(step);
+                    step = parent[step];
+                }
+            }
+
+            auto itr = sTaxiPathSetBySource.find(curr);
+            if (itr == sTaxiPathSetBySource.end())
+                continue;
+
+            for (auto const& [destNode, pathInfo] : itr->second)
+            {
+                if (parent.find(destNode) != parent.end())
+                    continue;
+
+                TaxiNodesEntry const* destEntry = sTaxiNodesStore.LookupEntry(destNode);
+                if (!CanTeamUseTaxiNode(destEntry, team))
+                    continue;
+
+                parent[destNode] = curr;
+                frontier.push(destNode);
+            }
+        }
+    }
 }
 
 void WorldSession::SendTaxiStatus(ObjectGuid guid)
@@ -100,11 +172,14 @@ void WorldSession::SendTaxiMenu(Creature* unit)
 
     TC_LOG_DEBUG("network", "WORLD: CMSG_TAXINODE_STATUS_QUERY {} ", curloc);
 
+    PlayerTaxi displayTaxi = GetPlayer()->m_taxi;
+    BuildBridgedTaxiMask(GetPlayer(), curloc, displayTaxi);
+
     WorldPacket data(SMSG_SHOWTAXINODES, (4 + 8 + 4 + 8 * 4));
     data << uint32(1);
     data << unit->GetGUID();
     data << uint32(curloc);
-    GetPlayer()->m_taxi.AppendTaximaskTo(data, GetPlayer()->isTaxiCheater());
+    displayTaxi.AppendTaximaskTo(data, GetPlayer()->isTaxiCheater());
     SendPacket(&data);
 
     TC_LOG_DEBUG("network", "WORLD: Sent SMSG_SHOWTAXINODES");
@@ -122,6 +197,19 @@ void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathN
         GetPlayer()->Mount(mountDisplayId);
 
     GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path, pathNode);
+
+    if (GetPlayer()->m_taxi.GetPath().size() > 2)
+    {
+        GetPlayer()->AddAura(26393, GetPlayer());
+        char const* hintMsg = TAXI_FLY_HINT_0;
+        switch (GetSessionDbcLocale())
+        {
+            case 6: hintMsg = TAXI_FLY_HINT_6; break;
+            case 7: hintMsg = TAXI_FLY_HINT_7; break;
+            default: break;
+        }
+        ChatHandler(this).SendSysMessage(hintMsg);
+    }
 }
 
 bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
@@ -180,7 +268,8 @@ void WorldSession::HandleActivateTaxiExpressOpcode (WorldPacket& recvData)
         uint32 node;
         recvData >> node;
 
-        if (!GetPlayer()->m_taxi.IsTaximaskNodeKnown(node) && !GetPlayer()->isTaxiCheater())
+        bool isEndpoint = (i == 0 || i + 1 == node_count);
+        if (isEndpoint && !GetPlayer()->m_taxi.IsTaximaskNodeKnown(node) && !GetPlayer()->isTaxiCheater())
         {
             SendActivateTaxiReply(ERR_TAXINOTVISITED);
             recvData.rfinish();

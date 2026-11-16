@@ -143,6 +143,19 @@ bool FlightPathMovementGenerator::DoUpdate(Player* owner, uint32 /*diff*/)
     return true;
 }
 
+void FlightPathMovementGenerator::TrimPath(Player* /*owner*/, size_t remainingLegs)
+{
+    if (remainingLegs == 0 || remainingLegs > _pointsForPathSwitch.size())
+        return;
+
+    uint32 targetPathIndex = _pointsForPathSwitch[remainingLegs - 1].PathIndex;
+    if (targetPathIndex <= _currentNode || targetPathIndex + 1 >= _path.size())
+        return;
+
+    _pointsForPathSwitch.resize(remainingLegs - 1);
+    _path.resize(targetPathIndex + 1);
+}
+
 void FlightPathMovementGenerator::DoDeactivate(Player* /*owner*/)
 {
     AddFlag(MOVEMENTGENERATOR_FLAG_DEACTIVATED);

@@ -71,6 +71,27 @@ class TC_GAME_API PlayerTaxi
             return GetTaxiDestination();
         }
 
+        uint32 RequestEarlyLanding(bool allKnown)
+        {
+            if (m_TaxiDestinations.size() <= 2)
+                return 0;
+
+            for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
+            {
+                uint32 node = m_TaxiDestinations[i];
+                if (allKnown || IsTaximaskNodeKnown(node))
+                {
+                    if (i + 1 < m_TaxiDestinations.size())
+                    {
+                        m_TaxiDestinations.resize(i + 1);
+                        return node;
+                    }
+                    return 0;
+                }
+            }
+            return 0;
+        }
+
         std::deque<uint32> const& GetPath() const { return m_TaxiDestinations; }
         bool empty() const { return m_TaxiDestinations.empty(); }
         FactionTemplateEntry const* GetFlightMasterFactionTemplate() const;

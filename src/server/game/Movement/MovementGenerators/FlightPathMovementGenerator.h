@@ -45,6 +45,7 @@ class FlightPathMovementGenerator : public MovementGeneratorMedium<Player, Fligh
 
         TaxiPathNodeList const& GetPath() { return _path; }
         uint32 GetPathAtMapEnd() const;
+        void TrimPath(Player* owner, size_t remainingLegs);
         bool HasArrived() const { return _currentNode >= _path.size(); }
         uint32 GetPathId(size_t index) const;
 

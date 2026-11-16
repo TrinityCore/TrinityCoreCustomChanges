@@ -90,8 +90,10 @@ void ReagentBankMgr::OpenBank(Player* player, ObjectGuid /*bankerGuid*/)
     WorldPackets::Guild::GuildPermissionsQueryResults permPacket;
     permPacket.RankID = 0;
     permPacket.WithdrawGoldLimit = 0;
-    permPacket.Flags = 0;
+    permPacket.Flags = 0x03;
     permPacket.NumTabs = 1;
+        for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+            permPacket.Tab[i] = { 0x03, 98 };
     player->SendDirectMessage(permPacket.Write());
 
     SendBankList(player);
@@ -156,11 +158,16 @@ void ReagentBankMgr::HandleSwapItems(Player* player, uint8 bankSlot, uint8 playe
     if (!player)
         return;
 
-    // Clic derecho desde la mochila en 3.3.5a envia AutoStore = false y bankSlot = 255 (NULL_SLOT)
-    if (toBank && bankSlot == NULL_SLOT)
+    // Deteccion inteligente: si hay un objeto valido en la mochila (playerBag != NULL_BAG), la intencion es depositar
+    Item* bagItemCheck = (playerBag != NULL_BAG) ? player->GetItemByPos(playerBag, playerSlot) : nullptr;
+    if (bagItemCheck)
     {
-        HandleAutoStore(player, NULL_SLOT, playerBag, playerSlot, splitedAmount);
-        return;
+        toBank = true;
+        if (bankSlot == NULL_SLOT || bankSlot >= REAGENT_BANK_MAX_SLOTS)
+        {
+            HandleAutoStore(player, NULL_SLOT, playerBag, playerSlot, splitedAmount);
+            return;
+        }
     }
 
     if (bankSlot >= REAGENT_BANK_MAX_SLOTS)

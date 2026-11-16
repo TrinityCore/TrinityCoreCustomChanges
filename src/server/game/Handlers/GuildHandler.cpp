@@ -241,8 +241,10 @@ void WorldSession::HandleGuildPermissionsQuery(WorldPackets::Guild::GuildPermiss
         WorldPackets::Guild::GuildPermissionsQueryResults permPacket;
         permPacket.RankID = 0;
         permPacket.WithdrawGoldLimit = 0;
-        permPacket.Flags = 0;
+        permPacket.Flags = 0x03;
         permPacket.NumTabs = 1;
+        for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+            permPacket.Tab[i] = { 0x03, 98 };
         SendPacket(permPacket.Write());
         return;
     }

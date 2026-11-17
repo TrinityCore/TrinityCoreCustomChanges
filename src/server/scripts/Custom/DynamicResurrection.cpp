@@ -47,7 +47,7 @@ public:
 
     void OnMapChanged(Player* player) override
     {
-        if (!player || !sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
+        if (!player || player->IsAlive() || !sConfigMgr->GetBoolDefault("Dynamic.Resurrections.enable", true))
             return;
 
         Map* map = player->GetMap();

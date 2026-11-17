@@ -7,7 +7,7 @@
 
 bool Dynamic_Resurrection::IsInDungeonOrRaid(Player* player)
 {
-    if (!player)
+    if (!player || player->IsAlive())
         return false;
 
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(player->GetMapId()))

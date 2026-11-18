@@ -18,7 +18,7 @@ struct ReagentSlotItem
 
 class Player;
 
-class ReagentBankMgr
+class TC_GAME_API ReagentBankMgr
 {
 public:
     static ReagentBankMgr* instance()
